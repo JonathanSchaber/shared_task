@@ -1,1 +1,4 @@
-data/*
+data/*/*.csv
+data/*/*.json
+data/*/*.tsv
+data/*/*.xml
