@@ -1,0 +1,56 @@
+The Hamburg Dependency Treebank
+===============================
+
+This archive contains the Hamburg Dependency Treebank 1.0.1, converted
+to the CoNLL-X format.  The HDT consists of 261.821 sentences
+annotated with dependency structure.
+
+Heise Zeitschriften Verlag kindly allowed us to distribute the
+underlying articles for scientific/academic use. The
+annotations themselves are distributed under a Creative Commons
+Attribution-ShareAlike 4.0 International License[0].
+
+The HDT is described in detail in [1]. If you use the HDT, please cite
+that paper. If you want to contact the creators of the HDT, please
+send an email to hdt@informatik.uni-hamburg.de
+
+The persistent Identifier of the HDT is:
+http://hdl.handle.net/11022/0000-0000-7FC7-2
+(There you can also find the data in the original format)
+
+
+Annotation
+----------
+
+All sentences are annotated according to [2].
+The treebank is split into three parts:
+
+  A) automatically parsed, manually revised & checked for consistency
+     with DECCA (101.999 sentences)
+  B) automatically parsed & manually revised (104.795 sentences)
+  C) automatically parsed only (55.027 sentences)
+
+
+Please consult the archive containing the original cda files for the
+mapping from sentences to the corresponding articles, their authors
+and the publication date.
+
+Annotation Remarks
+------------------
+
+The "Lemma" field is filled with the "base" attribute from the
+original annotation, if available.  Otherwise, the original word has
+been inserted.
+
+
+
+[0] http://creativecommons.org/licenses/by-sa/4.0/
+
+[1] Because Size Does Matter: The Hamburg Dependency Treebank
+    Kilian Foth, Arne Köhn, Niels Beuck, Wolfgang Menzel
+    in Proceedings of LREC 2014
+	http://nbn-resolving.de/urn:nbn:de:gbv:18-228-7-2013
+
+[2] Eine umfassende Constraint-Dependenz-Grammatik des Deutschen.
+    Kilian A. Foth
+	http://nbn-resolving.de/urn:nbn:de:gbv:18-228-7-2048
