@@ -4,9 +4,9 @@ class Parser:
         self.path_in = path_in
         self.path_out = path_out
 
-    @static_method
+    @staticmethod
     def load_file():
-        pass
+        raise NotImplementedError
 
 
 class NoahParser(Parser): 
@@ -16,5 +16,7 @@ class ChatmaniaParser(Parser):
     pass
 
 class SwissCrawlParser(Parser):
-    pass 
+    pass
 
+p = Parser('', '')
+p.load_file()
