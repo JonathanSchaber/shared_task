@@ -40,7 +40,7 @@ class SwissCrawlParser(Parser):
         for i, row in enumerate(reader):
             if i == 0:
                 continue
-            writer.writerow([row, '1', self.name])
+            writer.writerow([row[0], '1', self.name])
             if i % 10000:
                 print('Processed line {} of {}.'.format(i+1, self.num_lines))
 
