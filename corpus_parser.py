@@ -58,7 +58,7 @@ class Cleaner:
     @classmethod
     def clean(cls, raw_text):
         """Clean raw text. Can be overwritten by corpus specific cleaner."""
-        return raw_text
+        return re.sub('\s', ' ', raw_text)
 
     @classmethod
     def mask(cls, unmasked_text):
@@ -127,7 +127,7 @@ class Ex3Parser(Parser):
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
         infile = open(self.path_in, 'r', encoding='utf8')
-        writer = csv.writer(open(self.out_path, 'w', encoding='utf8'))
+        writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
         for i, line in enumerate(infile):
             id_, text = json.loads(line)
             masked_text, masked_strings = self.cleaner.mask(text)
@@ -156,7 +156,7 @@ class NoahParser(Parser):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
         file_names = [fn for fn in os.listdir(self.path_in_dir) if fn.endswith('.xml')]
         num_files = len(file_names)
-        writer = csv.writer(open(self.out_path, 'w', encoding='utf8'))
+        writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
         for i, fn in enumerate(file_names):
             tree = ET.parse(os.path.join(self.path_in_dir, fn))
             root = tree.getroot()
@@ -184,7 +184,7 @@ class SBCHParser(Parser):
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
         reader = csv.reader(self.infile)
-        writer = csv.writer(open(self.out_path, 'w', encoding='utf8'))
+        writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
         for i, row in enumerate(reader):
             if i == 0:
                 continue
@@ -209,7 +209,7 @@ class SBDEParser(Parser):
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
         reader = csv.reader(self.infile, delimiter='\t')
-        writer = csv.writer(open(self.out_path, 'w', encoding='utf8'))
+        writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
         for i, row in enumerate(reader):
             if i == 0:
                 continue
@@ -232,7 +232,7 @@ class SwissCrawlParser(Parser):
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
         reader = csv.reader(self.infile)
-        writer = csv.writer(open(self.out_path, 'w', encoding='utf8'))
+        writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
         for i, row in enumerate(reader):
             if i == 0:
                 continue
@@ -266,6 +266,10 @@ def main():
     p = SwissCrawlParser(path_in)
     p.copy_to_main_file()
 
+    try:
+        os.system('rm data/main/main.csv')
+    except:
+        pass
     os.system('cat data/main/* > data/main/main.csv')
 
 if __name__ == '__main__':
