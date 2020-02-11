@@ -10,6 +10,11 @@ p.copy_to_main_file()
 """
 
 
+# *****************************
+# ********** Cleaners *********
+# *****************************
+
+
 class Cleaner:
     mask_dict = {
         'MASK_URL': re.compile((r'(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org'
@@ -44,7 +49,7 @@ class Cleaner:
         # from: https://gist.github.com/gruber/8891611
         'MASK_MENTION': re.compile(r'(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9-_]+)'),
         # from: https://stackoverflow.com/questions/2304632/regex-for-twitter-username
-        'MASK_HASHTAG': re.compile(r'#.+?\b')  # TODO: match only hashtags with starting word boundary
+        'MASK_HASHTAG': re.compile(r'# ?.+?(?=\b)')  # TODO: match only hashtags with starting word boundary
     }
 
     @classmethod
@@ -77,6 +82,19 @@ class SwissCrawlCleaner(Cleaner):
     pass
 
 
+class SBCHCleaner(Cleaner):
+    pass
+
+
+class SBDECleaner(Cleaner):
+    pass
+
+
+# *****************************
+# ********** Parsers **********
+# *****************************
+
+
 class Parser:
 
     def __init__(self, path_in):
@@ -92,11 +110,50 @@ class NoahParser(Parser):
     pass
 
 
-class ChatmaniaParser(Parser):
-    pass
+class SBCHParser(Parser):
+
+    name = 'sb_ch'
+    num_lines = 90899
+    out_path = 'data/main/sb_ch_parsed.csv'
+    cleaner = SBCHCleaner()
+
+    def copy_to_main_file(self):
+        """Copy the loaded file to the main file."""
+        reader = csv.reader(self.infile)
+        writer = csv.writer(open(self.out_path, 'w', encoding='utf8'))
+        for i, row in enumerate(reader):
+            if i == 0:
+                continue
+            masked_text, masked_strings = self.cleaner.mask(row[1])
+            cleaned_text = self.cleaner.clean(masked_text)
+            writer.writerow([cleaned_text, str(masked_strings), '1', self.name])
+            if i % 10000:
+                print('Processed line {} of {}.'.format(i + 1, self.num_lines))
+
+
+class SBDEParser(Parser):
+
+    name = 'sb_de'
+    num_lines = 9983
+    out_path = 'data/main/sb_de_parser.csv'
+    cleaner = SBDECleaner()
+
+    def copy_to_main_file(self):
+        """Copy the loaded file to the main file."""
+        reader = csv.reader(self.infile, delimiter='\t')
+        writer = csv.writer(open(self.out_path, 'w', encoding='utf8'))
+        for i, row in enumerate(reader):
+            if i == 0:
+                continue
+            masked_text, masked_strings = self.cleaner.mask(row[3])
+            cleaned_text = self.cleaner.clean(masked_text)
+            writer.writerow([cleaned_text, str(masked_strings), '1', self.name])
+            if i % 10000:
+                print('Processed line {} of {}.'.format(i + 1, self.num_lines))
 
 
 class SwissCrawlParser(Parser):
+
     name = 'swisscrawl'
     num_lines = 562525
     out_path = 'data/main/swisscrawl_parsed.csv'
@@ -111,7 +168,7 @@ class SwissCrawlParser(Parser):
                 continue
             masked_text, masked_strings = self.cleaner.mask(row[0])
             cleaned_text = self.cleaner.clean(masked_text)
-            writer.writerow([cleaned_text, '1', self.name])
+            writer.writerow([cleaned_text, str(masked_strings), '1', self.name])
             if i % 10000:
                 print('Processed line {} of {}.'.format(i + 1, self.num_lines))
 
