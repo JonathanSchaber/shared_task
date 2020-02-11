@@ -122,19 +122,20 @@ class Ex3Parser(Parser):
     name = 'ex3'
     out_path = 'data/main/ex3_parsed.csv'
     cleaner = Ex3Cleaner()
+    num_tweets = 66921
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
-        tweets = json.load(open(self.path_in, 'r', encoding='utf8'))
-        num_tweets = len(tweets)
+        infile = open(self.path_in, 'r', encoding='utf8')
         writer = csv.writer(open(self.out_path, 'w', encoding='utf8'))
-        for i, (id_, text) in enumerate(tweets):
+        for i, line in enumerate(infile):
+            id_, text = json.loads(line)
             masked_text, masked_strings = self.cleaner.mask(text)
             cleaned_text = self.cleaner.clean(masked_text)
             if cleaned_text == '':
                 continue
             writer.writerow([cleaned_text, masked_strings, '0', self.name])
-        print('Processed document {} of {}.'.format(i + 1, num_tweets))
+        print('Processed document {} of {}.'.format(i + 1, self.num_tweets))
 
 
 class HamburgDTBParser(Parser):
