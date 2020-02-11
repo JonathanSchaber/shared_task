@@ -1,6 +1,7 @@
 import os
 import re
 import csv
+import json
 import xml.etree.ElementTree as ET
 
 
@@ -119,11 +120,21 @@ class Parser:
 class Ex3Parser(Parser):
 
     name = 'ex3'
-    in_dir = 'data/ex3_corpus'
     out_path = 'data/main/ex3_parsed.csv'
     cleaner = Ex3Cleaner()
 
-    def
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        tweets = json.load(open(self.path_in, 'r', encoding='utf8'))
+        num_tweets = len(tweets)
+        writer = csv.writer(open(self.out_path, 'w', encoding='utf8'))
+        for i, (id_, text) in enumerate(tweets):
+            masked_text, masked_strings = self.cleaner.mask(text)
+            cleaned_text = self.cleaner.clean(masked_text)
+            if cleaned_text == '':
+                continue
+            writer.writerow([cleaned_text, masked_strings, '0', self.name])
+        print('Processed document {} of {}.'.format(i + 1, num_tweets))
 
 
 class HamburgDTBParser(Parser):
@@ -234,6 +245,10 @@ class SwissCrawlParser(Parser):
 
 
 def main():
+    path_in = 'data/ex3_corpus/tweets.json'
+    p = Ex3Parser(path_in)
+    p.copy_to_main_file()
+
     path_in = 'data/noah_corpus/'
     p = NoahParser(path_in)
     p.copy_to_main_file()
