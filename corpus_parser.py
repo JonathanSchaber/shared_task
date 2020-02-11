@@ -96,6 +96,10 @@ class NoahCleaner(Cleaner):
     pass
 
 
+class Ex3Cleaner(Cleaner):
+    pass
+
+
 # *****************************
 # ********** Parsers **********
 # *****************************
@@ -113,7 +117,13 @@ class Parser:
 
 
 class Ex3Parser(Parser):
-    pass
+
+    name = 'ex3'
+    in_dir = 'data/ex3_corpus'
+    out_path = 'data/main/ex3_parsed.csv'
+    cleaner = Ex3Cleaner()
+
+    def
 
 
 class HamburgDTBParser(Parser):
@@ -142,11 +152,13 @@ class NoahParser(Parser):
                 for sent in article:
                     sent_buffer = []
                     for token in sent:
-                        sent_buffer.append(token)
+                        sent_buffer.append(token.text)
                     sent_str = ' '.join(sent_buffer)
                     masked_text, masked_strings = self.cleaner.mask(sent_str)
                     cleaned_text = self.cleaner.clean(masked_text)
-                    writer.writerow(cleaned_text, masked_strings, '1', self.name)
+                    if cleaned_text == '':
+                        continue
+                    writer.writerow([cleaned_text, masked_strings, '1', self.name])
             print('Processed document {} of {}.'.format(i + 1, num_files))
 
 
@@ -164,8 +176,12 @@ class SBCHParser(Parser):
         for i, row in enumerate(reader):
             if i == 0:
                 continue
+            if not row:  # continue if row/line is empty
+                continue
             masked_text, masked_strings = self.cleaner.mask(row[1])
             cleaned_text = self.cleaner.clean(masked_text)
+            if cleaned_text == '':
+                continue
             writer.writerow([cleaned_text, str(masked_strings), '1', self.name])
             if i % 10000:
                 print('Processed line {} of {}.'.format(i + 1, self.num_lines))
@@ -187,6 +203,8 @@ class SBDEParser(Parser):
                 continue
             masked_text, masked_strings = self.cleaner.mask(row[3])
             cleaned_text = self.cleaner.clean(masked_text)
+            if cleaned_text == '':
+                continue
             writer.writerow([cleaned_text, str(masked_strings), '0', self.name])
             if i % 10000:
                 print('Processed line {} of {}.'.format(i + 1, self.num_lines))
@@ -208,6 +226,8 @@ class SwissCrawlParser(Parser):
                 continue
             masked_text, masked_strings = self.cleaner.mask(row[0])
             cleaned_text = self.cleaner.clean(masked_text)
+            if cleaned_text == '':
+                continue
             writer.writerow([cleaned_text, str(masked_strings), '1', self.name])
             if i % 10000:
                 print('Processed line {} of {}.'.format(i + 1, self.num_lines))
@@ -218,6 +238,19 @@ def main():
     p = NoahParser(path_in)
     p.copy_to_main_file()
 
+    path_in = 'data/sb_ch_corpus/chatmania.csv'
+    p = SBCHParser(path_in)
+    p.copy_to_main_file()
+
+    path_in = 'data/sb_de_corpus/downloaded.tsv'
+    p = SBDEParser(path_in)
+    p.copy_to_main_file()
+
+    path_in = 'data/swisscrawl/swisscrawl-2019-11-23.csv'
+    p = SwissCrawlParser(path_in)
+    p.copy_to_main_file()
+
+    os.system('cat data/main/* > data/main/main.csv')
 
 if __name__ == '__main__':
     main()
