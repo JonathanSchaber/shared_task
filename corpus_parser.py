@@ -1,6 +1,8 @@
+import os
 import re
 import csv
-import string
+import xml.etree.ElementTree as ET
+
 
 """
 p = NoahParser(path_in, path_out)
@@ -90,6 +92,10 @@ class SBDECleaner(Cleaner):
     pass
 
 
+class NoahCleaner(Cleaner):
+    pass
+
+
 # *****************************
 # ********** Parsers **********
 # *****************************
@@ -106,8 +112,42 @@ class Parser:
         raise NotImplementedError
 
 
-class NoahParser(Parser):
+class Ex3Parser(Parser):
     pass
+
+
+class HamburgDTBParser(Parser):
+    pass
+
+
+class NoahParser(Parser):
+
+    name = 'noah'
+    in_dir = 'data/noah_corpus'
+    out_path = 'data/main/noah_parsed.csv'
+    cleaner = NoahCleaner()
+
+    def __init__(self, path_in):
+        self.path_in_dir = path_in
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        file_names = [fn for fn in os.listdir(self.path_in_dir) if fn.endswith('.xml')]
+        num_files = len(file_names)
+        writer = csv.writer(open(self.out_path, 'w', encoding='utf8'))
+        for i, fn in enumerate(file_names):
+            tree = ET.parse(os.path.join(self.path_in_dir, fn))
+            root = tree.getroot()
+            for article in root:
+                for sent in article:
+                    sent_buffer = []
+                    for token in sent:
+                        sent_buffer.append(token)
+                    sent_str = ' '.join(sent_buffer)
+                    masked_text, masked_strings = self.cleaner.mask(sent_str)
+                    cleaned_text = self.cleaner.clean(masked_text)
+                    writer.writerow(cleaned_text, masked_strings, '1', self.name)
+            print('Processed document {} of {}.'.format(i + 1, num_files))
 
 
 class SBCHParser(Parser):
@@ -147,7 +187,7 @@ class SBDEParser(Parser):
                 continue
             masked_text, masked_strings = self.cleaner.mask(row[3])
             cleaned_text = self.cleaner.clean(masked_text)
-            writer.writerow([cleaned_text, str(masked_strings), '1', self.name])
+            writer.writerow([cleaned_text, str(masked_strings), '0', self.name])
             if i % 10000:
                 print('Processed line {} of {}.'.format(i + 1, self.num_lines))
 
@@ -174,8 +214,8 @@ class SwissCrawlParser(Parser):
 
 
 def main():
-    path_in = 'data/swisscrawl/swisscrawl-2019-11-23.csv'
-    p = SwissCrawlParser(path_in)
+    path_in = 'data/noah_corpus/'
+    p = NoahParser(path_in)
     p.copy_to_main_file()
 
 
