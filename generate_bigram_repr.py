@@ -133,21 +133,21 @@ def gen_bigram_repr(path_in, path_out):
 
     fin = open(path_in, 'r', encoding='utf8')
     fout = open(path_out, 'w', encoding='utf8')
-        csv_reader = csv.reader(f)
-        for line in csv_reader:
-            try:
-                text, masked, label, source = line
-            except ValueError:
-                if line == ['Place for parser output']:
-                    continue
-                else:
-                    import pdb; pdb.set_trace()
-            ohe = np.zeros(num_dims)
-            bigrams = [bi for bi in zip(text, text[1:])]
-            for bigram in bigrams:
-                if bigram in mapping:
-                    ohe[mapping[bigram]] += 1
-            # write to file
+    csv_reader = csv.reader(f)
+    for line in csv_reader:
+        try:
+            text, masked, label, source = line
+        except ValueError:
+            if line == ['Place for parser output']:
+                continue
+            else:
+                import pdb; pdb.set_trace()
+        ohe = np.zeros(num_dims)
+        bigrams = [bi for bi in zip(text, text[1:])]
+        for bigram in bigrams:
+            if bigram in mapping:
+                ohe[mapping[bigram]] += 1
+        # write to file
 
 
 
