@@ -51,7 +51,7 @@ def count_bigrams(path_in, threshold=None):
         csv_reader = csv.reader(f)
         for line in csv_reader:
             try:
-                text, masked, label, source = line
+                text_id, text, masked, label, source = line
             except ValueError:
                 if line == ['Place for parser output']:
                     pass
