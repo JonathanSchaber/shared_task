@@ -8,7 +8,7 @@ def parse_cmd_args():
     parser.add_argument('-g', '--gold_path', type=str, default='data/main/dev_main.csv', help='Path to gold labels (dev_main.csv).')
     parser.add_argument('-o', '--path_out', type=str, default='data/main/results.csv',
                         help='Path to output file to write results.')
-    parser.add_argument('-p', '--predicted_path', type=str default='data/main/predicted.csv',
+    parser.add_argument('-p', '--predicted_path', type=str, default='data/main/predicted.csv',
                         help='Path to predicted lables (predicted.csv).')
     return parser.parse_args()
 
@@ -47,7 +47,12 @@ def compare_line_by_line(gold_path, predicted_path):
      
 
 def write_measures_to_file(true_pos, false_pos, true_neg, false_neg, out_file):
-    outfile = 
+    with open(out_file, 'w', encoding='utf8') as outfile:
+        outfile.write('True Positives: ' + str(true_pos) + '\n')
+        outfile.write('False Positives: ' + str(false_pos) + '\n')
+        outfile.write('True Negatives: ' + str(true_neg) + '\n')
+        outfile.write('False Negatives: ' + str(false_neg) + '\n\n')
+        outfile.write('Total: ' + str(true_pos + false_pos + true_neg + false_neg))
 
 
 def main():
