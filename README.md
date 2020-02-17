@@ -16,7 +16,7 @@ Timeline:
 - 23-24.06.2020: Swiss Text Conference
 
 TODOs for week 17.-22. Feb:
-- [ ] write script to split training/validation data
+- [x] write script to split training/validation data
 - [ ] write script for evaluation
 - [ ] write bigram based model
 - [ ] train and test bigram based model
