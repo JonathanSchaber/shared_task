@@ -14,3 +14,12 @@ Timeline:
 21.04.2020: Acceptance Notification
 05.05.2020: Camera Ready
 23-24.06.2020: Swiss Text Conference
+
+TODOs for this week:
+- [ ] write script to split training/validation data
+- [ ] write script for evaluation
+- [ ] write bigram based model
+- [ ] train and test bigram based model
+
+TODOs for next week:
+- [ ] train and test embedding based model
