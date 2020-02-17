@@ -106,6 +106,9 @@ class Ex3Cleaner(Cleaner):
 # *****************************
 
 
+text_id = 0
+
+
 class Parser:
 
     def __init__(self, path_in):
@@ -115,6 +118,23 @@ class Parser:
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
         raise NotImplementedError
+
+    @staticmethod
+    def writerow(writer, cleaned_text, masked_strings, label, corpus_name):
+        """Write row to output file and increase id-counter.
+
+        Args:
+            writer: csv-writer object
+            cleaned_text: str
+            masked_strings: list of str
+            label: str
+            corpus_name: str
+        """
+        global text_id
+        writer.writerow([text_id, cleaned_text, str(masked_strings), label, corpus_name])
+        if text_id % 10000:
+            print('Processed line {} of {}.'.format(text_id + 1, 737628))
+        text_id += 1
 
 
 class Ex3Parser(Parser):
@@ -128,14 +148,13 @@ class Ex3Parser(Parser):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
         infile = open(self.path_in, 'r', encoding='utf8')
         writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
-        for i, line in enumerate(infile):
+        for line in infile:
             id_, text = json.loads(line)
             masked_text, masked_strings = self.cleaner.mask(text)
             cleaned_text = self.cleaner.clean(masked_text)
             if cleaned_text == '':
                 continue
-            writer.writerow([cleaned_text, masked_strings, '0', self.name])
-        print('Processed document {} of {}.'.format(i + 1, self.num_tweets))
+            self.writerow(writer, cleaned_text, masked_strings, '0', self.name)
 
 
 class HamburgDTBParser(Parser):
@@ -157,7 +176,7 @@ class NoahParser(Parser):
         file_names = [fn for fn in os.listdir(self.path_in_dir) if fn.endswith('.xml')]
         num_files = len(file_names)
         writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
-        for i, fn in enumerate(file_names):
+        for fn in file_names:
             tree = ET.parse(os.path.join(self.path_in_dir, fn))
             root = tree.getroot()
             for article in root:
@@ -170,8 +189,7 @@ class NoahParser(Parser):
                     cleaned_text = self.cleaner.clean(masked_text)
                     if cleaned_text == '':
                         continue
-                    writer.writerow([cleaned_text, masked_strings, '1', self.name])
-            print('Processed document {} of {}.'.format(i + 1, num_files))
+                    self.writerow(writer, cleaned_text, masked_strings, '1', self.name)
 
 
 class SBCHParser(Parser):
@@ -185,18 +203,15 @@ class SBCHParser(Parser):
         """Copy the loaded file to the main file."""
         reader = csv.reader(self.infile)
         writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
-        for i, row in enumerate(reader):
-            if i == 0:
-                continue
+        next(reader)
+        for row in reader:
             if not row:  # continue if row/line is empty
                 continue
             masked_text, masked_strings = self.cleaner.mask(row[1])
             cleaned_text = self.cleaner.clean(masked_text)
             if cleaned_text == '':
                 continue
-            writer.writerow([cleaned_text, str(masked_strings), '1', self.name])
-            if i % 10000:
-                print('Processed line {} of {}.'.format(i + 1, self.num_lines))
+            self.writerow(writer, cleaned_text, masked_strings, '1', self.name)
 
 
 class SBDEParser(Parser):
@@ -210,16 +225,13 @@ class SBDEParser(Parser):
         """Copy the loaded file to the main file."""
         reader = csv.reader(self.infile, delimiter='\t')
         writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
-        for i, row in enumerate(reader):
-            if i == 0:
-                continue
+        next(reader)
+        for row in reader:
             masked_text, masked_strings = self.cleaner.mask(row[3])
             cleaned_text = self.cleaner.clean(masked_text)
             if cleaned_text == '':
                 continue
-            writer.writerow([cleaned_text, str(masked_strings), '0', self.name])
-            if i % 10000:
-                print('Processed line {} of {}.'.format(i + 1, self.num_lines))
+            self.writerow(writer, cleaned_text, masked_strings, '0', self.name)
 
 
 class SwissCrawlParser(Parser):
@@ -233,16 +245,13 @@ class SwissCrawlParser(Parser):
         """Copy the loaded file to the main file."""
         reader = csv.reader(self.infile)
         writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
-        for i, row in enumerate(reader):
-            if i == 0:
-                continue
+        next(reader)
+        for row in reader:
             masked_text, masked_strings = self.cleaner.mask(row[0])
             cleaned_text = self.cleaner.clean(masked_text)
             if cleaned_text == '':
                 continue
-            writer.writerow([cleaned_text, str(masked_strings), '1', self.name])
-            if i % 10000:
-                print('Processed line {} of {}.'.format(i + 1, self.num_lines))
+            self.writerow(writer, cleaned_text, masked_strings, '1', self.name)
 
 
 def main():
