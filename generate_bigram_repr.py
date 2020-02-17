@@ -134,8 +134,9 @@ def gen_bigram_repr(path_in, path_out):
     fin = open(path_in, 'r', encoding='utf8')
     fout = open(path_out, 'w', encoding='utf8')
     csv_reader = csv.reader(fin)
-    csv_writer = csv.writer(fout)
-    for line in csv_reader:
+    # csv_writer = csv.writer(fout)
+    write_list = []
+    for i, line in enumerate(csv_reader):
         try:
             text_id, text, masked, label, source = line
         except ValueError:
@@ -148,7 +149,11 @@ def gen_bigram_repr(path_in, path_out):
         for bigram in bigrams:
             if bigram in mapping:
                 ohe[mapping[bigram]] += 1
-        csv_writer.writerow([text_id, ', '.join([str(value) for value in ohe])])
+        if i % 10000 == 0 and len(write_list) != 0:
+            fout.write('\n'.join(write_list))
+            write_list = [] 
+        else:
+            write_list.append(', '.join([text_id] + [str(value) for value in ohe]))
         if int(text_id) % 10000 == 0:
             print("Processed line {}.".format(text_id))
 
