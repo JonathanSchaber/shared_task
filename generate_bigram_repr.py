@@ -27,6 +27,7 @@ def parse_cmd_args():
                         help="Path to output file")
     parser.add_argument('-g', '--gen_mapping', default=False, action='store_true',
                         help='Generate new dictionary for bigram to dimension mapping.')
+    parser.add_argument('-m', 'mapping_path', type='str', help='Path to where mapping-json-file is dumped.')
     parser.add_argument('-c', '--ch', type=int, default=2000, help='The top n bigrams are used as ch features.')
     parser.add_argument('-w', '--world', type=int, default=10000, help='The top n bigrams are used as features '
                                                                        'for other languages.')
@@ -93,12 +94,13 @@ def get_bigram_to_dim_mapping(top_n_ch, top_n_other):
     return mapping
 
 
-def dump_bigram_to_dim_mapping(bigram_to_dim_mapping):
+def dump_bigram_to_dim_mapping(bigram_to_dim_mapping, path_out):
     """Dump bigram-to-dim-mapping into json.
 
+    :param path_out: str
     :param bigram_to_dim_mapping: {bigram<str>: dim<int>}
     """
-    with open('bigram_to_dim_mapping.json', 'w', encoding='utf8') as f:
+    with open(path_out, 'w', encoding='utf8') as f:
         json.dump(bigram_to_dim_mapping, f)
 
 
@@ -163,7 +165,7 @@ def main():
         top_n_ch = get_top_n(bigram_counts_ch, args.ch)
         top_n_other = get_top_n(bigram_counts_other, args.world)
         bigram_to_dim_mapping = get_bigram_to_dim_mapping(top_n_ch, top_n_other)
-        dump_bigram_to_dim_mapping(bigram_to_dim_mapping)
+        dump_bigram_to_dim_mapping(bigram_to_dim_mapping, args.mapping_path)
 
     gen_bigram_repr(args.path_in, args.path_out)
 
