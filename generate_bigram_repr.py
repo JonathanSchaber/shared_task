@@ -144,11 +144,13 @@ def gen_bigram_repr(path_in, path_out):
             else:
                 import pdb; pdb.set_trace()
         ohe = np.zeros(num_dims)
-        bigrams = [bi for bi in zip(text, text[1:])]
+        bigrams = [''.join(bi) for bi in zip(text, text[1:])]
         for bigram in bigrams:
             if bigram in mapping:
                 ohe[mapping[bigram]] += 1
         csv_writer.writerow([text_id, ', '.join([str(value) for value in ohe])])
+        if int(text_id) % 10000 == 0:
+            print("Processed line {}.".format(text_id))
 
 
 
