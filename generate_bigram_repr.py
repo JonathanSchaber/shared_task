@@ -33,13 +33,11 @@ def parse_cmd_args():
     return parser.parse_args()
 
 
-def count_bigrams(path_in, threshold=None):
+def count_bigrams(path_in):
     """Count bigrams for ch and other.
 
     Args:
         path_in: str, path to input csv file
-        threshold: None or int, if int, bigrams occurring
-            less than int are not in returned dict.
     Return:
         Tuple containing:
             bigram_counts_ch: {bigram: num occurences}
@@ -156,8 +154,6 @@ def gen_bigram_repr(path_in, path_out):
             write_list.append(', '.join([text_id] + [str(value) for value in ohe]))
         if int(text_id) % 10000 == 0:
             print("Processed line {}.".format(text_id))
-
-
 
 
 def main():
