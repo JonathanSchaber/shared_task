@@ -23,3 +23,8 @@ TODOs for week 17.-22. Feb:
 
 TODOs for week 23.-29. Feb:
 - [ ] train and test embedding based model
+
+Format of system output:
+- csv file
+- columns: id, label
+- optional: confidence as additional column
