@@ -8,6 +8,12 @@ import numpy as np
 
 """Generate a bigram representation of the corpus.
 
+Use this call to compute bigram representations for the training set and generate training only bigram mapping:
+python3 generate_bigram_repr.py -g -m train_bigram_to_dim_mapping.json -i data/main/train_main.csv -o data/main/train_main_bigr_repr.csv
+
+Use this call to compute bigram representations for the dev set:
+python3 generate_bigram_repr.py -i data/main/dev_main.csv -o data/main/dev_main_bigr_repr.csv
+
 To use default paths use: python3 generate_bigram_repr.py
 
 To manually set input and output path use: python3 generate_bigram_repr.py -i <path_in> -o <path_out>
@@ -27,7 +33,7 @@ def parse_cmd_args():
                         help="Path to output file")
     parser.add_argument('-g', '--gen_mapping', default=False, action='store_true',
                         help='Generate new dictionary for bigram to dimension mapping.')
-    parser.add_argument('-m', 'mapping_path', type='str', help='Path to where mapping-json-file is dumped.')
+    parser.add_argument('-m', '--mapping_path', type=str, default='to_be_set_mapping.json', fhelp='Path to where mapping-json-file is dumped.')
     parser.add_argument('-c', '--ch', type=int, default=2000, help='The top n bigrams are used as ch features.')
     parser.add_argument('-w', '--world', type=int, default=10000, help='The top n bigrams are used as features '
                                                                        'for other languages.')
@@ -154,8 +160,8 @@ def gen_bigram_repr(path_in, path_out):
             write_list = [] 
         else:
             write_list.append(', '.join([text_id] + [str(value) for value in ohe]))
-        if int(text_id) % 10000 == 0:
-            print("Processed line {}.".format(text_id))
+        if int(i) % 10000 == 0:
+            print("Processed line {}.".format(i))
 
 
 def main():
