@@ -21,7 +21,7 @@ def compare_line_by_line(gold_path, predicted_path):
         gold_path: str, path to gold csv file
         predicted_path: str, path to predicted csv file
     Return:
-        TODO
+        true_pos, false_pos, true_neg, false_neg: int
     """
     true_pos = 0
     false_pos = 0
@@ -49,6 +49,13 @@ def compare_line_by_line(gold_path, predicted_path):
      
 
 def write_measures_to_file(true_pos, false_pos, true_neg, false_neg, out_file):
+    """Writes the counts from compare_line_by_line() to the outfile
+        Returns none.
+ 
+    Args:
+        true_pos, false_pos, true_neg, false_neg: int
+    """
+
     with open(out_file, 'w', encoding='utf8') as outfile:
         outfile.write('True Positives: ' + str(true_pos) + '\n'
                       'False Positives: ' + str(false_pos) + '\n'
