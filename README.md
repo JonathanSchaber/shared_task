@@ -3,7 +3,7 @@ Swiss German Language Detection
 
 Collaborators: Janis Goldzycher, Jonathan Schaber
 
-Timeline:
+## Timeline:
 
 - 22.03.2020: Bigram Model trained/finished
 - 29.03.2020: Embedding Based Model traind/finished
@@ -28,3 +28,13 @@ Format of system output:
 - csv file
 - columns: id, label
 - optional: confidence as additional column
+
+##  Execution Instructions
+
+1. activate the conda environment
+2. `python corpus_parser.py`
+3. `python split_corpus.py -r 0.8`
+4. `python3 generate_bigram_repr.py -g -m train_bigram_to_dim_mapping.json -i data/main/train_main.csv -o data/main/train_main_bigr_repr.csv`
+5. `python3 generate_bigram_repr.py -i -m train_bigram_to_dim_mapping.json data/main/dev_main.csv -o data/main/dev_main_bigr_repr.csv`
+6. Some call for training
+7. Some call for evaluation
