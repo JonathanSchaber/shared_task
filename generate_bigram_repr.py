@@ -33,7 +33,7 @@ def parse_cmd_args():
                         help="Path to output file")
     parser.add_argument('-g', '--gen_mapping', default=False, action='store_true',
                         help='Generate new dictionary for bigram to dimension mapping.')
-    parser.add_argument('-m', '--mapping_path', type=str, default='to_be_set_mapping.json', fhelp='Path to where mapping-json-file is dumped.')
+    parser.add_argument('-m', '--mapping_path', type=str, default='to_be_set_mapping.json', help='Path to where mapping-json-file is dumped.')
     parser.add_argument('-c', '--ch', type=int, default=2000, help='The top n bigrams are used as ch features.')
     parser.add_argument('-w', '--world', type=int, default=10000, help='The top n bigrams are used as features '
                                                                        'for other languages.')
