@@ -29,7 +29,7 @@ Format of system output:
 - columns: id, label
 - optional: confidence as additional column
 
-##  Execution Instructions
+## Execution Instructions
 
 1. activate the conda environment
 2. `python corpus_parser.py`
@@ -38,3 +38,46 @@ Format of system output:
 5. `python3 generate_bigram_repr.py -m train_bigram_to_dim_mapping.json -i data/main/dev_main.csv -o data/main/dev_main_bigr_repr.csv`
 6. Some call for training
 7. Some call for evaluation
+
+## Linguistic Considerations
+
+- linguistic intuition: most difficult languages to distinguish from swiss german are:
+  - Standard German
+  - Luxemburgish
+  - Dutch
+  - French
+  - English
+  - -> these languages should have strong representation in the training data
+- assumption: swiss german text will mostly use latin1 characters
+- -> text that mostly consists of other characters (after cleaning of urls etc.) can be ruled out in a 
+rule based way (without classification)
+- Thus, the structure:
+  1. filter out text that is mostly not latin1 (ignore emojis) -> negative for sure
+  2. clean/mask text remaining text examples
+  3. pass remaining text examples to trained model (and only train model on such languages)
+
+#### Ideas for models
+
+  - bigram based
+    - "multi"-hot-encoding for bigrams
+    - problems: sparsity, high dimenionality
+    - for classification on top: svm, mlp, CNNs (hierarchical)
+  - character embedding based
+    - compute character embeddings using char-lang-model or cbow/skip-gram for on char-level?
+    - for classification on top: CNN (hierarchical, mutiple channels, dilation etc)  
+    
+    
+## Questions
+
+- What ratio of swiss german vs not-swiss german should we target? (depends on distribution of test data?)
+- Invest more time in collecting data or tweaking models (do we need more swiss german data)?
+- other model ideas?
+- other representation ideas?
+- what are the SOTA performances in language detection?
+- Do you need data who contributed what? What with pair programming? etc
+- Can the submitted paper count as the report for the pp?
+
+
+## Additional sources
+- Hamburd Tree Bank: already downloaded
+- Leipzig corpora (many languages to choose from): https://wortschatz.uni-leipzig.de/en/download
