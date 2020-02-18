@@ -12,7 +12,7 @@ Use this call to compute bigram representations for the training set and generat
 python3 generate_bigram_repr.py -g -m train_bigram_to_dim_mapping.json -i data/main/train_main.csv -o data/main/train_main_bigr_repr.csv
 
 Use this call to compute bigram representations for the dev set:
-python3 generate_bigram_repr.py -i data/main/dev_main.csv -o data/main/dev_main_bigr_repr.csv
+python3 generate_bigram_repr.py -i -m train_bigram_to_dim_mapping.json data/main/dev_main.csv -o data/main/dev_main_bigr_repr.csv
 
 To use default paths use: python3 generate_bigram_repr.py
 
@@ -33,7 +33,7 @@ def parse_cmd_args():
                         help="Path to output file")
     parser.add_argument('-g', '--gen_mapping', default=False, action='store_true',
                         help='Generate new dictionary for bigram to dimension mapping.')
-    parser.add_argument('-m', '--mapping_path', type=str, default='to_be_set_mapping.json',
+    parser.add_argument('-m', '--mapping_path', type=str, default='train_bigram_to_dim_mapping.json',
                         help='Path to where mapping-json-file is dumped.')
     parser.add_argument('-c', '--ch', type=int, default=2000, help='The top n bigrams are used as ch features.')
     parser.add_argument('-w', '--world', type=int, default=10000, help='The top n bigrams are used as features '
@@ -124,13 +124,15 @@ def get_num_lines(path):
     return count
 
 
-def gen_bigram_repr(path_in, path_out):
+def gen_bigram_repr(path_in, path_out, path_mapping):
     """Generate a bigram representation of the input corpus.
 
-    :param path_in: path to input csv-file.
-    :param path_out: path to output csv-file.
+    Args:
+        path_in: str, path to input csv-file.
+        path_out: str, path to output csv-file.
+        path_mapping: str, path to mapping to be used
+
     """
-    path_mapping = 'bigram_to_dim_mapping.json'
     if not os.path.exists(path_mapping):
         raise Exception('Bigram-to-dim-mapping not found. Please generate the mapping first!')
 
@@ -168,13 +170,19 @@ def gen_bigram_repr(path_in, path_out):
 def main():
     args = parse_cmd_args()
     if args.gen_mapping:
+        print('Counting bigrams...')
         bigram_counts_ch, bigram_counts_other = count_bigrams(args.path_in)
+        print('Get top n bigrams for ch...')
         top_n_ch = get_top_n(bigram_counts_ch, args.ch)
+        print('Get top n bigrams for other...')
         top_n_other = get_top_n(bigram_counts_other, args.world)
+        print('Create bigram to dim mapping...')
         bigram_to_dim_mapping = get_bigram_to_dim_mapping(top_n_ch, top_n_other)
+        print('Dump bigram mapping...')
         dump_bigram_to_dim_mapping(bigram_to_dim_mapping, args.mapping_path)
 
-    gen_bigram_repr(args.path_in, args.path_out)
+    print('Generate bigram represented corpus...')
+    gen_bigram_repr(args.path_in, args.path_out, args.mapping_path)
 
 
 if __name__ == '__main__':
