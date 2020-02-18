@@ -33,8 +33,8 @@ def compare_line_by_line(gold_path, predicted_path):
     for line_gold, line_pred in zip(gold_labels, predicted_labels):
         if line_gold[0] != line_pred[0]:
             raise Error
-        gold = int(line_gold[3])
-        pred = int(line_pred[1])
+        gold = int(float(line_gold[3]))
+        pred = int(float(line_pred[1]))
         if gold == 1 and pred == 1:
             true_pos += 1
         elif gold == 1 and pred == 0:
