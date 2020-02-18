@@ -28,38 +28,40 @@ def compare_line_by_line(gold_path, predicted_path):
     true_neg = 0
     false_neg = 0
  
-    gold_labels = csv.reader(open(gold_path, 'r', encoding='utf8') )
-    predicted_labels = csv.reader(open(predicted_path, 'r', encoding='utf8'))
+    gold_labels = csv.reader(open(gold_path, 'r', encoding='utf-8'))
+    predicted_labels = csv.reader(open(predicted_path, 'r', encoding='utf-8'))
     for line_gold, line_pred in zip(gold_labels, predicted_labels):
         if line_gold[0] != line_pred[0]:
             raise Error
-        gold = line_gold[3]
-        pred = line_pred[1]
+        gold = int(line_gold[3])
+        pred = int(line_pred[1])
         if gold == 1 and pred == 1:
             true_pos += 1
         elif gold == 1 and pred == 0:
-            false_ned += 1
+            false_neg += 1
         elif gold == 0 and pred == 1:
             false_pos += 1
         elif gold == 0 and pred == 0:
             true_neg += 1
+        else:
+            print('Error unallowed values for gold: ' + str(gold) + ' or pred: ' + str(pred))
     return true_pos, false_pos, true_neg, false_neg
      
 
 def write_measures_to_file(true_pos, false_pos, true_neg, false_neg, out_file):
     with open(out_file, 'w', encoding='utf8') as outfile:
-        outfile.write('True Positives: ' + str(true_pos) + '\n')
-        outfile.write('False Positives: ' + str(false_pos) + '\n')
-        outfile.write('True Negatives: ' + str(true_neg) + '\n')
-        outfile.write('False Negatives: ' + str(false_neg) + '\n\n')
-        outfile.write('Total: ' + str(true_pos + false_pos + true_neg + false_neg))
+        outfile.write('True Positives: ' + str(true_pos) + '\n'
+                      'False Positives: ' + str(false_pos) + '\n'
+                      'True Negatives: ' + str(true_neg) + '\n'
+                      'False Negatives: ' + str(false_neg) + '\n\n'
+                      'Total: ' + str(true_pos + false_pos + true_neg + false_neg))
 
 
 def main():
     args = parse_cmd_args()
     true_pos, false_pos, true_neg, false_neg = compare_line_by_line(args.gold_path, args.predicted_path)
-    write_measures_to_file(true_pos, false_pos, true_neg, false_neg, arg.path_out)
+    write_measures_to_file(true_pos, false_pos, true_neg, false_neg, args.path_out)
 
 
-if __name__ == '__name__':
+if __name__ == '__main__':
     main()
