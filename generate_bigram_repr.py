@@ -12,7 +12,7 @@ Use this call to compute bigram representations for the training set and generat
 python3 generate_bigram_repr.py -g -m train_bigram_to_dim_mapping.json -i data/main/train_main.csv -o data/main/train_main_bigr_repr.csv
 
 Use this call to compute bigram representations for the dev set:
-python3 generate_bigram_repr.py -i -m train_bigram_to_dim_mapping.json data/main/dev_main.csv -o data/main/dev_main_bigr_repr.csv
+python3 generate_bigram_repr.py -m train_bigram_to_dim_mapping.json -i data/main/dev_main.csv -o data/main/dev_main_bigr_repr.csv
 
 To use default paths use: python3 generate_bigram_repr.py
 
