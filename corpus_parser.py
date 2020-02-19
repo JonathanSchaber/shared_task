@@ -286,9 +286,6 @@ class HamburgDTBParser(Parser):
     path_out = 'data/main/hamburgtb_parsed.csv'
     cleaner = HamburgTBCleaner()
 
-    def __init__(self, path_in):
-        self.path_in = path_in
-
     def clean_and_write(self, csv_writer, words):
         sent_str = ' '.join(words)
         masked_text, masked_strings = self.cleaner.mask(sent_str)
