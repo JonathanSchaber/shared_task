@@ -69,17 +69,20 @@ rule based way (without classification)
     
 ## Questions
 
-- What ratio of swiss german vs not-swiss german should we target? (depends on distribution of test data?)
-- Invest more time in collecting data or tweaking models (do we need more swiss german data)?
-- other model ideas?
-- other representation ideas?
-- what are the SOTA performances in language detection?
+### Organizational
 - Do you need data who contributed what? What with pair programming? etc
 - Can the submitted paper count as the report for the pp?
 
+### Technical
+- what are the SOTA performances in language detection? -> over 99%
+- What ratio of swiss german vs not-swiss german should we target? (depends on distribution of test data?)
+- Invest more time in collecting data or tweaking models (do we need more swiss german data)?
+- Encode with padding or rnn-hidden representations?
+- other model ideas?
+- other representation ideas?
 
 ## Additional Corpora
-- Hamburd Tree Bank: already downloaded
+- Hamburg Tree Bank: already downloaded
 - Leipzig corpora (many languages to choose from): https://wortschatz.uni-leipzig.de/en/download
 
 
