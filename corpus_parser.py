@@ -257,7 +257,7 @@ class SBDEParser(Parser):
 
     name = 'sb_de'
     num_lines = 9983
-    out_path = 'data/main/sb_de_parser.csv'
+    out_path = 'data/main/sb_de_parsed.csv'
     cleaner = SBDECleaner()
 
     def copy_to_main_file(self):
