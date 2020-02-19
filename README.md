@@ -17,9 +17,15 @@ Collaborators: Janis Goldzycher, Jonathan Schaber
 
 TODOs for week 17.-22. Feb:
 - [x] write script to split training/validation data
-- [ ] write script for evaluation
+- [x] write script for evaluation
 - [x] write bigram based model
 - [x] train and test bigram based model
+- [ ] get balanced training data
+- [ ] train svm over subset of balanced training data to get baseline
+- [ ] implement filter mechanism; all on swiss keyboard; test on swiss data, if stuff is filtered out
+- [ ] test if filter mechanism produces errors
+- [ ] train character embeddings
+- [ ] train CNN
 
 TODOs for week 23.-29. Feb:
 - [ ] train and test embedding based model
