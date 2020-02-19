@@ -115,6 +115,8 @@ text_id = 0
 
 class Parser:
 
+    num_lines_overall = 737628
+
     def __init__(self, path_in):
         self.path_in = path_in
         self.infile = open(self.path_in, 'r', encoding='utf8')
@@ -123,8 +125,8 @@ class Parser:
         """Copy the loaded file to the main file."""
         raise NotImplementedError
 
-    @staticmethod
-    def writerow(writer, cleaned_text, masked_strings, label, corpus_name):
+    @classmethod
+    def writerow(cls, writer, cleaned_text, masked_strings, label, corpus_name):
         """Write row to output file and increase id-counter.
 
         Args:
@@ -137,7 +139,7 @@ class Parser:
         global text_id
         writer.writerow([text_id, cleaned_text, str(masked_strings), label, corpus_name])
         if text_id % 10000:
-            print('Processed line {} of {}.'.format(text_id + 1, 737628))
+            print('Processed line {} of {}.'.format(text_id + 1, cls.num_lines_overall))
         text_id += 1
 
 
@@ -168,6 +170,9 @@ class HamburgDTBParser(Parser):
     filenames = ['part_A.conll', 'part_B.conll', 'part_C.conll']
     out_path = 'data/main/hamburgtb_parsed.csv'
     cleaner = HamburgTBCleaner()
+
+    def __init__(self, path_in):
+        self.path_in = path_in
 
     def clean_and_write(self, csv_writer, words):
         sent_str = ' '.join(words)
@@ -289,25 +294,25 @@ class SwissCrawlParser(Parser):
 
 
 def main():
-    # path_in = 'data/ex3_corpus/tweets.json'
-    # p = Ex3Parser(path_in)
-    # p.copy_to_main_file()
-    #
-    # path_in = 'data/noah_corpus/'
-    # p = NoahParser(path_in)
-    # p.copy_to_main_file()
-    #
-    # path_in = 'data/sb_ch_corpus/chatmania.csv'
-    # p = SBCHParser(path_in)
-    # p.copy_to_main_file()
-    #
-    # path_in = 'data/sb_de_corpus/downloaded.tsv'
-    # p = SBDEParser(path_in)
-    # p.copy_to_main_file()
-    #
-    # path_in = 'data/swisscrawl/swisscrawl-2019-11-23.csv'
-    # p = SwissCrawlParser(path_in)
-    # p.copy_to_main_file()
+    path_in = 'data/ex3_corpus/tweets.json'
+    p = Ex3Parser(path_in)
+    p.copy_to_main_file()
+
+    path_in = 'data/noah_corpus/'
+    p = NoahParser(path_in)
+    p.copy_to_main_file()
+
+    path_in = 'data/sb_ch_corpus/chatmania.csv'
+    p = SBCHParser(path_in)
+    p.copy_to_main_file()
+
+    path_in = 'data/sb_de_corpus/downloaded.tsv'
+    p = SBDEParser(path_in)
+    p.copy_to_main_file()
+
+    path_in = 'data/swisscrawl/swisscrawl-2019-11-23.csv'
+    p = SwissCrawlParser(path_in)
+    p.copy_to_main_file()
 
     path_in = 'data/hamburg_dep_treebank/hamburg-dependency-treebank-conll'
     p = HamburgDTBParser(path_in)
