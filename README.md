@@ -86,18 +86,19 @@ rule based way (without classification)
 ## Relevant Literature and Resources
 
 ### Languate Detection
-https://arxiv.org/pdf/1804.08186.pdf
-http://ceur-ws.org/Vol-1228/
-https://dbs.cs.uni-duesseldorf.de/lehre/bmarbeit/barbeiten/ba_panich.pdf
-https://www.slideshare.net/shuyo/language-detection-library-for-java
+- https://arxiv.org/pdf/1804.08186.pdf
+- http://ceur-ws.org/Vol-1228/
+- http://ceur-ws.org/Vol-1228/tweetlid-1-gamallo.pdf -> winner of above, best model: naive bayes with bigrams and trigrams for prefix and suffix
+- https://dbs.cs.uni-duesseldorf.de/lehre/bmarbeit/barbeiten/ba_panich.pdf
+- https://www.slideshare.net/shuyo/language-detection-library-for-java
 
 ### Character Embeddings
-https://www.aclweb.org/anthology/S19-1008/
-https://www.depends-on-the-definition.com/lstm-with-char-embeddings-for-ner/
-https://hackernoon.com/chars2vec-character-based-language-model-for-handling-real-world-texts-with-spelling-errors-and-a3e4053a147d
-https://github.com/euler16/CharRNN
-https://www.kaggle.com/francescapaulin/character-level-lstm-in-pytorch
+- https://www.aclweb.org/anthology/S19-1008/
+- https://www.depends-on-the-definition.com/lstm-with-char-embeddings-for-ner/
+- https://hackernoon.com/chars2vec-character-based-language-model-for-handling-real-world-texts-with-spelling-errors-and-a3e4053a147d
+- https://github.com/euler16/CharRNN
+- https://www.kaggle.com/francescapaulin/character-level-lstm-in-pytorch
 
 ### Swiss Dialect Identification
-https://github.com/bricksdont/swiss-dialect-identification
+- https://github.com/bricksdont/swiss-dialect-identification
 
