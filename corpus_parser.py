@@ -101,6 +101,10 @@ class Ex3Cleaner(Cleaner):
     pass
 
 
+class HamburgTBCleaner(Cleaner):
+    pass
+
+
 # *****************************
 # ********** Parsers **********
 # *****************************
@@ -158,7 +162,37 @@ class Ex3Parser(Parser):
 
 
 class HamburgDTBParser(Parser):
-    pass
+
+    name = 'hamburgtb'
+    in_dir = 'data/hamburg_dep_treebank/hamburg-dependency-treebank-conll/'
+    filenames = ['part_A.conll', 'part_B.conll', 'part_C.conll']
+    out_path = 'data/main/hamburgtb_parsed.csv'
+    cleaner = HamburgTBCleaner()
+
+    def clean_and_write(self, csv_writer, words):
+        sent_str = ' '.join(words)
+        masked_text, masked_strings = self.cleaner.mask(sent_str)
+        cleaned_text = self.cleaner.clean(masked_text)
+        if cleaned_text == '':
+            return
+        self.writerow(csv_writer, cleaned_text, masked_strings, '0', self.name)
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all conll-files to the main file (csv) one sentence per row."""
+        fpaths_in = [os.path.join(self.in_dir, fn) for fn in self.filenames]
+        fout = open(self.out_path, 'w', encoding='utf8')
+        csv_writer = csv.writer(fout)
+        for fp in fpaths_in:
+            with open(fp, 'r', encoding='utf8') as f:
+                words = []
+                for line in f:
+                    if line == '\n':
+                        self.clean_and_write(csv_writer, words)
+                        words = []
+                    else:
+                        word = line.split('\t')[1]
+                        words.append(word)
+                self.clean_and_write(csv_writer, words)
 
 
 class NoahParser(Parser):
@@ -174,7 +208,7 @@ class NoahParser(Parser):
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
         file_names = [fn for fn in os.listdir(self.path_in_dir) if fn.endswith('.xml')]
-        num_files = len(file_names)
+        # num_files = len(file_names)
         writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
         for fn in file_names:
             tree = ET.parse(os.path.join(self.path_in_dir, fn))
@@ -255,24 +289,28 @@ class SwissCrawlParser(Parser):
 
 
 def main():
-    path_in = 'data/ex3_corpus/tweets.json'
-    p = Ex3Parser(path_in)
-    p.copy_to_main_file()
+    # path_in = 'data/ex3_corpus/tweets.json'
+    # p = Ex3Parser(path_in)
+    # p.copy_to_main_file()
+    #
+    # path_in = 'data/noah_corpus/'
+    # p = NoahParser(path_in)
+    # p.copy_to_main_file()
+    #
+    # path_in = 'data/sb_ch_corpus/chatmania.csv'
+    # p = SBCHParser(path_in)
+    # p.copy_to_main_file()
+    #
+    # path_in = 'data/sb_de_corpus/downloaded.tsv'
+    # p = SBDEParser(path_in)
+    # p.copy_to_main_file()
+    #
+    # path_in = 'data/swisscrawl/swisscrawl-2019-11-23.csv'
+    # p = SwissCrawlParser(path_in)
+    # p.copy_to_main_file()
 
-    path_in = 'data/noah_corpus/'
-    p = NoahParser(path_in)
-    p.copy_to_main_file()
-
-    path_in = 'data/sb_ch_corpus/chatmania.csv'
-    p = SBCHParser(path_in)
-    p.copy_to_main_file()
-
-    path_in = 'data/sb_de_corpus/downloaded.tsv'
-    p = SBDEParser(path_in)
-    p.copy_to_main_file()
-
-    path_in = 'data/swisscrawl/swisscrawl-2019-11-23.csv'
-    p = SwissCrawlParser(path_in)
+    path_in = 'data/hamburg_dep_treebank/hamburg-dependency-treebank-conll'
+    p = HamburgDTBParser(path_in)
     p.copy_to_main_file()
 
     try:
@@ -280,6 +318,7 @@ def main():
     except:
         pass
     os.system('cat data/main/* > data/main/main.csv')
+
 
 if __name__ == '__main__':
     main()
