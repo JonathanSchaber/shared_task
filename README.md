@@ -18,8 +18,8 @@ Collaborators: Janis Goldzycher, Jonathan Schaber
 TODOs for week 17.-22. Feb:
 - [x] write script to split training/validation data
 - [ ] write script for evaluation
-- [ ] write bigram based model
-- [ ] train and test bigram based model
+- [x] write bigram based model
+- [x] train and test bigram based model
 
 TODOs for week 23.-29. Feb:
 - [ ] train and test embedding based model
@@ -78,6 +78,25 @@ rule based way (without classification)
 - Can the submitted paper count as the report for the pp?
 
 
-## Additional sources
+## Additional Corpora
 - Hamburd Tree Bank: already downloaded
 - Leipzig corpora (many languages to choose from): https://wortschatz.uni-leipzig.de/en/download
+
+
+## Relevant Literature and Resources
+
+### Languate Detection
+https://arxiv.org/pdf/1804.08186.pdf
+https://dbs.cs.uni-duesseldorf.de/lehre/bmarbeit/barbeiten/ba_panich.pdf
+https://www.slideshare.net/shuyo/language-detection-library-for-java
+
+### Character Embeddings
+https://www.aclweb.org/anthology/S19-1008/
+https://www.depends-on-the-definition.com/lstm-with-char-embeddings-for-ner/
+https://hackernoon.com/chars2vec-character-based-language-model-for-handling-real-world-texts-with-spelling-errors-and-a3e4053a147d
+https://github.com/euler16/CharRNN
+https://www.kaggle.com/francescapaulin/character-level-lstm-in-pytorch
+
+### Swiss Dialect Identification
+https://github.com/bricksdont/swiss-dialect-identification
+
