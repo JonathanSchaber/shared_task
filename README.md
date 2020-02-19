@@ -6,7 +6,7 @@ Collaborators: Janis Goldzycher, Jonathan Schaber
 ## Timeline:
 
 - 22.03.2020: Bigram Model trained/finished
-- 29.03.2020: Embedding Based Model traind/finished
+- 29.03.2020: Embedding Based Model trained/finished
 - 20.03.2020: Test Set Release
 - 27.03.2020: Experimental Results Due
 - 03.04.2020: Publication of Evaluation Results
@@ -41,7 +41,7 @@ Format of system output:
 - Number of examples (line of main.csv): 989'466
 - Number positive examples (ch): 660'724 (`grep -Pc '\d+,.*,.*,1,.*$' main.csv`)
 - Number of negative examples (other): 328'742 (`grep -Pc '\d+,.*,.*,0,.*$' main.csv`)
-- Number of standard german examples (in other): hamburgtb + sbde + a little ex3 = ca. 272103
+- Number of standard german examples (in other): hamburgtb + sbde + a little ex3 = ca. 272'000
 
 ### Subcorpora
 Number of examples:
@@ -83,11 +83,11 @@ rule based way (without classification)
 
   - bigram based
     - "multi"-hot-encoding for bigrams
-    - problems: sparsity, high dimenionality
+    - problems: sparsity, high dimensionality
     - for classification on top: svm, mlp, CNNs (hierarchical)
   - character embedding based
     - compute character embeddings using char-lang-model or cbow/skip-gram for on char-level?
-    - for classification on top: CNN (hierarchical, mutiple channels, dilation etc)  
+    - for classification on top: CNN (hierarchical, multiple channels, dilation etc)  
     
     
 ## Questions
@@ -105,7 +105,6 @@ rule based way (without classification)
 - other representation ideas?
 
 ## Additional Corpora
-- Hamburg Tree Bank: already downloaded
 - Leipzig corpora (many languages to choose from): https://wortschatz.uni-leipzig.de/en/download
 
 
