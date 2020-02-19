@@ -20,10 +20,10 @@ TODOs for week 17.-22. Feb:
 - [x] write script for evaluation
 - [x] write bigram based model
 - [x] train and test bigram based model
-- [ ] get balanced training data
-- [ ] train svm over subset of balanced training data to get baseline
-- [ ] implement filter mechanism; all on swiss keyboard; test on swiss data, if stuff is filtered out
-- [ ] test if filter mechanism produces errors
+- [ ] get balanced training data -> Janis
+- [ ] train svm over subset of balanced training data to get baseline -> Janis
+- [ ] implement filter mechanism; all on swiss keyboard; test on swiss data, if stuff is filtered out -> Jonathan
+- [ ] test if filter mechanism produces errors -> Jonathan
 - [ ] train character embeddings
 - [ ] train CNN
 
@@ -95,7 +95,8 @@ rule based way (without classification)
 ## Relevant Literature and Resources
 
 ### Languate Detection
-- https://arxiv.org/pdf/1804.08186.pdf
+- kocmi: https://arxiv.org/pdf/1701.03338.pdf
+- survey: https://arxiv.org/pdf/1804.08186.pdf
 - http://ceur-ws.org/Vol-1228/
 - http://ceur-ws.org/Vol-1228/tweetlid-1-gamallo.pdf -> winner of above, best model: naive bayes with bigrams and trigrams for prefix and suffix
 - https://dbs.cs.uni-duesseldorf.de/lehre/bmarbeit/barbeiten/ba_panich.pdf
@@ -111,3 +112,5 @@ rule based way (without classification)
 ### Swiss Dialect Identification
 - https://github.com/bricksdont/swiss-dialect-identification
 
+### Libraries
+- for sequence classification: https://github.com/pytorch/fairseq
