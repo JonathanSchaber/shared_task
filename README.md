@@ -1,4 +1,4 @@
-# shared_task
+# Swiss German Language Detection
 Swiss German Language Detection
 
 Collaborators: Janis Goldzycher, Jonathan Schaber
@@ -105,6 +105,7 @@ rule based way (without classification)
 - other representation ideas?
 
 ## Additional Corpora
+- Hamburg Tree Bank: already downloaded
 - Leipzig corpora (many languages to choose from): https://wortschatz.uni-leipzig.de/en/download
 
 
