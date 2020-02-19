@@ -87,6 +87,7 @@ rule based way (without classification)
 
 ### Languate Detection
 https://arxiv.org/pdf/1804.08186.pdf
+http://ceur-ws.org/Vol-1228/
 https://dbs.cs.uni-duesseldorf.de/lehre/bmarbeit/barbeiten/ba_panich.pdf
 https://www.slideshare.net/shuyo/language-detection-library-for-java
 
