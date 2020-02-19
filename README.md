@@ -35,6 +35,23 @@ Format of system output:
 - columns: id, label
 - optional: confidence as additional column
 
+## Corpus Statistics
+
+### Overall
+- Number of examples (line of main.csv): 989'466
+- Number positive examples (ch): 660'724 (`grep -Pc '\d+,.*,.*,1,.*$' main.csv`)
+- Number of negative examples (other): 328'742 (`grep -Pc '\d+,.*,.*,0,.*$' main.csv`)
+- Number of standard german examples (in other): hamburgtb + sbde + a little ex3 = ca. 272103
+
+### Subcorpora
+Number of examples:
+- ex3-corpus: 66'921
+- hamburgtb: 261'821
+- sbde: 9'982
+- noah: 7'303
+- sbch: 90'897
+- swisscrawl: 562'524
+
 ## Execution Instructions
 
 1. activate the conda environment
