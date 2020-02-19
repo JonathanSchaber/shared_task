@@ -322,7 +322,7 @@ def main():
         os.system('rm data/main/main.csv')
     except:
         pass
-    os.system('cat data/main/* > data/main/main.csv')
+    os.system('cat data/main/*_parsed.csv > data/main/main.csv')
 
 
 if __name__ == '__main__':
