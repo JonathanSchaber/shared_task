@@ -3,3 +3,5 @@ data/*/*.json
 data/*/*.tsv
 data/*/*.xml
 data/*/*/*.conll
+data/*/*.sql
+data/*/*.txt
