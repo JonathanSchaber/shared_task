@@ -105,6 +105,34 @@ class HamburgTBCleaner(Cleaner):
     pass
 
 
+class LeipzigCleaner(Cleaner):
+    pass
+
+
+class LeipzigCleanerBAR(LeipzigCleaner):
+    pass
+
+
+class LeipzigCleanerDE(LeipzigCleaner):
+    pass
+
+
+class LeipzigCleanerEN(LeipzigCleaner):
+    pass
+
+
+class LeipzigCleanerFR(LeipzigCleaner):
+    pass
+
+
+class LeipzigCleanerITA(LeipzigCleaner):
+    pass
+
+
+class LeipzigCleanerNLD(LeipzigCleaner):
+    pass
+
+
 # *****************************
 # ********** Parsers **********
 # *****************************
@@ -117,9 +145,8 @@ class Parser:
 
     num_lines_overall = 737628
 
-    def __init__(self, path_in):
-        self.path_in = path_in
-        self.infile = open(self.path_in, 'r', encoding='utf8')
+    def __init__(self):
+        pass
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
@@ -143,17 +170,105 @@ class Parser:
         text_id += 1
 
 
+class LeipzigParser(Parser):
+
+    @classmethod
+    def _copy_to_main_file(cls, path_in, path_out, cleaner, name):
+        csv_writer = csv.writer(open(path_out, 'w', encoding='utf8'))
+        with open(path_in, 'r', encoding='utf8') as f:
+            for line in f:
+                text_id, text = line.strip('\n').split('\t')
+                masked_text, masked_strings = cleaner.mask(text)
+                cleaned_text = cleaner.clean(masked_text)
+                if cleaned_text == '':
+                    continue
+                cls.writerow(csv_writer, cleaned_text, masked_strings, '0', name)
+
+
+class LeipzigParserBAR(LeipzigParser):
+
+    path_in = 'data/leipzig_bar/bar_wikipedia_2010_30K-sentences.txt'
+    path_out = 'data/main/leipzig_bar_parsed.csv'
+    name = 'leipzig_bar'
+    cleaner = LeipzigCleanerBAR()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
+class LeipzigParserDE(LeipzigParser):
+
+    path_in = 'data/leipzig_de/deu_mixed-typical_2011_300K-sentences.txt'
+    path_out = 'data/main/leipzig_de_parsed.csv'
+    name = 'leipzig_de'
+    cleaner = LeipzigCleanerDE()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
+class LeipzigParserEN(LeipzigParser):
+
+    path_in = 'data/leipzig_en/eng_news_2016_300K-sentences.txt'
+    path_out = 'data/main/leipzig_en_parsed.csv'
+    name = 'leipzig_en'
+    cleaner = LeipzigCleanerEN()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
+class LeipzigParserFR(LeipzigParser):
+
+    path_in = 'data/leipzig_fr/fra_mixed_2009_300K-sentences.txt'
+    path_out = 'data/main/leipzig_fr_parsed.csv'
+    name = 'leipzig_fr'
+    cleaner = LeipzigCleanerFR()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
+class LeipzigParserITA(LeipzigParser):
+
+    path_in = 'data/leipzig_ita/ita_mixed-typical_2017_300K-sentences.txt'
+    path_out = 'data/main/leipzig_ita_parsed.csv'
+    name = 'leipzig_ita'
+    cleaner = LeipzigCleanerITA()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
+class LeipzigParserNLD(LeipzigParser):
+
+    path_in = 'data/leipzig_nld/nld_mixed_2012_300K-sentences.txt'
+    path_out = 'data/main/leipzig_nld_parsed.csv'
+    name = 'leipzig_nld'
+    cleaner = LeipzigCleanerNLD()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
 class Ex3Parser(Parser):
 
     name = 'ex3'
-    out_path = 'data/main/ex3_parsed.csv'
+    path_in = 'data/ex3_corpus/tweets.json'
+    path_out = 'data/main/ex3_parsed.csv'
     cleaner = Ex3Cleaner()
     num_tweets = 66921
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
         infile = open(self.path_in, 'r', encoding='utf8')
-        writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
+        writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
         for line in infile:
             id_, text = json.loads(line)
             masked_text, masked_strings = self.cleaner.mask(text)
@@ -166,9 +281,9 @@ class Ex3Parser(Parser):
 class HamburgDTBParser(Parser):
 
     name = 'hamburgtb'
-    in_dir = 'data/hamburg_dep_treebank/hamburg-dependency-treebank-conll/'
+    path_in = 'data/hamburg_dep_treebank/hamburg-dependency-treebank-conll/'
     filenames = ['part_A.conll', 'part_B.conll', 'part_C.conll']
-    out_path = 'data/main/hamburgtb_parsed.csv'
+    path_out = 'data/main/hamburgtb_parsed.csv'
     cleaner = HamburgTBCleaner()
 
     def __init__(self, path_in):
@@ -184,8 +299,8 @@ class HamburgDTBParser(Parser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all conll-files to the main file (csv) one sentence per row."""
-        fpaths_in = [os.path.join(self.in_dir, fn) for fn in self.filenames]
-        fout = open(self.out_path, 'w', encoding='utf8')
+        fpaths_in = [os.path.join(self.path_in, fn) for fn in self.filenames]
+        fout = open(self.path_out, 'w', encoding='utf8')
         csv_writer = csv.writer(fout)
         for fp in fpaths_in:
             with open(fp, 'r', encoding='utf8') as f:
@@ -203,20 +318,17 @@ class HamburgDTBParser(Parser):
 class NoahParser(Parser):
 
     name = 'noah'
-    in_dir = 'data/noah_corpus'
+    path_in = 'data/noah_corpus'
     out_path = 'data/main/noah_parsed.csv'
     cleaner = NoahCleaner()
 
-    def __init__(self, path_in):
-        self.path_in_dir = path_in
-
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
-        file_names = [fn for fn in os.listdir(self.path_in_dir) if fn.endswith('.xml')]
+        file_names = [fn for fn in os.listdir(self.path_in) if fn.endswith('.xml')]
         # num_files = len(file_names)
         writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
         for fn in file_names:
-            tree = ET.parse(os.path.join(self.path_in_dir, fn))
+            tree = ET.parse(os.path.join(self.path_in, fn))
             root = tree.getroot()
             for article in root:
                 for sent in article:
@@ -235,12 +347,13 @@ class SBCHParser(Parser):
 
     name = 'sb_ch'
     num_lines = 90899
+    path_in = 'data/sb_ch_corpus/chatmania.csv'
     out_path = 'data/main/sb_ch_parsed.csv'
     cleaner = SBCHCleaner()
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
-        reader = csv.reader(self.infile)
+        reader = csv.reader(open(self.path_in, 'r', encoding='utf8'))
         writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
         next(reader)
         for row in reader:
@@ -257,12 +370,13 @@ class SBDEParser(Parser):
 
     name = 'sb_de'
     num_lines = 9983
+    path_in = 'data/sb_de_corpus/downloaded.tsv'
     out_path = 'data/main/sb_de_parsed.csv'
     cleaner = SBDECleaner()
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
-        reader = csv.reader(self.infile, delimiter='\t')
+        reader = csv.reader(open(self.path_in, 'r', encoding='utf8'), delimiter='\t')
         writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
         next(reader)
         for row in reader:
@@ -277,13 +391,14 @@ class SwissCrawlParser(Parser):
 
     name = 'swisscrawl'
     num_lines = 562525
-    out_path = 'data/main/swisscrawl_parsed.csv'
+    path_in = 'data/swisscrawl/swisscrawl-2019-11-23.csv'
+    path_out = 'data/main/swisscrawl_parsed.csv'
     cleaner = SwissCrawlCleaner()
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
-        reader = csv.reader(self.infile)
-        writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
+        reader = csv.reader(open(self.path_in, 'r', encoding='utf8'))
+        writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
         next(reader)
         for row in reader:
             masked_text, masked_strings = self.cleaner.mask(row[0])
@@ -294,28 +409,40 @@ class SwissCrawlParser(Parser):
 
 
 def main():
-    path_in = 'data/ex3_corpus/tweets.json'
-    p = Ex3Parser(path_in)
+    p = Ex3Parser()
     p.copy_to_main_file()
 
-    path_in = 'data/noah_corpus/'
-    p = NoahParser(path_in)
+    p = NoahParser()
     p.copy_to_main_file()
 
-    path_in = 'data/sb_ch_corpus/chatmania.csv'
-    p = SBCHParser(path_in)
+    p = SBCHParser()
     p.copy_to_main_file()
 
-    path_in = 'data/sb_de_corpus/downloaded.tsv'
-    p = SBDEParser(path_in)
+    p = SBDEParser()
     p.copy_to_main_file()
 
-    path_in = 'data/swisscrawl/swisscrawl-2019-11-23.csv'
-    p = SwissCrawlParser(path_in)
+    p = SwissCrawlParser()
     p.copy_to_main_file()
 
-    path_in = 'data/hamburg_dep_treebank/hamburg-dependency-treebank-conll'
-    p = HamburgDTBParser(path_in)
+    p = HamburgDTBParser()
+    p.copy_to_main_file()
+
+    p = LeipzigParserBAR()
+    p.copy_to_main_file()
+
+    p = LeipzigParserDE()
+    p.copy_to_main_file()
+
+    p = LeipzigParserEN()
+    p.copy_to_main_file()
+
+    p = LeipzigParserFR()
+    p.copy_to_main_file()
+
+    p = LeipzigParserITA()
+    p.copy_to_main_file()
+
+    p = LeipzigParserNLD()
     p.copy_to_main_file()
 
     try:
