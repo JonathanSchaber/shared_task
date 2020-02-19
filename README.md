@@ -38,10 +38,10 @@ Format of system output:
 ## Corpus Statistics
 
 ### Overall
-- Number of examples (line of main.csv): 989'466
-- Number positive examples (ch): 660'724 (`grep -Pc '\d+,.*,.*,1,.*$' main.csv`)
-- Number of negative examples (other): 328'742 (`grep -Pc '\d+,.*,.*,0,.*$' main.csv`)
-- Number of standard german examples (in other): hamburgtb + sbde + a little ex3 = ca. 272'000
+- Number of examples (line of main.csv): 2'528'459
+- Number positive examples (ch): 660'727 (`grep -Pc '\d+,.*,.*,1,.*$' main.csv`)
+- Number of negative examples (other): 1'867'735 (`grep -Pc '\d+,.*,.*,0,.*$' main.csv`)
+- Number of standard german examples (part of other): hamburgtb + sbde + leipzig_de + leipzig_bar + a little ex3 = ca. 600'000
 
 ### Subcorpora
 Number of examples:
@@ -51,6 +51,13 @@ Number of examples:
 - noah: 7'303
 - sbch: 90'897
 - swisscrawl: 562'524
+- leipzig_bar: 30000 
+- leipzig_de: 299994
+- leipzig_en: 300000
+- leipzig_fr: 299017
+- leipzig_ita: 300000
+- leipzig_nld: 300000
+
 
 ## Execution Instructions
 
