@@ -1,4 +1,5 @@
 # Swiss German Language Detection
+
 Swiss German Language Detection
 
 Collaborators: Janis Goldzycher, Jonathan Schaber
@@ -44,6 +45,7 @@ Format of system output:
 - Number of standard german examples (part of other): hamburgtb + sbde + leipzig_de + leipzig_bar + a little ex3 = ca. 600'000
 
 ### Subcorpora
+
 Number of examples:
 - ex3-corpus: 66'921
 - hamburgtb: 261'821
@@ -126,7 +128,7 @@ rule based way (without classification)
 
 ## Relevant Literature and Resources
 
-### Languate Detection
+### Language Detection
 - kocmi: https://arxiv.org/pdf/1701.03338.pdf
 - survey: https://arxiv.org/pdf/1804.08186.pdf
 - http://ceur-ws.org/Vol-1228/
