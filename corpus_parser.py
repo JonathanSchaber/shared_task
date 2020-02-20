@@ -125,12 +125,41 @@ class LeipzigCleanerFR(LeipzigCleaner):
     pass
 
 
+class LeipzigCleanerFRR(LeipzigCleaner):
+    pass
+
+
 class LeipzigCleanerITA(LeipzigCleaner):
+    pass
+
+
+class LeipzigCleanerLMO(LeipzigCleaner):
+    pass
+
+
+class LeipzigCleanerLTZ(LeipzigCleaner):
+    pass
+
+
+class LeipzigCleanerNDS(LeipzigCleaner):
     pass
 
 
 class LeipzigCleanerNLD(LeipzigCleaner):
     pass
+
+
+class LeipzigCleanerNOR(LeipzigCleaner):
+    pass
+
+
+class LeipzigCleanerSWE(LeipzigCleaner):
+    pass
+
+
+class LeipzigCleanerYID(LeipzigCleaner):
+    pass
+
 
 
 # *****************************
@@ -186,6 +215,7 @@ class LeipzigParser(Parser):
 
 
 class LeipzigParserBAR(LeipzigParser):
+    """For Bavarian."""
 
     path_in = 'data/leipzig_bar/bar_wikipedia_2010_30K-sentences.txt'
     path_out = 'data/main/leipzig_bar_parsed.csv'
@@ -198,6 +228,7 @@ class LeipzigParserBAR(LeipzigParser):
 
 
 class LeipzigParserDE(LeipzigParser):
+    """For German."""
 
     path_in = 'data/leipzig_de/deu_mixed-typical_2011_300K-sentences.txt'
     path_out = 'data/main/leipzig_de_parsed.csv'
@@ -210,6 +241,7 @@ class LeipzigParserDE(LeipzigParser):
 
 
 class LeipzigParserEN(LeipzigParser):
+    """For English."""
 
     path_in = 'data/leipzig_en/eng_news_2016_300K-sentences.txt'
     path_out = 'data/main/leipzig_en_parsed.csv'
@@ -222,6 +254,7 @@ class LeipzigParserEN(LeipzigParser):
 
 
 class LeipzigParserFR(LeipzigParser):
+    """For French."""
 
     path_in = 'data/leipzig_fr/fra_mixed_2009_300K-sentences.txt'
     path_out = 'data/main/leipzig_fr_parsed.csv'
@@ -233,7 +266,21 @@ class LeipzigParserFR(LeipzigParser):
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
 
 
+class LeipzigParserFRR(LeipzigParser):
+    """For North Frisian."""
+
+    path_in = 'data/leipzig_frr/frr_wikipedia_2016_10K-sentences.txt'
+    path_out = 'data/main/leipzig_frr_parsed.csv'
+    name = 'leipzig_fr'
+    cleaner = LeipzigCleanerFRR()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
 class LeipzigParserITA(LeipzigParser):
+    """For Italian."""
 
     path_in = 'data/leipzig_ita/ita_mixed-typical_2017_300K-sentences.txt'
     path_out = 'data/main/leipzig_ita_parsed.csv'
@@ -245,12 +292,91 @@ class LeipzigParserITA(LeipzigParser):
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
 
 
+class LeipzigParserLMO(LeipzigParser):
+    """For Lombardic."""
+
+    path_in = 'data/leipzig_lmo/lmo_wikipedia_2016_30K-sentences.txt'
+    path_out = 'data/main/leipzig_lmo_parsed.csv'
+    name = 'leipzig_lmo'
+    cleaner = LeipzigCleanerLMO()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
+class LeipzigParserLTZ(LeipzigParser):
+    """For Lombardic."""
+
+    path_in = 'data/leipzig_ltz/ltz_newscrawl_2016_300K-sentences.txt'
+    path_out = 'data/main/leipzig_ltz_parsed.csv'
+    name = 'leipzig_ltz'
+    cleaner = LeipzigCleanerLTZ()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
+class LeipzigParserNDS(LeipzigParser):
+    """For Lombardic."""
+
+    path_in = 'data/leipzig_nds/nds_wikipedia_2016_100K-sentences.txt'
+    path_out = 'data/main/leipzig_nds_parsed.csv'
+    name = 'leipzig_nds'
+    cleaner = LeipzigCleanerNDS()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
 class LeipzigParserNLD(LeipzigParser):
+    """For Netherlandish."""
 
     path_in = 'data/leipzig_nld/nld_mixed_2012_300K-sentences.txt'
     path_out = 'data/main/leipzig_nld_parsed.csv'
     name = 'leipzig_nld'
     cleaner = LeipzigCleanerNLD()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
+class LeipzigParserNOR(LeipzigParser):
+    """For Norwegian."""
+
+    path_in = 'data/leipzig_nor/nor_wikipedia_2016_300K-sentences.txt'
+    path_out = 'data/main/leipzig_nor_parsed.csv'
+    name = 'leipzig_nor'
+    cleaner = LeipzigCleanerNOR()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
+class LeipzigParserSWE(LeipzigParser):
+    """For Swedish.."""
+
+    path_in = 'data/leipzig_swe/swe_wikipedia_2016_300K-sentences.txt'
+    path_out = 'data/main/leipzig_swe_parsed.csv'
+    name = 'leipzig_swe'
+    cleaner = LeipzigCleanerSWE()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.name)
+
+
+class LeipzigParserYID(LeipzigParser):
+    """For Swedish.."""
+
+    path_in = 'data/leipzig_yid/yid_wikipedia_2016_30K-sentences.txt'
+    path_out = 'data/main/leipzig_yid_parsed.csv'
+    name = 'leipzig_yid'
+    cleaner = LeipzigCleanerYID()
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
@@ -436,10 +562,31 @@ def main():
     p = LeipzigParserFR()
     p.copy_to_main_file()
 
+    p = LeipzigParserFRR()
+    p.copy_to_main_file()
+
     p = LeipzigParserITA()
     p.copy_to_main_file()
 
+    p = LeipzigParserLMO()
+    p.copy_to_main_file()
+
+    p = LeipzigParserLTZ()
+    p.copy_to_main_file()
+
+    p = LeipzigParserNDS()
+    p.copy_to_main_file()
+
     p = LeipzigParserNLD()
+    p.copy_to_main_file()
+
+    p = LeipzigParserNOR()
+    p.copy_to_main_file()
+
+    p = LeipzigParserSWE()
+    p.copy_to_main_file()
+
+    p = LeipzigParserYID()
     p.copy_to_main_file()
 
     try:
