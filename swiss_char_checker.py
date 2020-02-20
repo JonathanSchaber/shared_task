@@ -27,11 +27,11 @@ def check_sentences(text, threshold):
     for char in non_white_text:
         if char not in swiss_chars:
             num_non_swiss_chars += 1
-    ratio = num_non_swiss_chars / num_chars * 100
+    ratio = num_non_swiss_chars / num_chars * 100 if num_chars != 0 else 0
     if ratio > threshold:
         return text
     else:
-        return "SWISS GERMAN TEXT FOUND: " + text
+        return "POSSIBLE SWISS GERMAN TEXT FOUND: " + text
 
 def process_file(path_in, path_out, threshold):
     with open(path_in, "r", encoding="utf-8") as f:
