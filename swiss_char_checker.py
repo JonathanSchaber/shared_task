@@ -1,6 +1,8 @@
 import re
 import argparse
 import csv
+import emoji
+
 
 swiss_chars = [char for char in "qQwWeRtTzZuUiIoOpPüèÜaAsSdDfFgGhHjJkKlLöéÖäàÄyYxXcCvVbBnNmMçÇ"]
 
@@ -21,7 +23,7 @@ def parse_cmd_args():
 
 
 def check_sentences(text, threshold):
-    non_white_text = re.sub(punctuation, "", re.sub("\s", "", text))
+    non_white_text = re.sub(emoji.get_emoji_regexp(), "", re.sub(punctuation, "", re.sub("\s", "", text)))
     num_chars = len(non_white_text)
     num_non_swiss_chars = 0
     for char in non_white_text:
@@ -29,25 +31,36 @@ def check_sentences(text, threshold):
             num_non_swiss_chars += 1
     ratio = num_non_swiss_chars / num_chars * 100 if num_chars != 0 else 0
     if ratio > threshold:
-        return text
+        return "POSSIBLE NON_SWISS GERMAN TEXT:" + text if print_only else False
     else:
-        return "POSSIBLE SWISS GERMAN TEXT FOUND: " + text
+        return text
+
 
 def process_file(path_in, path_out, threshold):
-    with open(path_in, "r", encoding="utf-8") as f:
-        csv_reader = csv.reader(f)
-        for line in csv_reader:
-            try:
-                text_id, text, masked, label, source = line
-            except ValueError:
-                if line == ['Place for parser output']:
-                    pass
-                else:
-                    import pdb; pdb.set_trace()
-            if print_only:
-                print(check_sentences(text, threshold))
+    infile = open(path_in, "r", encoding="utf-8")
+    outfile = open(path_out, "w", encoding="utf-8")
+    csv_reader = csv.reader(infile)
+    csv_writer = csv.writer(outfile)
+    for i, line in enumerate(csv_reader):
+        try:
+            text_id, text, masked, label, source = line
+        except ValueError:
+            if line == ['Place for parser output']:
+                pass
             else:
-                return False
+                import pdb; pdb.set_trace()
+        if print_only:
+            print(check_sentences(text, threshold))
+        else:
+            # return False
+            swiss_text = check_sentences(text, threshold)
+            if i % 10000 == 0:
+                print("Processed line #{}".format(i) + " {}".format(text))
+            if swiss_text:
+                    csv_writer.writerow([text_id, swiss_text, masked, label, source])
+    infile.close()
+    outfile.close()
+
 
 
 def main():
@@ -59,9 +72,6 @@ def main():
     print_only = True if args.print_only else False
     print("Processing the follwoing file: {}".format(path_in))
     process_file(path_in, path_out, threshold)
-
-    #check_sentences("hAlloo=====000000m i bims :-) ahah, wie ga@sg@sg@sg@sg@sg@sg@sg@sg@sgaaaååats?", threshold)
-    # check_sentences("data/main/main.csv", 80)
 
 
 if __name__ == "__main__":
