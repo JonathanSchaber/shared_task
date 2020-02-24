@@ -303,7 +303,7 @@ class LeipzigParserFRR(LeipzigParser):
     language = 'northern_frisian'
     corpus_name = 'leipzig_frr'
     label_binary = lang_to_label['binary']['other']
-    label_ternary = lang_to_label['ternary']['german']  # TODO: Should it count as german?
+    label_ternary = lang_to_label['ternary']['other']
     label_finegrained = lang_to_label['finegrained'][language]
     cleaner = LeipzigCleanerFRR()
 
@@ -313,14 +313,14 @@ class LeipzigParserFRR(LeipzigParser):
 
 
 class LeipzigParserFRY(LeipzigParser):
-    """For Swiss German (Leipzig News Corpus).."""
+    """For west frisian."""
 
     path_in = 'data/leipzig_fry/fry_wikipedia_2016_100K-sentences.txt'
     path_out = 'data/main/leipzig_fry_parsed.csv'
     language = 'west_frisian'
     corpus_name = 'leipzig_fry'
     label_binary = lang_to_label['binary']['other']
-    label_ternary = lang_to_label['ternary']['german']  # TODO: Should it count as german???
+    label_ternary = lang_to_label['ternary']['other']
     label_finegrained = lang_to_label['finegrained'][language]
     cleaner = LeipzigCleanerFRY()
 
@@ -388,7 +388,7 @@ class LeipzigParserNDS(LeipzigParser):
     language = 'low_german'
     corpus_name = 'leipzig_nds'
     label_binary = lang_to_label['binary']['other']
-    label_ternary = lang_to_label['ternary']['german']  # Should it count as german???
+    label_ternary = lang_to_label['ternary']['other']
     label_finegrained = lang_to_label['finegrained'][language]
     cleaner = LeipzigCleanerNDS()
 
@@ -658,7 +658,7 @@ def main():
                HamburgDTBParser, LeipzigParserBAR, LeipzigParserDE, LeipzigParserEN,
                LeipzigParserFR, LeipzigParserFRR, LeipzigParserFRY, LeipzigParserGSW,
                LeipzigParserITA, LeipzigParserLMO, LeipzigParserLTZ, LeipzigParserNDS,
-               LeipzigParserNLD, LeipzigParserNOR, LeipzigParserSWE, LeipzigParserYID]
+               LeipzigParserNLD, LeipzigParserNOR, LeipzigParserSWE]  # LeipzigParserYID
 
     for parser_type in parsers:
         parser = parser_type()
