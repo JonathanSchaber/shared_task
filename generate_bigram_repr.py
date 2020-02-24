@@ -57,7 +57,7 @@ def count_bigrams(path_in):
         csv_reader = csv.reader(f)
         for line in csv_reader:
             try:
-                text_id, text, masked, label, source = line
+                text_id, text, masked, label_binary, label_ternary, label_finegrained, source = line
             except ValueError:
                 if line == ['Place for parser output']:
                     pass
@@ -147,7 +147,7 @@ def gen_bigram_repr(path_in, path_out, path_mapping):
     write_list = []
     for i, line in enumerate(csv_reader):
         try:
-            text_id, text, masked, label, source = line
+            text_id, text, masked, label_binary, label_ternary, label_finegrained, source = line
         except ValueError:
             if line == ['Place for parser output']:
                 continue

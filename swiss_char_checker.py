@@ -55,7 +55,7 @@ def process_file(path_in, path_out, threshold):
     csv_writer = csv.writer(outfile)
     for i, line in enumerate(csv_reader):
         try:
-            text_id, text, masked, label, source = line
+            text_id, text, masked, label_binary, label_ternary, label_finegrained, source = line
         except ValueError:
             if line == ['Place for parser output']:
                 pass
