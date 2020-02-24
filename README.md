@@ -164,3 +164,4 @@ rule based way (without classification)
     * `label_finegrained`
     * `cleaner`
 5. Include parser in `parsers`-list in `main`.
+6. Update corpus statistics in this readme.
