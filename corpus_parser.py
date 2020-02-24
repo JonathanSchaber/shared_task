@@ -532,62 +532,14 @@ class SwissCrawlParser(Parser):
 
 
 def main():
-    p = Ex3Parser()
-    p.copy_to_main_file()
+    parsers = [Ex3Parser, NoahParser, SBCHParser, SBDEParser, SwissCrawlParser,
+               HamburgDTBParser, LeipzigParserBAR, LeipzigParserDE, LeipzigParserEN,
+               LeipzigParserFR, LeipzigParserFRR, LeipzigParserITA, LeipzigParserLMO,
+               LeipzigParserLTZ, LeipzigParserNDS, LeipzigParserNLD, LeipzigParserNOR,
+               LeipzigParserSWE, LeipzigParserYID]
 
-    p = NoahParser()
-    p.copy_to_main_file()
-
-    p = SBCHParser()
-    p.copy_to_main_file()
-
-    p = SBDEParser()
-    p.copy_to_main_file()
-
-    p = SwissCrawlParser()
-    p.copy_to_main_file()
-
-    p = HamburgDTBParser()
-    p.copy_to_main_file()
-
-    p = LeipzigParserBAR()
-    p.copy_to_main_file()
-
-    p = LeipzigParserDE()
-    p.copy_to_main_file()
-
-    p = LeipzigParserEN()
-    p.copy_to_main_file()
-
-    p = LeipzigParserFR()
-    p.copy_to_main_file()
-
-    p = LeipzigParserFRR()
-    p.copy_to_main_file()
-
-    p = LeipzigParserITA()
-    p.copy_to_main_file()
-
-    p = LeipzigParserLMO()
-    p.copy_to_main_file()
-
-    p = LeipzigParserLTZ()
-    p.copy_to_main_file()
-
-    p = LeipzigParserNDS()
-    p.copy_to_main_file()
-
-    p = LeipzigParserNLD()
-    p.copy_to_main_file()
-
-    p = LeipzigParserNOR()
-    p.copy_to_main_file()
-
-    p = LeipzigParserSWE()
-    p.copy_to_main_file()
-
-    p = LeipzigParserYID()
-    p.copy_to_main_file()
+    for parser in parsers:
+        parser.copy_to_main_file()
 
     try:
         os.system('rm data/main/main.csv')
