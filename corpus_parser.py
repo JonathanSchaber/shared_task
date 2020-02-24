@@ -165,6 +165,10 @@ class LeipzigCleanerGSW(LeipzigCleaner):
     pass
 
 
+class LeipzigCleanerFRY(LeipzigCleaner):
+    pass
+
+
 # *****************************
 # ********** Parsers **********
 # *****************************
@@ -302,6 +306,23 @@ class LeipzigParserFRR(LeipzigParser):
     label_ternary = lang_to_label['ternary']['german']  # TODO: Should it count as german?
     label_finegrained = lang_to_label['finegrained'][language]
     cleaner = LeipzigCleanerFRR()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
+
+
+class LeipzigParserFRY(LeipzigParser):
+    """For Swiss German (Leipzig News Corpus).."""
+
+    path_in = 'data/leipzig_fry/fry_wikipedia_2016_100K-sentences.txt'
+    path_out = 'data/main/leipzig_fry_parsed.csv'
+    language = 'west_frisian'
+    corpus_name = 'leipzig_fry'
+    label_binary = lang_to_label['binary']['other']
+    label_ternary = lang_to_label['ternary']['german']  # TODO: Should it count as german???
+    label_finegrained = lang_to_label['finegrained'][language]
+    cleaner = LeipzigCleanerFRY()
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
@@ -447,7 +468,7 @@ class LeipzigParserYID(LeipzigParser):
 class LeipzigParserGSW(LeipzigParser):
     """For Swiss German (Leipzig News Corpus).."""
 
-    path_in = 'data/leipzig_gsw/yid_wikipedia_2016_30K-sentences.txt'
+    path_in = 'data/leipzig_gsw/gsw-ch_web_2017_100K-sentences.txt'
     path_out = 'data/main/leipzig_gsw_parsed.csv'
     language = 'swiss_german'
     corpus_name = 'leipzig_gsw'
@@ -635,9 +656,9 @@ class SwissCrawlParser(Parser):
 def main():
     parsers = [Ex3Parser, NoahParser, SBCHParser, SBDEParser, SwissCrawlParser,
                HamburgDTBParser, LeipzigParserBAR, LeipzigParserDE, LeipzigParserEN,
-               LeipzigParserFR, LeipzigParserFRR, LeipzigParserITA, LeipzigParserLMO,
-               LeipzigParserLTZ, LeipzigParserNDS, LeipzigParserNLD, LeipzigParserNOR,
-               LeipzigParserSWE, LeipzigParserYID]
+               LeipzigParserFR, LeipzigParserFRR, LeipzigParserFRY, LeipzigParserGSW,
+               LeipzigParserITA, LeipzigParserLMO, LeipzigParserLTZ, LeipzigParserNDS,
+               LeipzigParserNLD, LeipzigParserNOR, LeipzigParserSWE, LeipzigParserYID]
 
     for parser_type in parsers:
         parser = parser_type()
