@@ -161,6 +161,10 @@ class LeipzigCleanerYID(LeipzigCleaner):
     pass
 
 
+class LeipzigCleanerGSW(LeipzigCleaner):
+    pass
+
+
 # *****************************
 # ********** Parsers **********
 # *****************************
@@ -434,6 +438,23 @@ class LeipzigParserYID(LeipzigParser):
     label_ternary = lang_to_label['ternary']['other']
     label_finegrained = lang_to_label['finegrained'][language]
     cleaner = LeipzigCleanerYID()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
+
+
+class LeipzigParserGSW(LeipzigParser):
+    """For Swiss German (Leipzig News Corpus).."""
+
+    path_in = 'data/leipzig_gsw/yid_wikipedia_2016_30K-sentences.txt'
+    path_out = 'data/main/leipzig_gsw_parsed.csv'
+    language = 'swiss_german'
+    corpus_name = 'leipzig_gsw'
+    label_binary = lang_to_label['binary'][language]
+    label_ternary = lang_to_label['ternary'][language]
+    label_finegrained = lang_to_label['finegrained'][language]
+    cleaner = LeipzigCleanerGSW()
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
