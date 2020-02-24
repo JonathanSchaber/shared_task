@@ -23,7 +23,7 @@ def parse_cmd_args():
     return parser.parse_args()
 
 
-def check_sentences(text, threshold):
+def check_sentences(text, threshold, print_only=False):
     non_white_text = re.sub(emoji.get_emoji_regexp(), "", re.sub(punctuation, "", re.sub("\s", "", text)))
     num_chars = len(non_white_text)
     num_non_swiss_chars = 0
@@ -69,7 +69,7 @@ def process_file(path_in, path_out, threshold):
             if i % 10000 == 0:
                 print("Processed line #{}".format(i) + " {}".format(text))
             if swiss_text:
-                    csv_writer.writerow([text_id, swiss_text, masked, label, source])
+                    csv_writer.writerow([text_id, text, masked, label_binary, label_ternary, label_finegrained, source])
     infile.close()
     outfile.close()
 
@@ -84,7 +84,7 @@ def main():
     print_only = True if args.print_only else False
     print("Processing the follwoing file: {}".format(path_in))
     if  file_exists_check(path_out): 
-        process_file(path_in, path_out, threshold)
+        process_file(path_in, path_out, threshold, print_only)
 
 
 if __name__ == "__main__":
