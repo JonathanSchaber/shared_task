@@ -62,7 +62,7 @@ def process_file(path_in, path_out, threshold):
             else:
                 import pdb; pdb.set_trace()
         if print_only:
-            print(check_sentences(text, threshold))
+            print(check_sentences(text, threshold, print_only))
         else:
             # return False
             swiss_text = check_sentences(text, threshold)
@@ -83,8 +83,11 @@ def main():
     global print_only
     print_only = True if args.print_only else False
     print("Processing the follwoing file: {}".format(path_in))
-    if  file_exists_check(path_out): 
-        process_file(path_in, path_out, threshold, print_only)
+    if print_only:
+        process_file(path_in, path_out, threshold)
+    else: 
+        file_exists_check(path_out)
+        process_file(path_in, path_out, threshold)
 
 
 if __name__ == "__main__":
