@@ -9,6 +9,8 @@ swiss_chars = [char for char in "qQwWeRtTzZuUiIoOpPüèÜaAsSdDfFgGhHjJkKlLöé�
 
 punctuation = re.compile(r"[<>,;.:?'¿^`´+\-\\*%&/()=0123456789]")
 
+masks = re.compile(r"[MASK_MENTION|MASK_HASHTAG|MASK_URL]")
+
 
 def parse_cmd_args():
     """Parse command line arguments."""
@@ -24,7 +26,7 @@ def parse_cmd_args():
 
 
 def check_sentences(text, threshold, print_only=False):
-    non_white_text = re.sub(emoji.get_emoji_regexp(), "", re.sub(punctuation, "", re.sub("\s", "", text)))
+    non_white_text = re.sub(masks, "", re.sub(emoji.get_emoji_regexp(), "", re.sub(punctuation, "", re.sub("\s", "", text))))
     num_chars = len(non_white_text)
     num_non_swiss_chars = 0
     for char in non_white_text:
