@@ -7,7 +7,7 @@ import emoji
 
 swiss_chars = [char for char in "qQwWeRtTzZuUiIoOpPüèÜaAsSdDfFgGhHjJkKlLöéÖäàÄyYxXcCvVbBnNmMçÇ"]
 
-punctuation = re.compile(r"[<>,;.:?'¿^`´+\-\\*%&/()=0123456789]")
+punctuation = re.compile(r"[<>,;.:?!'¿^`´+\-\\*%&/()=0123456789]")
 
 masks = re.compile(r"[MASK_MENTION|MASK_HASHTAG|MASK_URL]")
 
@@ -45,6 +45,7 @@ def file_exists_check(path):
             os.system("rm {}".format(path))
             return True
         else:
+            print("\nAborted.")
             return False
     else:
         return True
