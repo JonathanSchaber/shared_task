@@ -21,7 +21,7 @@ TODOs for week 17.-22. Feb:
 - [x] write script for evaluation
 - [x] write bigram based model
 - [x] train and test bigram based model
-- [ ] get balanced training data -> Janis
+- [x] get balanced training data -> Janis
 - [ ] train svm over subset of balanced training data to get baseline -> Janis
 - [ ] implement filter mechanism; all on swiss keyboard; test on swiss data, if stuff is filtered out -> Jonathan
 - [ ] test if filter mechanism produces errors -> Jonathan
@@ -33,15 +33,16 @@ TODOs for week 23.-29. Feb:
 
 Format of system output:
 - csv file
-- columns: id, label
+- columns: id, label-binary, label-ternary label-finegrained, corpus-name
+- swiss german always has the label 0
 - optional: confidence as additional column
 
 ## Corpus Statistics
 
 ### Overall
 - Number of examples (line of main.csv): 3'598'459
-- Number positive examples (ch): 660'727 (`grep -Pc '\d+,.*,.*,1,.*$' main.csv`)
-- Number of negative examples (other): 2'937'735 (`grep -Pc '\d+,.*,.*,0,.*$' main.csv`)
+- Number positive examples (ch): 660'727 (`grep -Pc '\d+,.*,.*,0,.*$' main.csv`)
+- Number of negative examples (other): 2'937'735 (`grep -Pc '\d+,.*,.*,0,.*$' main.csv`) <- needs update
 - Number of standard german examples (part of other): hamburgtb + sbde + leipzig_de + leipzig_bar + a little ex3 = ca. 600'000
 
 ### Subcorpora
@@ -109,8 +110,7 @@ rule based way (without classification)
 ## Questions
 
 ### Organizational
-- Do you need data who contributed what? What with pair programming? etc
-- Can the submitted paper count as the report for the pp?
+- Can the submitted paper count as the report for the pp? yes
 
 ### Technical
 - what are the SOTA performances in language detection? -> over 99%
@@ -148,3 +148,19 @@ rule based way (without classification)
 
 ### Libraries
 - for sequence classification: https://github.com/pytorch/fairseq
+
+## Instructions for Adding a Corpus
+
+1. Create a directory in `data/` and copy files into directory.
+2. Add language-label mappings in `lang_to_label_mappings.json` if necessary.
+3. Create a CorpusCleaner. Can just be a empty class.
+4. Create a Corpus Parser. Needs to implement `copy_to_main_file()` and at least have the following attributes: 
+    * `path_in`
+    * `path_out` 
+    * `language`
+    * `corpus_name`
+    * `label_binary`
+    * `label_ternary`
+    * `label_finegrained`
+    * `cleaner`
+5. Include parser in `parsers`-list in `main`.
