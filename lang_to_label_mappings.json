@@ -1,0 +1,33 @@
+{
+  "binary":
+  {
+    "swiss_german": 0,
+    "other": 1
+  },
+  "ternary":
+  {
+    "swiss_german": 0,
+    "german": 1,
+    "other": 2
+  },
+  "fine_grained":
+  {
+    "swiss_german": 0,
+    "german": 1,
+    "bavarian": 2,
+    "english": 3,
+    "french": 4,
+    "northern_frisian": 5,
+    "italian": 6,
+    "lombard": 7,
+    "luxembourgish": 8,
+    "low_german": 9,
+    "dutch": 10,
+    "norwegian": 11,
+    "swedish": 12,
+    "yiddish": 13,
+    "various": 14
+
+
+  }
+}
