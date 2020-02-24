@@ -1,4 +1,5 @@
 import re
+import os
 import argparse
 import csv
 import emoji
@@ -34,6 +35,17 @@ def check_sentences(text, threshold):
         return "POSSIBLE NON_SWISS GERMAN TEXT:" + text if print_only else False
     else:
         return text
+
+def file_exists_check(path):
+    if os.path.exists(path):
+        overwrite = input("Outfile already existing. Overwrite [Y/n]?: ")
+        if overwrite == "Y":
+            os.system("rm {}".format(path))
+            return True
+        else:
+            return False
+    else:
+        return True
 
 
 def process_file(path_in, path_out, threshold):
@@ -71,7 +83,8 @@ def main():
     global print_only
     print_only = True if args.print_only else False
     print("Processing the follwoing file: {}".format(path_in))
-    process_file(path_in, path_out, threshold)
+    if  file_exists_check(path_out): 
+        process_file(path_in, path_out, threshold)
 
 
 if __name__ == "__main__":
