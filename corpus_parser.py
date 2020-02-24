@@ -618,7 +618,8 @@ def main():
                LeipzigParserLTZ, LeipzigParserNDS, LeipzigParserNLD, LeipzigParserNOR,
                LeipzigParserSWE, LeipzigParserYID]
 
-    for parser in parsers:
+    for parser_type in parsers:
+        parser = parser_type()
         parser.copy_to_main_file()
 
     try:
