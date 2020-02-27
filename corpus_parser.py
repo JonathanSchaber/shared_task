@@ -2,6 +2,7 @@ import os
 import re
 import csv
 import json
+from collections import defaultdict
 import xml.etree.ElementTree as ET
 from abc import ABC
 
@@ -485,8 +486,11 @@ class LeipzigParserGSW(LeipzigParser):
 class Ex3Parser(Parser):
     path_in = 'data/ex3_corpus/tweets.json'
     path_out = 'data/main/ex3_parsed.csv'
-    language = 'various'
+    path_train = 'data/ex3_corpus/labels-train+dev.tsv'
+    path_dev = 'data/ex3_corpus/labels-test.tsv'
+    language = 'other'
     corpus_name = 'ex3'
+    ex3_lang_to_label = json.load(open('ex3_mappings.json', 'r', encoding='utf8'))
     label_binary = lang_to_label['binary']['other']
     label_ternary = lang_to_label['ternary']['other']
     label_finegrained = lang_to_label['finegrained'][language]
@@ -494,16 +498,56 @@ class Ex3Parser(Parser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        id_to_label = self.load_labels()  # {tweet_id: lang_label}
+        de_v = [v for v in id_to_label.values() if v == 'de']
+        import pdb; pdb.set_trace()
         infile = open(self.path_in, 'r', encoding='utf8')
         writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
         for line in infile:
-            id_, text = json.loads(line)
+            tweet_id, text = json.loads(line)
+            if tweet_id not in id_to_label:
+                if self.language == 'de':
+                    import pdb; pdb.set_trace()
+                continue
+            ex3_label = id_to_label[tweet_id]
+            self.language = self.ex3_lang_to_label[ex3_label]
+            self.label_ternary = lang_to_label['ternary'][self.language if self.language == 'german' else 'other']
+            self.label_finegrained = lang_to_label['finegrained'][self.language]
             masked_text, masked_strings = self.cleaner.mask(text)
             cleaned_text = self.cleaner.clean(masked_text)
             if cleaned_text == '':
                 continue
             self.writerow(writer, cleaned_text, masked_strings, self.label_binary,
                           self.label_ternary, self.label_finegrained, self.corpus_name)
+
+    def load_labels(self):
+        # ftweets = open(path_tweets, 'r', encoding='utf8')
+        ftrain = open(self.path_train, 'r', encoding='utf8')
+        fdev = open(self.path_dev, 'r', encoding='utf8')
+
+        # tweets = {}  # {id: tweet}
+        # for line in ftweets:
+        #     id_, tweet = json.loads(line.strip('\n'))
+        #     tweets[id_] = tweet
+
+        id_to_label = {}  # {id: label}
+        for line in ftrain:
+            if line == '\n':
+                continue
+            label, id_ = line.strip('\n').split('\t')
+            id_to_label[id_] = label
+
+        for line in fdev:
+            if line == '\n':
+                continue
+            label, id_ = line.strip('\n').split('\t')
+            id_to_label[id_] = label
+
+        # label_count = defaultdict(int)  # {label: num occurences}
+        # for id_, label in id_to_label.items():
+        #     label_count[label] += 1
+        # labels_filtered = [label for label in label_count if label_count[label] >= 40]
+        return id_to_label
 
 
 class HamburgDTBParser(Parser):
@@ -663,6 +707,7 @@ def main():
     for parser_type in parsers:
         parser = parser_type()
         parser.copy_to_main_file()
+        break
 
     try:
         os.system('rm data/main/main.csv')
