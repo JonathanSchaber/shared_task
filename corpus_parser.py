@@ -500,14 +500,11 @@ class Ex3Parser(Parser):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
         id_to_label = self.load_labels()  # {tweet_id: lang_label}
         de_v = [v for v in id_to_label.values() if v == 'de']
-        import pdb; pdb.set_trace()
         infile = open(self.path_in, 'r', encoding='utf8')
         writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
         for line in infile:
             tweet_id, text = json.loads(line)
             if tweet_id not in id_to_label:
-                if self.language == 'de':
-                    import pdb; pdb.set_trace()
                 continue
             ex3_label = id_to_label[tweet_id]
             self.language = self.ex3_lang_to_label[ex3_label]
@@ -702,12 +699,11 @@ def main():
                HamburgDTBParser, LeipzigParserBAR, LeipzigParserDE, LeipzigParserEN,
                LeipzigParserFR, LeipzigParserFRR, LeipzigParserFRY, LeipzigParserGSW,
                LeipzigParserITA, LeipzigParserLMO, LeipzigParserLTZ, LeipzigParserNDS,
-               LeipzigParserNLD, LeipzigParserNOR, LeipzigParserSWE]  # LeipzigParserYID
+               LeipzigParserNLD, LeipzigParserNOR, LeipzigParserSWE, LeipzigParserYID]
 
     for parser_type in parsers:
         parser = parser_type()
         parser.copy_to_main_file()
-        break
 
     try:
         os.system('rm data/main/main.csv')
