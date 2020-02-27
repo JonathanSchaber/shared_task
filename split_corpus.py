@@ -16,7 +16,7 @@ def parse_cmd_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--path_in", type=str, default='data/main/main.csv', help="Path to main.csv")
     parser.add_argument("-o", "--path_out", type=str, default='data/main/', help="Path to output directory.")
-    parser.add_argument('-r', '--ratio', type=float, help='Train-dev ratio.')
+    parser.add_argument('-r', '--ratio', type=float, default=0.95, help='Train-dev ratio.')
     return parser.parse_args()
 
 
