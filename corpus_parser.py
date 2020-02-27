@@ -180,7 +180,7 @@ lang_to_label = json.load(open('lang_to_label_mappings.json', 'r', encoding='utf
 
 
 class Parser:
-    num_lines_overall = 737628
+    num_lines_overall = 3744990
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
