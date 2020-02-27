@@ -20,11 +20,13 @@ def load_id_to_label(path, limit=None):
     Args:
         path: str
         limit: int
+    Returns:
+        id_to_label: {text_id<int>:list(int)}
     """
     id_to_label = {}
     num_zeros = 0
-    num_ones = 0
-    goal = limit / 2
+    num_else = 0
+    goal = limit / 2 if limit else float('inf')
     line_counter = 0
     with open(path, 'r', encoding='utf8') as f:
         csv_reader = csv.reader(f)
@@ -32,18 +34,25 @@ def load_id_to_label(path, limit=None):
             # if limit is not None:
             #     if line_counter > limit:
             #         break
-            if num_ones >= goal and num_zeros >= goal:
-                break
             try:
-                text_id, text, masked, label, corpus = row
+                text_id, text, masked, label_binary, label_ternary, label_finegrained, source = row
+                int_text_id, int_label_binary, int_label_ternary, int_label_finegrained = int(text_id), int(label_binary), int(label_ternary), int(label_finegrained)
             except ValueError:
+                print("Value Error. Breaking.")
                 continue
-            if label == 0 and num_zeros >= goal:
-                continue
-            if label == 1 and num_ones >= goal:
-                continue
-            id_to_label[text_id] = label
+            if goal:
+                if num_else >= goal and num_zeros >= goal:
+                    break
+                elif int_label_binary == 0 and num_zeros >= goal:
+                    continue
+                elif int_label_binary == 1 and num_else >= goal:
+                    continue
+            if int_label_binary == 0:
+                num_zeros += 1
+            else:
+                num_else += 1
             line_counter += 1
+            id_to_label[int_text_id] = [int_label_binary, int_label_ternary, int_label_finegrained]
     return id_to_label
 
 
