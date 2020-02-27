@@ -33,7 +33,7 @@ TODOs for week 23.-29. Feb:
 
 Format of system output:
 - csv file
-- columns: id, label-binary, label-ternary label-finegrained, corpus-name
+- columns: id, text, masked-items, label-binary, label-ternary label-finegrained, corpus-name
 - swiss german always has the label 0
 - optional: confidence as additional column
 
@@ -74,7 +74,7 @@ Number of examples:
 
 1. activate the conda environment
 2. `python corpus_parser.py`
-3. `python split_corpus.py -r 0.8`
+3. `python split_corpus.py`
 4. `python3 generate_bigram_repr.py -g -m train_bigram_to_dim_mapping.json -i data/main/train_main.csv -o data/main/train_main_bigr_repr.csv`
 5. `python3 generate_bigram_repr.py -m train_bigram_to_dim_mapping.json -i data/main/dev_main.csv -o data/main/dev_main_bigr_repr.csv`
 6. Some call for training
