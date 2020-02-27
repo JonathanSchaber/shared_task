@@ -4,12 +4,15 @@ import argparse
 import csv
 import emoji
 
+# Some Variables (Lists of characters, regexes etc.)
 
 swiss_chars = [char for char in "qQwWeRtTzZuUiIoOpPüèÜaAsSdDfFgGhHjJkKlLöéÖäàÄyYxXcCvVbBnNmMçÇ"]
 
 punctuation = re.compile(r"[<>,;.:?!'¿^`´+\-\\*%&/()=0123456789]")
 
 masks = re.compile(r"[MASK_MENTION|MASK_HASHTAG|MASK_URL]")
+
+emojis = emoji.get_emoji_regexp()
 
 
 def parse_cmd_args():
@@ -26,7 +29,17 @@ def parse_cmd_args():
 
 
 def check_sentences(text, threshold, print_only=False):
-    non_white_text = re.sub(masks, "", re.sub(emoji.get_emoji_regexp(), "", re.sub(punctuation, "", re.sub("\s", "", text))))
+    """check if a given text consists of more non-swiss chars than allowed by the threshold
+
+    Args:
+        text: str
+        threshold: int
+        print_only: boolean
+    Returns:
+        True (if below threshold)
+        False XOR str (if print_only == True)
+    """
+    non_white_text = re.sub(masks, "", re.sub(emojis, "", re.sub(punctuation, "", re.sub("\s", "", text))))
     num_chars = len(non_white_text)
     num_non_swiss_chars = 0
     for char in non_white_text:
@@ -39,6 +52,14 @@ def check_sentences(text, threshold, print_only=False):
         return text
 
 def file_exists_check(path):
+    """checks if outfile already exists. if yes, user is asked if it should be overwritten.
+
+    Args:
+        path: str
+    Returns:
+        True (if file doesn't exist XOR user tells to overwrite
+        False (else)
+    """
     if os.path.exists(path):
         overwrite = input("Outfile already existing. Overwrite [Y/n]?: ")
         if overwrite == "Y":
@@ -52,6 +73,15 @@ def file_exists_check(path):
 
 
 def process_file(path_in, path_out, threshold):
+    """Process infile line by line. If text is below threshold it is written to outfile.
+
+    Args:
+        path_in: str
+        path_out: str
+        threshold: int
+    Returns:
+        None
+    """
     infile = open(path_in, "r", encoding="utf-8")
     outfile = open(path_out, "w", encoding="utf-8")
     csv_reader = csv.reader(infile)
