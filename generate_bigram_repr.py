@@ -63,7 +63,7 @@ def count_bigrams(path_in):
                     pass
                 else:
                     import pdb; pdb.set_trace()
-            cur_dict = bigram_counts_ch if label == '1' else bigram_counts_other
+            cur_dict = bigram_counts_ch if label_binary == '0' else bigram_counts_other
             bigrams = [bi for bi in zip(text, text[1:])]
             for bigram in bigrams:
                 cur_dict[bigram[0]+bigram[1]] += 1
