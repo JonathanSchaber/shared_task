@@ -61,7 +61,7 @@ def load_id_to_repr(path, id_to_label, limit=None):
 
     Args:
         path: str
-        id_to_label: {text_id: label}
+        id_to_label: {text_id<int>: list(label<int>)}
         limit: int
     Return: Tuple containing
         id_to_repr: {text-id<str>: multi-hot-representation<ndarray>}
