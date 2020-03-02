@@ -86,7 +86,7 @@ def load_id_to_repr(path, id_to_label, limit=None):
     return id_to_repr, id_list_ordered
 
 
-def load_data(path_train, path_dev):
+def load_data(path_train, path_dev, granularity="binary"):
     """Load training data into numpy arrays.
 
     Args:
@@ -112,8 +112,18 @@ def load_data(path_train, path_dev):
     X_train = np.zeros((num_examples_train, num_feats))
     y_train = np.zeros(num_examples_train)
 
+    if granularity == "binary":
+        index = 0
+    elif granularity == "ternary":
+        index = 1
+    elif granularity == "finegrained":
+        index = 2
+    else:
+        raise Exception("WARNING: Unknwon granularity!")
+        
+
     for i, text_id in enumerate(id_list_ordered_train):
-        label = id_to_label_train[text_id]
+        label = id_to_label_train[text_id][index]
         repr = id_to_repr_train[text_id]
         X_train[i] = repr
         y_train[i] = label
@@ -127,10 +137,12 @@ def load_data(path_train, path_dev):
     print('Constructing feature dev-matrix...')
     X_dev = np.zeros((num_examples_dev, num_feats))
     for i, text_id in enumerate(id_list_ordered_dev):
+        label = id_to_label_dev[text_id][index]
         repr = id_to_repr_dev[text_id]
         X_dev[i] = repr
+        y_dev[i] = label
 
-    return X_train, y_train, X_dev
+    return X_train, y_train, X_dev, y_dev
 
 
 
@@ -161,7 +173,7 @@ def svm_predict(svm, X_dev):
     return svm.predict(X_dev)
 
 
-def write_to_file(predictions, path_out):
+def write_to_file(predictions, y_dev, granularity, path_out):
     """Write predictions to file.
 
     Args:
@@ -174,21 +186,23 @@ def write_to_file(predictions, path_out):
             text_ids.append(row[0])
     with open(path_out, 'w', encoding='utf8') as f:
         csv_writer = csv.writer(f)
-        for text_id, label in zip(text_ids, predictions):
-            csv_writer.writerow([text_id, label])
+        csv_writer.writerow(["text_id", "label_pred", "label_true", "granularity_index"])
+        for text_id, label_pred, label_true in zip(text_ids, predictions, y_dev):
+            csv_writer.writerow([text_id, label_pred, label_true, granularity])
 
 
 def main():
     print('Parse cmd args...')
     args = parse_cmd_args()
-    print('Load training and test data...')
-    X_train, y_train, X_dev = load_data(args.path_train, args.path_dev)
-    print('Train svm...')
-    svm = train_svm(args, X_train, y_train)
-    print('Predict on dev-set...')
-    predictions = svm_predict(svm, X_dev)
-    print('Write to output file...')
-    write_to_file(predictions, args.path_out)
+    for granularity in ["binary", "ternary", "finegrained"]:
+        print('Load training and test data...')
+        X_train, y_train, X_dev, y_dev = load_data(args.path_train, args.path_dev, granularity)
+        print('Train svm...')
+        svm = train_svm(args, X_train, y_train)
+        print('Predict on dev-set...')
+        predictions = svm_predict(svm, X_dev)
+        print('Write to output file...')
+        write_to_file(predictions, y_dev, granularity, args.path_out)
 
 
 if __name__ == '__main__':
