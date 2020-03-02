@@ -136,6 +136,7 @@ def load_data(path_train, path_dev, granularity="binary"):
 
     print('Constructing feature dev-matrix...')
     X_dev = np.zeros((num_examples_dev, num_feats))
+    y_dev = np.zeros(num_examples_dev)
     for i, text_id in enumerate(id_list_ordered_dev):
         label = id_to_label_dev[text_id][index]
         repr = id_to_repr_dev[text_id]
