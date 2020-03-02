@@ -7,10 +7,9 @@ from sklearn.svm import SVC
 def parse_cmd_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--path_train", type=str, default='data/main/main.csv', help="Path to train data.")
-    parser.add_argument("-d", "--path_dev", type=str, default='data/main/main.csv', help="Path to dev data.")
-    parser.add_argument("-o", "--path_out", type=str, default='data/main/predicted.csv',
-                        help="Path to output file containing predictions.")
+    parser.add_argument("-t", "--path_train", type=str, help="Path to train data.")
+    parser.add_argument("-d", "--path_dev", type=str, help="Path to dev data.")
+    parser.add_argument("-o", "--path_out", type=str, help="Path to output file containing predictions.")
     return parser.parse_args()
 
 
