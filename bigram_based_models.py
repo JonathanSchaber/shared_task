@@ -3,6 +3,10 @@ import numpy as np
 import argparse
 from sklearn.svm import SVC
 
+"""
+
+"""
+
 
 def parse_cmd_args():
     """Parse command line arguments."""
@@ -55,33 +59,30 @@ def load_id_to_label(path, limit=None):
     return id_to_label
 
 
-def load_id_to_repr(path, id_to_label, limit=None):
+def load_id_to_repr(path, id_to_label):
     """Load mapping of text-ids to bigram representations.
 
     Args:
         path: str
         id_to_label: {text_id<int>: list(label<int>)}
-        limit: int
     Return: Tuple containing
         id_to_repr: {text-id<str>: multi-hot-representation<ndarray>}
         id_list_ordered: list of str
     """
     id_to_repr = {}
     id_list_ordered = []
-    line_counter = 0
     with open(path, 'r', encoding='utf8') as f:
         for line in f:
-            # if limit is not None:
-            #     if line_counter > limit:
-            #         break
             if len(id_to_repr) == len(id_to_label):
                 break
+            if len(id_to_repr) % 10 == 0:
+                print('Num loaded: {}'.format(len(id_to_repr)))
             columns = line.strip('\n').split(', ')
-            text_id, repr = columns[0], np.array([int(float(i)) for i in columns[1:]])
+            text_id = columns[0]
             if text_id in id_to_label:
+                repr = np.array([int(float(i)) for i in columns[1:]])
                 id_to_repr[text_id] = repr
                 id_list_ordered.append(text_id)
-            # line_counter += 1
     return id_to_repr, id_list_ordered
 
 
@@ -100,7 +101,7 @@ def load_data(path_train, path_dev, granularity="binary"):
     print('Loading labels for trainset...')
     id_to_label_train = load_id_to_label('data/main/train_main.csv', limit=2000)
     print('Loading reprs for trainset...')
-    id_to_repr_train, id_list_ordered_train = load_id_to_repr('data/main/train_main_bigr_repr.csv', id_to_label_train, limit=2000)
+    id_to_repr_train, id_list_ordered_train = load_id_to_repr('data/main/train_main_bigr_repr.csv', id_to_label_train)
 
     text_id = list(id_to_repr_train.keys())[0]
     num_feats = len(id_to_repr_train[text_id])
@@ -130,7 +131,7 @@ def load_data(path_train, path_dev, granularity="binary"):
     # Loading of dev set
     print('Loading labels for devset...')
     id_to_label_dev = load_id_to_label('data/main/dev_main.csv', limit=200)
-    id_to_repr_dev, id_list_ordered_dev = load_id_to_repr('data/main/dev_main_bigr_repr.csv', id_to_label_dev, limit=200)
+    id_to_repr_dev, id_list_ordered_dev = load_id_to_repr('data/main/dev_main_bigr_repr.csv', id_to_label_dev)
     num_examples_dev = len(id_to_repr_dev)
 
     print('Constructing feature dev-matrix...')
