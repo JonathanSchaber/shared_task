@@ -179,13 +179,13 @@ lang_to_label = json.load(open('lang_to_label_mappings.json', 'r', encoding='utf
 class Parser:
     num_lines_overall = 3744990
 
-    def __init__(self, use_seve_paths):
+    def __init__(self, use_server_paths):
         """Initialize parser object.
 
         Args:
             server: bool, if true server paths are used, else local paths.
         """
-        self.use_seve_paths = use_seve_paths
+        self.use_server_paths = use_server_paths
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
@@ -249,7 +249,7 @@ class LeipzigParserBAR(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
-        if self.use_seve_paths:
+        if self.use_server_paths:
             self.path_in = self.path_in_server
             self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
@@ -540,7 +540,7 @@ class Ex3Parser(Parser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
-        if self.use_seve_paths:
+        if self.use_server_paths:
             self.path_in = self.path_in_server
             self.path_out = self.path_out_server
             self.path_train = self.path_train_server
@@ -618,7 +618,7 @@ class HamburgDTBParser(Parser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all conll-files to the main file (csv) one sentence per row."""
-        if self.use_seve_paths:
+        if self.use_server_paths:
             self.path_in = self.path_in_server
             self.path_out = self.path_out_server
         fpaths_in = [os.path.join(self.path_in, fn) for fn in self.filenames]
@@ -651,7 +651,7 @@ class NoahParser(Parser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
-        if self.use_seve_paths:
+        if self.use_server_paths:
             self.path_in = self.path_in_server
             self.path_out = self.path_out_server
         file_names = [fn for fn in os.listdir(self.path_in) if fn.endswith('.xml')]
@@ -689,7 +689,7 @@ class SBCHParser(Parser):
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
-        if self.use_seve_paths:
+        if self.use_server_paths:
             self.path_in = self.path_in_server
             self.path_out = self.path_out_server
         reader = csv.reader(open(self.path_in, 'r', encoding='utf8'))
@@ -721,7 +721,7 @@ class SBDEParser(Parser):
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
-        if self.use_seve_paths:
+        if self.use_server_paths:
             self.path_in = self.path_in_server
             self.path_out = self.path_out_server
         reader = csv.reader(open(self.path_in, 'r', encoding='utf8'), delimiter='\t')
@@ -751,7 +751,7 @@ class SwissCrawlParser(Parser):
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
-        if self.use_seve_paths:
+        if self.use_server_paths:
             self.path_in = self.path_in_server
             self.path_out = self.path_out_server
         reader = csv.reader(open(self.path_in, 'r', encoding='utf8'))
@@ -775,6 +775,7 @@ def parse_cmd_args():
 
 
 def main():
+    args = parse_cmd_args()
     parsers = [Ex3Parser, NoahParser, SBCHParser, SBDEParser, SwissCrawlParser,
                HamburgDTBParser, LeipzigParserBAR, LeipzigParserDE, LeipzigParserEN,
                LeipzigParserFR, LeipzigParserFRR, LeipzigParserFRY, LeipzigParserGSW,
@@ -782,7 +783,7 @@ def main():
                LeipzigParserNLD, LeipzigParserNOR, LeipzigParserSWE, LeipzigParserYID]
 
     for parser_type in parsers:
-        parser = parser_type()
+        parser = parser_type(args.server)
         parser.copy_to_main_file()
 
     try:
