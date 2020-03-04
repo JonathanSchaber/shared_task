@@ -6,6 +6,7 @@ import argparse
 from sklearn.svm import SVC
 from utils import get_timestamp
 
+
 """
 Train 'classical' models on bigram based representations.
 """
