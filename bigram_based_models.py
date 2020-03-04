@@ -4,7 +4,7 @@ import argparse
 from sklearn.svm import SVC
 
 """
-
+Train 'classical' models on bigram based representations.
 """
 
 
