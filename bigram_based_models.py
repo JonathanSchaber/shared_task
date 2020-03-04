@@ -183,7 +183,7 @@ def write_to_file(predictions, y_dev, granularity, path_out):
         csv_reader = csv.reader(f)
         for row in csv_reader:
             text_ids.append(row[0])
-    with open(path_out, 'w', encoding='utf8') as f:
+    with open(path_out.rstrip('.csv') + '_' + granularity + '.csv', 'w', encoding='utf8') as f:
         csv_writer = csv.writer(f)
         csv_writer.writerow(["text_id", "label_pred", "label_true", "granularity_index"])
         for text_id, label_pred, label_true in zip(text_ids, predictions, y_dev):
