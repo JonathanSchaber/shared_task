@@ -17,130 +17,56 @@ def parse_cmd_args():
     return parser.parse_args()
 
 
-def load_id_to_label(path, limit=None):
-    """Load mapping of text-ids to labels.
-
-    Args:
-        path: str
-        limit: int
-    Returns:
-        id_to_label: {text_id<int>:list(int)}
-    """
-    id_to_label = {}
-    num_zeros = 0
-    num_else = 0
-    goal = limit / 2 if limit else float('inf')
-    line_counter = 0
-    with open(path, 'r', encoding='utf8') as f:
-        csv_reader = csv.reader(f)
-        for row in csv_reader:
-            try:
-                text_id, text, masked, label_binary, label_ternary, label_finegrained, source = row
-                int_text_id, int_label_binary, int_label_ternary, int_label_finegrained = int(text_id), int(label_binary), int(label_ternary), int(label_finegrained)
-            except ValueError:
-                print("Value Error. Breaking.")
-                continue
-            if goal:
-                if num_else >= goal and num_zeros >= goal:
-                    break
-                elif int_label_binary == 0 and num_zeros >= goal:
-                    continue
-                elif int_label_binary == 1 and num_else >= goal:
-                    continue
-            if int_label_binary == 0:
-                num_zeros += 1
-            else:
-                num_else += 1
-            line_counter += 1
-            id_to_label[int_text_id] = [int_label_binary, int_label_ternary, int_label_finegrained]
-    return id_to_label
-
-
-def load_data(path, granularity):
+def load_dataset(path, granularity):
     """Load mapping of text-ids to bigram representations.
 
     Args:
         path: str
+        granularity: str
     Return: Tuple containing
-        id_to_repr: {text-id<str>: multi-hot-representation<ndarray>}
-        id_list_ordered: list of str
+        X: 2D-Array
+        y: 1D-Array
     """
-    X_train = []
-    y_train = []
+    X_list = []
+    y_list = []
     gran_to_idx = {
         'binary': 1,
         'ternary': 2,
         'finegrained': 3
     }
+    print('Loading data from file...')
     with open(path, 'r', encoding='utf8') as f:
-        for line in f:
+        for i, line in enumerate(f):
             columns = line.strip('\n').split(', ')
             # text_id, label_binary, label_ternary, label_finegrained = columns[:4]
             repr = np.array([int(float(i)) for i in columns[4:]], dtype=int)
-            X_train.append(repr)
-            y_train.append(columns[gran_to_idx[granularity]])
-    X_train = np.array(X_train, dtype=int)
-    y_train = np.array(y_train, dtype=int)
+            X_list.append(repr)
+            y_list.append(columns[gran_to_idx[granularity]])
+            if i % 10000 == 0 and i != 0:
+                print('Loaded 10000 rows from file...')
+    print('Converting lists to arrays...')
+    X_train = np.array(X_list, dtype=int)
+    y_train = np.array(y_list, dtype=int)
     return X_train, y_train
 
 
-def load_data(path_train, path_dev, granularity="binary"):
+def load_data(path_trainset, path_devset, granularity):
     """Load training data into numpy arrays.
 
     Args:
         path_train: str
         path_dev: str
+        granularity: str
     Return: Tuple containing:
         X_train: 2D-Array
         y_train: 1D-Array
         X_dev: 2D-Array
+        y_dev: 1D-Array
     """
-    # Loading of train set
-    print('Loading labels for trainset...')
-    id_to_label_train = load_id_to_label('data/main/train_main.csv', limit=2000)
-    print('Loading reprs for trainset...')
-    id_to_repr_train, id_list_ordered_train = load_id_to_repr('data/main/train_main_bigr_repr.csv', id_to_label_train)
-
-    text_id = list(id_to_repr_train.keys())[0]
-    num_feats = len(id_to_repr_train[text_id])
-    num_examples_train = len(id_to_repr_train)
-
-    # convert to correct matrix/column vector
-    print('Constructing train-feature matrix and label vector...')
-    X_train = np.zeros((num_examples_train, num_feats))
-    y_train = np.zeros(num_examples_train)
-
-    if granularity == "binary":
-        index = 0
-    elif granularity == "ternary":
-        index = 1
-    elif granularity == "finegrained":
-        index = 2
-    else:
-        raise Exception("WARNING: Unknwon granularity!")
-        
-
-    for i, text_id in enumerate(id_list_ordered_train):
-        label = id_to_label_train[text_id][index]
-        repr = id_to_repr_train[text_id]
-        X_train[i] = repr
-        y_train[i] = label
-
-    # Loading of dev set
-    print('Loading labels for devset...')
-    id_to_label_dev = load_id_to_label('data/main/dev_main.csv', limit=200)
-    id_to_repr_dev, id_list_ordered_dev = load_id_to_repr('data/main/dev_main_bigr_repr.csv', id_to_label_dev)
-    num_examples_dev = len(id_to_repr_dev)
-
-    print('Constructing feature dev-matrix...')
-    X_dev = np.zeros((num_examples_dev, num_feats))
-    y_dev = np.zeros(num_examples_dev)
-    for i, text_id in enumerate(id_list_ordered_dev):
-        label = id_to_label_dev[text_id][index]
-        repr = id_to_repr_dev[text_id]
-        X_dev[i] = repr
-        y_dev[i] = label
-
+    print('Loading trainset...')
+    X_train, y_train = load_dataset(path_trainset, granularity)
+    print('Loading devset...')
+    X_dev, y_dev = load_dataset(path_devset, granularity)
     return X_train, y_train, X_dev, y_dev
 
 
