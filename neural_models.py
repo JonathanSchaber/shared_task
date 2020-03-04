@@ -45,16 +45,16 @@ def load_batches(csv_reader, batch_size, granularity):
         index = 2 + 3
     else:
         raise Exception('ERROR: Granularity level not known.')
-    batch = []
 
-    while i < batch_size:
-        try:
-            row = next(csv_reader)
-            batch.append((row[1], row[index]))
-        except StopIteration:
-            break
-
-    return batch if batch else None
+    while True:
+        batch = []
+        while i < batch_size:
+            try:
+                row = next(csv_reader)
+                batch.append((row[1], row[index]))
+            except StopIteration:
+                return
+        yield batch if batch else None
 
 
 def get_num_batches(path_train, batch_size):
