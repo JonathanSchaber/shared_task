@@ -829,10 +829,17 @@ def main():
         parser.copy_to_main_file()
 
     try:
-        os.system('rm data/main/main.csv')
+        if args.server:
+            os.system('rm /home/user/jgoldz/storage/shared_task/data/main/main.csv')
+        else:
+            os.system('rm data/main/main.csv')
     except:
         pass
-    os.system('cat data/main/*_parsed.csv > data/main/main.csv')
+    if args.server:
+        os.system('cat /home/user/jgoldz/storage/shared_task/data/main/*_parsed.csv > '
+                  '/home/user/jgoldz/storage/shared_task/data/main/main.csv')
+    else:
+        os.system('cat data/main/*_parsed.csv > data/main/main.csv')
 
 
 if __name__ == '__main__':
