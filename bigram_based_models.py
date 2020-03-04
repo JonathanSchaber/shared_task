@@ -1,7 +1,9 @@
+import os
 import csv
 import numpy as np
 import argparse
 from sklearn.svm import SVC
+from utils import get_timestamp
 
 """
 Train 'classical' models on bigram based representations.
@@ -98,20 +100,27 @@ def svm_predict(svm, X_dev):
     return svm.predict(X_dev)
 
 
-def write_to_file(predictions, y_dev, granularity, path_out):
+def write_to_file(predictions, y_dev, granularity, path_dev, path_out_dir):
     """Write predictions to file.
 
     Args:
-        predictions: numpy-array with labels (0 or 1)
+        predictions: numpy-array with labels
+        y_dev: numpy-array with true labels
+        granularity: str
+        path_dev: str
+        path_out_dir: str
     """
+    # Load text-ids
     text_ids = []
-    with open('data/main/dev_main.csv', 'r', encoding='utf8') as f:
+    with open(path_dev, 'r', encoding='utf8') as f:
         csv_reader = csv.reader(f)
         for row in csv_reader:
             text_ids.append(row[0])
-    with open(path_out.rstrip('.csv') + '_' + granularity + '.csv', 'w', encoding='utf8') as f:
+    # write results to file
+    fname_out = 'results_{granularity}_{timestamp}.csv'
+    with open(os.path.join(path_out_dir, fname_out), 'w', encoding='utf8') as f:
         csv_writer = csv.writer(f)
-        csv_writer.writerow(["text_id", "label_pred", "label_true", "granularity_index"])
+        csv_writer.writerow(["text_id", "label_pred", "label_true", "granularity"])
         for text_id, label_pred, label_true in zip(text_ids, predictions, y_dev):
             csv_writer.writerow([text_id, label_pred, label_true, granularity])
 
@@ -128,6 +137,7 @@ def main():
         predictions = svm_predict(svm, X_dev)
         print('Write to output file...')
         write_to_file(predictions, y_dev, granularity, args.path_out)
+        print('Done.')
 
 
 if __name__ == '__main__':
