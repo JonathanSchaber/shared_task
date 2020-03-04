@@ -5,7 +5,7 @@ import csv
 import numpy as np
 import torch
 from torch import nn
-from bigram_based_models import load_data, write_to_file
+from utils import get_timestamp
 
 
 def parse_cmd_args():
@@ -33,8 +33,9 @@ def load_batches(csv_reader, batch_size, granularity):
     Lazy loading of batches. Returns
 
     Args:
-        path_train_data: str
+        csv_reader: csv-reader object
         batch_size: int
+        granularity: str
     """
     i = 0
     if granularity == "binary":
@@ -66,7 +67,7 @@ def get_num_batches(path_train, batch_size):
     """
     with open(path_train, 'r', encoding='utf8') as f:
         num_examples = 0
-        for line in f:
+        for _ in f:
             num_examples += 1
         num_batches = num_examples / batch_size
         if num_examples % batch_size != 0:
@@ -111,10 +112,13 @@ def train_model(config):
     lr = config['learning_rate']
     num_classes = config['num_classes']
     dropout = config['dropout']
+    hidden_gru_size = config['hidden_gru_size']
+    num_gru_layers = config['num_gru_layers']
     if not os.path.exists('char_to_idx.json'):
         create_char_to_idx(path_train)
     char_to_idx = load_char_to_idx()
-    model = SeqToLabelModel(char_to_idx, embedding_dim=config['embedding_dim'])
+    model = SeqToLabelModel(char_to_idx, embedding_dim=config['embedding_dim'], hidden_gru_size=hidden_gru_size,
+                            num_gru_layers=num_gru_layers, num_classes=num_classes, dropout=dropout)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -123,12 +127,13 @@ def train_model(config):
     for epoch in range(1, num_epochs + 1):
         train_reader = csv.reader(open(path_train, 'r', encoding='utf8'))
         losses = []
-        for batch_num, batch in enumerate(load_batches(csv_reader=train_reader, batch_size=batch_size, granularity=granularity)):
+        for batch_num, batch in enumerate(load_batches(csv_reader=train_reader, batch_size=batch_size,
+                                                       granularity=granularity)):
             if not batch:
                 print('WARNING: Empty batch.')
                 continue
-            x_train = torch.LongTensor(batch[0]).to(device)
-            y_train = torch.LongTensor(batch[1]).to(device)
+            x_train = torch.Tensor(batch[0], dtype=torch.LongTensor).to(device)
+            y_train = torch.Tensor(batch[1], dtype=torch.LongTensor).to(device)
 
             # zero the gradients
             optimizer.zero_grad()
@@ -155,7 +160,7 @@ def train_model(config):
 
 class SeqToLabelModel(torch.nn.Module):
 
-    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes):
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
 
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size,
@@ -169,7 +174,27 @@ class SeqToLabelModel(torch.nn.Module):
         return output
 
 
+def save_model(trained_model, config, use_server_paths):
+    if use_server_paths:
+        path_out = '/home/user/jgoldz/storage/shared_task/models'
+    else:
+        path_out = 'models'
+    fname = '{model_id}_{timestamp}.model'.format(model_id=config['model_id'], timestamp=get_timestamp())
+    fpath = os.path.join(path_out, fname)
+    torch.save(trained_model, fpath)
+    print('Model saved to {}'.format(fpath))
+
+
 def main():
+    print('Parse cmd line args...')
     args = parse_cmd_args()
+    print('Loading config from {}...'.format(args.path_config))
     config = load_config(args.path_config)
+    print('Start model training')
     trained_model = train_model(config)
+    print('Saving trained model...')
+    save_model(trained_model, config, args.server)
+
+
+if __name__ == '__main__':
+    main()
