@@ -52,7 +52,7 @@ def create_sub_train_corpus(path_in, granularity, number=1000):
 	    15:0
 	  }
     else:
-        raise Error("ERROR: granularity unknown!")
+        raise Exception("ERROR: granularity unknown!")
 
     with open(path_in, "r",  encoding="utf8") as f:
         csv_reader = csv.reader(f)
