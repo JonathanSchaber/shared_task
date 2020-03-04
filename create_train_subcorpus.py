@@ -7,11 +7,11 @@ def parse_cmd_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--path_in", type=str, help="Path to whole train data.")
     parser.add_argument("-g", "--granularity", type=str, help="Specify granularity (binary, ternary, or finegrained).")
-    parser.add_argument("-n", "--number", type=int, help="Number of examples per label. Default is 1000.")
+    parser.add_argument("-n", "--number", type=int, help="Number of examples per label. Default is 1000.", default=1000)
     return parser.parse_args()
 
 
-def create_sub_train_corpus(path_in, granularity, number=1000):
+def create_sub_train_corpus(path_in, granularity, number):
     """Compute Subcorpus and write to file
     Args:
         path_in: str
@@ -58,19 +58,19 @@ def create_sub_train_corpus(path_in, granularity, number=1000):
         csv_reader = csv.reader(f)
         for line in csv_reader:
             if not all(counts == number for counts in labels_dict.values()):
-                label_relevant = line[{"binary":1, "ternary":2, "finegrained":3}[granularity]].strip()
-                if labels_dict[int(label_relevant)] >= number:
+                label_relevant = int(line[{"binary":1, "ternary":2, "finegrained":3}[granularity]].strip())
+                if labels_dict[label_relevant] >= number:
                     continue
                 else:
                     lines_to_write.append(line)
-                    labels_dict[int(label_relevant)] += 1
+                    labels_dict[label_relevant] += 1
             else:
                 break
+
     with open(path_in.rstrip(".csv") + "_" + granularity + "_" + str(number) + ".csv", "w", encoding="utf8") as f:
         csv_writer = csv.writer(f)
         for line in lines_to_write:
             csv_writer.writerow(line)
-
 
 
 def main():
@@ -78,6 +78,7 @@ def main():
     args = parse_cmd_args()
     print("Creating Sub-Corpus with granularity {} and {} examples per language.".format(args.granularity, str(args.number)))
     create_sub_train_corpus(args.path_in, args.granularity, args.number) 
+
 
 if __name__ == "__main__":
     main()
