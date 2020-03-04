@@ -271,6 +271,9 @@ class LeipzigParserDE(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -290,6 +293,9 @@ class LeipzigParserEN(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -309,6 +315,9 @@ class LeipzigParserFR(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -328,6 +337,9 @@ class LeipzigParserFRR(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -347,6 +359,9 @@ class LeipzigParserFRY(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -366,6 +381,9 @@ class LeipzigParserITA(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -385,6 +403,9 @@ class LeipzigParserLMO(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -404,6 +425,9 @@ class LeipzigParserLTZ(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -423,6 +447,9 @@ class LeipzigParserNDS(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -442,6 +469,9 @@ class LeipzigParserNLD(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -461,6 +491,9 @@ class LeipzigParserNOR(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -480,6 +513,9 @@ class LeipzigParserSWE(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -499,6 +535,9 @@ class LeipzigParserYID(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -518,6 +557,9 @@ class LeipzigParserGSW(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
