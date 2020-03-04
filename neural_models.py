@@ -157,11 +157,13 @@ def train_model(config):
                 print(msg.format(epoch, num_epochs, batch_num, num_batches, avg_loss))
                 losses = []
 
+    return model
+
 
 class SeqToLabelModel(torch.nn.Module):
 
     def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
-
+        super(SeqToLabelModel, self).__init__()
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size,
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=True)
@@ -179,7 +181,9 @@ def save_model(trained_model, config, use_server_paths):
         path_out = '/home/user/jgoldz/storage/shared_task/models'
     else:
         path_out = 'models'
-    fname = '{model_id}_{timestamp}.model'.format(model_id=config['model_id'], timestamp=get_timestamp())
+    fname = '{model_name}_{config_id}_{timestamp}.model'.format(model_name=config['model_name'],
+                                                                config_id=config['config_id'],
+                                                                timestamp=get_timestamp())
     fpath = os.path.join(path_out, fname)
     torch.save(trained_model, fpath)
     print('Model saved to {}'.format(fpath))
