@@ -162,7 +162,8 @@ def gen_bigram_repr(path_in, path_out, path_mapping):
             fout.write('\n'.join(write_list))
             write_list = [] 
         else:
-            write_list.append(', '.join([text_id] + [str(value) for value in ohe]))
+            write_list.append(', '.join([text_id] + [label_binary] + [label_ternary] + [label_finegrained] + \
+                    [str(int(value)) for value in ohe]))
         if int(i) % 10000 == 0:
             print("Processed line {}.".format(i))
 
