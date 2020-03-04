@@ -2,15 +2,12 @@ import os
 import re
 import csv
 import json
-from collections import defaultdict
+import argparse
 import xml.etree.ElementTree as ET
-from abc import ABC
+
 
 """
-p = NoahParser(path_in, path_out)
-p.copy_to_main_file()
-
-
+Parse and clean all corpora.
 """
 
 
@@ -182,6 +179,14 @@ lang_to_label = json.load(open('lang_to_label_mappings.json', 'r', encoding='utf
 class Parser:
     num_lines_overall = 3744990
 
+    def __init__(self, use_seve_paths):
+        """Initialize parser object.
+
+        Args:
+            server: bool, if true server paths are used, else local paths.
+        """
+        self.use_seve_paths = use_seve_paths
+
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
         raise NotImplementedError
@@ -232,7 +237,9 @@ class LeipzigParserBAR(LeipzigParser):
     """For Bavarian."""
 
     path_in = 'data/leipzig_bar/bar_wikipedia_2010_30K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_bar_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'bavarian'
     corpus_name = 'leipzig_bar'
     label_binary = lang_to_label['binary']['other']
@@ -242,6 +249,9 @@ class LeipzigParserBAR(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_seve_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
@@ -249,7 +259,9 @@ class LeipzigParserDE(LeipzigParser):
     """For German."""
 
     path_in = 'data/leipzig_de/deu_mixed-typical_2011_300K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_de_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'german'
     corpus_name = 'leipzig_de'
     label_binary = lang_to_label['binary']['other']
@@ -266,7 +278,9 @@ class LeipzigParserEN(LeipzigParser):
     """For English."""
 
     path_in = 'data/leipzig_en/eng_news_2016_300K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_en_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'english'
     corpus_name = 'leipzig_en'
     label_binary = lang_to_label['binary']['other']
@@ -283,7 +297,9 @@ class LeipzigParserFR(LeipzigParser):
     """For French."""
 
     path_in = 'data/leipzig_fr/fra_mixed_2009_300K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_fr_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'french'
     corpus_name = 'leipzig_fr'
     label_binary = lang_to_label['binary']['other']
@@ -300,7 +316,9 @@ class LeipzigParserFRR(LeipzigParser):
     """For North Frisian."""
 
     path_in = 'data/leipzig_frr/frr_wikipedia_2016_10K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_frr_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'northern_frisian'
     corpus_name = 'leipzig_frr'
     label_binary = lang_to_label['binary']['other']
@@ -317,7 +335,9 @@ class LeipzigParserFRY(LeipzigParser):
     """For west frisian."""
 
     path_in = 'data/leipzig_fry/fry_wikipedia_2016_100K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_fry_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'west_frisian'
     corpus_name = 'leipzig_fry'
     label_binary = lang_to_label['binary']['other']
@@ -334,7 +354,9 @@ class LeipzigParserITA(LeipzigParser):
     """For Italian."""
 
     path_in = 'data/leipzig_ita/ita_mixed-typical_2017_300K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_ita_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'italian'
     corpus_name = 'leipzig_ita'
     label_binary = lang_to_label['binary']['other']
@@ -351,7 +373,9 @@ class LeipzigParserLMO(LeipzigParser):
     """For Lombardic."""
 
     path_in = 'data/leipzig_lmo/lmo_wikipedia_2016_30K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_lmo_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'lombard'
     corpus_name = 'leipzig_lmo'
     label_binary = lang_to_label['binary']['other']
@@ -368,7 +392,9 @@ class LeipzigParserLTZ(LeipzigParser):
     """For Luxembourgish."""
 
     path_in = 'data/leipzig_ltz/ltz_newscrawl_2016_300K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_ltz_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'luxembourgish'
     corpus_name = 'leipzig_ltz'
     label_binary = lang_to_label['binary']['other']
@@ -385,7 +411,9 @@ class LeipzigParserNDS(LeipzigParser):
     """For low german (niedersächsisch)."""
 
     path_in = 'data/leipzig_nds/nds_wikipedia_2016_100K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_nds_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'low_german'
     corpus_name = 'leipzig_nds'
     label_binary = lang_to_label['binary']['other']
@@ -402,7 +430,9 @@ class LeipzigParserNLD(LeipzigParser):
     """For Dutch."""
 
     path_in = 'data/leipzig_nld/nld_mixed_2012_300K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_nld_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'dutch'
     corpus_name = 'leipzig_nld'
     label_binary = lang_to_label['binary']['other']
@@ -419,7 +449,9 @@ class LeipzigParserNOR(LeipzigParser):
     """For Norwegian."""
 
     path_in = 'data/leipzig_nor/nor_wikipedia_2016_300K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_nor_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'norwegian'
     corpus_name = 'leipzig_nor'
     label_binary = lang_to_label['binary']['other']
@@ -436,7 +468,9 @@ class LeipzigParserSWE(LeipzigParser):
     """For Swedish.."""
 
     path_in = 'data/leipzig_swe/swe_wikipedia_2016_300K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_swe_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'swedish'
     corpus_name = 'leipzig_swe'
     label_binary = lang_to_label['binary']['other']
@@ -453,7 +487,9 @@ class LeipzigParserYID(LeipzigParser):
     """For Yiddish.."""
 
     path_in = 'data/leipzig_yid/yid_wikipedia_2016_30K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_yid_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'yiddish'
     corpus_name = 'leipzig_yid'
     label_binary = lang_to_label['binary']['other']
@@ -470,7 +506,9 @@ class LeipzigParserGSW(LeipzigParser):
     """For Swiss German (Leipzig News Corpus).."""
 
     path_in = 'data/leipzig_gsw/gsw-ch_web_2017_100K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/leipzig_gsw_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'swiss_german'
     corpus_name = 'leipzig_gsw'
     label_binary = lang_to_label['binary'][language]
@@ -485,9 +523,13 @@ class LeipzigParserGSW(LeipzigParser):
 
 class Ex3Parser(Parser):
     path_in = 'data/ex3_corpus/tweets.json'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/ex3_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     path_train = 'data/ex3_corpus/labels-train+dev.tsv'
+    path_train_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_train)
     path_dev = 'data/ex3_corpus/labels-test.tsv'
+    path_dev_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_dev)
     language = 'other'
     corpus_name = 'ex3'
     ex3_lang_to_label = json.load(open('ex3_mappings.json', 'r', encoding='utf8'))
@@ -498,6 +540,11 @@ class Ex3Parser(Parser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_seve_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
+            self.path_train = self.path_train_server
+            self.path_dev = self.path_dev_server
         id_to_label = self.load_labels()  # {tweet_id: lang_label}
         de_v = [v for v in id_to_label.values() if v == 'de']
         infile = open(self.path_in, 'r', encoding='utf8')
@@ -549,8 +596,10 @@ class Ex3Parser(Parser):
 
 class HamburgDTBParser(Parser):
     path_in = 'data/hamburg_dep_treebank/hamburg-dependency-treebank-conll/'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     filenames = ['part_A.conll', 'part_B.conll', 'part_C.conll']
     path_out = 'data/main/hamburgtb_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'german'
     corpus_name = 'hamburgtb'
     label_binary = lang_to_label['binary']['other']
@@ -569,6 +618,9 @@ class HamburgDTBParser(Parser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all conll-files to the main file (csv) one sentence per row."""
+        if self.use_seve_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         fpaths_in = [os.path.join(self.path_in, fn) for fn in self.filenames]
         fout = open(self.path_out, 'w', encoding='utf8')
         csv_writer = csv.writer(fout)
@@ -587,7 +639,9 @@ class HamburgDTBParser(Parser):
 
 class NoahParser(Parser):
     path_in = 'data/noah_corpus'
-    out_path = 'data/main/noah_parsed.csv'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
+    path_out = 'data/main/noah_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'swiss_german'
     corpus_name = 'noah'
     label_binary = lang_to_label['binary'][language]
@@ -597,9 +651,12 @@ class NoahParser(Parser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_seve_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         file_names = [fn for fn in os.listdir(self.path_in) if fn.endswith('.xml')]
         # num_files = len(file_names)
-        writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
+        writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
         for fn in file_names:
             tree = ET.parse(os.path.join(self.path_in, fn))
             root = tree.getroot()
@@ -620,7 +677,9 @@ class NoahParser(Parser):
 class SBCHParser(Parser):
     num_lines = 90899
     path_in = 'data/sb_ch_corpus/chatmania.csv'
-    out_path = 'data/main/sb_ch_parsed.csv'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
+    path_out = 'data/main/sb_ch_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'swiss_german'
     corpus_name = 'sb_ch'
     label_binary = lang_to_label['binary'][language]
@@ -630,8 +689,11 @@ class SBCHParser(Parser):
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
+        if self.use_seve_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         reader = csv.reader(open(self.path_in, 'r', encoding='utf8'))
-        writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
+        writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
         next(reader)
         for row in reader:
             if not row:  # continue if row/line is empty
@@ -647,7 +709,9 @@ class SBCHParser(Parser):
 class SBDEParser(Parser):
     num_lines = 9983
     path_in = 'data/sb_de_corpus/downloaded.tsv'
-    out_path = 'data/main/sb_de_parsed.csv'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
+    path_out = 'data/main/sb_de_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'german'
     corpus_name = 'sb_de'
     label_binary = lang_to_label['binary']['other']
@@ -657,8 +721,11 @@ class SBDEParser(Parser):
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
+        if self.use_seve_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         reader = csv.reader(open(self.path_in, 'r', encoding='utf8'), delimiter='\t')
-        writer = csv.writer(open(self.out_path, 'w', encoding='utf8', newline='\n'))
+        writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
         next(reader)
         for row in reader:
             masked_text, masked_strings = self.cleaner.mask(row[3])
@@ -672,7 +739,9 @@ class SBDEParser(Parser):
 class SwissCrawlParser(Parser):
     num_lines = 562525
     path_in = 'data/swisscrawl/swisscrawl-2019-11-23.csv'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/swisscrawl_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
     language = 'swiss_german'
     corpus_name = 'swisscrawl'
     label_binary = lang_to_label['binary'][language]
@@ -682,6 +751,9 @@ class SwissCrawlParser(Parser):
 
     def copy_to_main_file(self):
         """Copy the loaded file to the main file."""
+        if self.use_seve_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
         reader = csv.reader(open(self.path_in, 'r', encoding='utf8'))
         writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
         next(reader)
@@ -692,6 +764,14 @@ class SwissCrawlParser(Parser):
                 continue
             self.writerow(writer, cleaned_text, masked_strings, self.label_binary,
                           self.label_ternary, self.label_finegrained, self.corpus_name)
+
+
+def parse_cmd_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--server", action='store_true', default=False,
+                        help='Indicate if server paths should be used.')
+    return parser.parse_args()
 
 
 def main():
