@@ -58,12 +58,12 @@ def create_sub_train_corpus(path_in, granularity, number=1000):
         csv_reader = csv.reader(f)
         for line in csv_reader:
             if not all(counts == number for counts in labels_dict.values()):
-                label_relevant = line[{"binary":1, "ternary":2, "finegrained":3}[granularity]]
-                if labels_dict[int(label_relevant.strip())] >= number:
+                label_relevant = line[{"binary":1, "ternary":2, "finegrained":3}[granularity]].strip()
+                if labels_dict[int(label_relevant)] >= number:
                     continue
                 else:
                     lines_to_write.append(line)
-                    labels_dict[int(label_relevant.strip())] += 1
+                    labels_dict[int(label_relevant)] += 1
             else:
                 break
     with open(path_in.rstrip(".csv") + "_" + granularity + "_" + str(number) + ".csv", "w", encoding="utf8") as f:
