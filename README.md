@@ -37,6 +37,9 @@ Format of system output:
 - swiss german always has the label 0
 - optional: confidence as additional column
 
+Format of bigram repr files:
+text_id KOMMA label_binary KOMMA label_ternary KOMMA label_finegrained KOMMA Representations
+
 ## Corpus Statistics
 
 ### Overall

@@ -1,10 +1,14 @@
+import os
+import re
 import csv
 import numpy as np
 import argparse
 from sklearn.svm import SVC
+from utils import get_timestamp
+
 
 """
-
+Train 'classical' models on bigram based representations.
 """
 
 
@@ -13,138 +17,75 @@ def parse_cmd_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--path_train", type=str, help="Path to train data.")
     parser.add_argument("-d", "--path_dev", type=str, help="Path to dev data.")
-    parser.add_argument("-o", "--path_out", type=str, help="Path to output file containing predictions.")
+    parser.add_argument("-o", "--path_out_dir", type=str, help="Path to output directory.")
     return parser.parse_args()
 
 
-def load_id_to_label(path, limit=None):
-    """Load mapping of text-ids to labels.
+def get_xperc(args):
+    """Get the number of examples per class.
 
     Args:
-        path: str
-        limit: int
-    Returns:
-        id_to_label: {text_id<int>:list(int)}
+        args: argparse-argument object
     """
-    id_to_label = {}
-    num_zeros = 0
-    num_else = 0
-    goal = limit / 2 if limit else float('inf')
-    line_counter = 0
-    with open(path, 'r', encoding='utf8') as f:
-        csv_reader = csv.reader(f)
-        for row in csv_reader:
-            # if limit is not None:
-            #     if line_counter > limit:
-            #         break
-            try:
-                text_id, text, masked, label_binary, label_ternary, label_finegrained, source = row
-                int_text_id, int_label_binary, int_label_ternary, int_label_finegrained = int(text_id), int(label_binary), int(label_ternary), int(label_finegrained)
-            except ValueError:
-                print("Value Error. Breaking.")
-                continue
-            if goal:
-                if num_else >= goal and num_zeros >= goal:
-                    break
-                elif int_label_binary == 0 and num_zeros >= goal:
-                    continue
-                elif int_label_binary == 1 and num_else >= goal:
-                    continue
-            if int_label_binary == 0:
-                num_zeros += 1
-            else:
-                num_else += 1
-            line_counter += 1
-            id_to_label[int_text_id] = [int_label_binary, int_label_ternary, int_label_finegrained]
-    return id_to_label
+    result = re.search(r'(\d+)\.csv$', args.path_train)
+    if result:
+        return int(result.group(1))
+    else:
+        msg = 'Error: Number of examples per class could not be read from train_path. train_path: {}'
+        raise Exception(msg.format(args.path_train))
 
 
-def load_id_to_repr(path, id_to_label):
+def load_dataset(path, granularity):
     """Load mapping of text-ids to bigram representations.
 
     Args:
         path: str
-        id_to_label: {text_id<int>: list(label<int>)}
+        granularity: str
     Return: Tuple containing
-        id_to_repr: {text-id<str>: multi-hot-representation<ndarray>}
-        id_list_ordered: list of str
+        X: 2D-Array
+        y: 1D-Array
     """
-    id_to_repr = {}
-    id_list_ordered = []
+    X_list = []
+    y_list = []
+    gran_to_idx = {
+        'binary': 1,
+        'ternary': 2,
+        'finegrained': 3
+    }
+    print('Loading data from file...')
     with open(path, 'r', encoding='utf8') as f:
-        for line in f:
-            if len(id_to_repr) == len(id_to_label):
-                break
-            if len(id_to_repr) % 10 == 0:
-                print('Num loaded: {}'.format(len(id_to_repr)))
+        for i, line in enumerate(f):
             columns = line.strip('\n').split(', ')
-            text_id = columns[0]
-            if text_id in id_to_label:
-                repr = np.array([int(float(i)) for i in columns[1:]])
-                id_to_repr[text_id] = repr
-                id_list_ordered.append(text_id)
-    return id_to_repr, id_list_ordered
+            # text_id, label_binary, label_ternary, label_finegrained = columns[:4]
+            text_repr = np.array([int(float(i)) for i in columns[4:]], dtype=int)
+            X_list.append(text_repr)
+            y_list.append(columns[gran_to_idx[granularity]])
+            if i % 10000 == 0 and i != 0:
+                print('Loaded 10000 rows from file...')
+    print('Converting lists to arrays...')
+    X_train = np.array(X_list, dtype=int)
+    y_train = np.array(y_list, dtype=int)
+    return X_train, y_train
 
 
-def load_data(path_train, path_dev, granularity="binary"):
+def load_data(path_trainset, path_devset, granularity):
     """Load training data into numpy arrays.
 
     Args:
-        path_train: str
-        path_dev: str
+        path_trainset: str
+        path_devset: str
+        granularity: str
     Return: Tuple containing:
         X_train: 2D-Array
         y_train: 1D-Array
         X_dev: 2D-Array
+        y_dev: 1D-Array
     """
-    # Loading of train set
-    print('Loading labels for trainset...')
-    id_to_label_train = load_id_to_label('data/main/train_main.csv', limit=2000)
-    print('Loading reprs for trainset...')
-    id_to_repr_train, id_list_ordered_train = load_id_to_repr('data/main/train_main_bigr_repr.csv', id_to_label_train)
-
-    text_id = list(id_to_repr_train.keys())[0]
-    num_feats = len(id_to_repr_train[text_id])
-    num_examples_train = len(id_to_repr_train)
-
-    # convert to correct matrix/column vector
-    print('Constructing train-feature matrix and label vector...')
-    X_train = np.zeros((num_examples_train, num_feats))
-    y_train = np.zeros(num_examples_train)
-
-    if granularity == "binary":
-        index = 0
-    elif granularity == "ternary":
-        index = 1
-    elif granularity == "finegrained":
-        index = 2
-    else:
-        raise Exception("WARNING: Unknwon granularity!")
-        
-
-    for i, text_id in enumerate(id_list_ordered_train):
-        label = id_to_label_train[text_id][index]
-        repr = id_to_repr_train[text_id]
-        X_train[i] = repr
-        y_train[i] = label
-
-    # Loading of dev set
-    print('Loading labels for devset...')
-    id_to_label_dev = load_id_to_label('data/main/dev_main.csv', limit=200)
-    id_to_repr_dev, id_list_ordered_dev = load_id_to_repr('data/main/dev_main_bigr_repr.csv', id_to_label_dev)
-    num_examples_dev = len(id_to_repr_dev)
-
-    print('Constructing feature dev-matrix...')
-    X_dev = np.zeros((num_examples_dev, num_feats))
-    y_dev = np.zeros(num_examples_dev)
-    for i, text_id in enumerate(id_list_ordered_dev):
-        label = id_to_label_dev[text_id][index]
-        repr = id_to_repr_dev[text_id]
-        X_dev[i] = repr
-        y_dev[i] = label
-
+    print('Loading trainset...')
+    X_train, y_train = load_dataset(path_trainset, granularity)
+    print('Loading devset...')
+    X_dev, y_dev = load_dataset(path_devset, granularity)
     return X_train, y_train, X_dev, y_dev
-
 
 
 def train_svm(args, X, y):
@@ -174,20 +115,29 @@ def svm_predict(svm, X_dev):
     return svm.predict(X_dev)
 
 
-def write_to_file(predictions, y_dev, granularity, path_out):
+def write_to_file(predictions, y_dev, granularity, path_dev, path_out_dir, xperc):
     """Write predictions to file.
 
     Args:
-        predictions: numpy-array with labels (0 or 1)
+        predictions: numpy-array with labels
+        y_dev: numpy-array with true labels
+        granularity: str
+        path_dev: str
+        path_out_dir: str
+        xperc: int, number of examples per class
     """
+    # Load text-ids
     text_ids = []
-    with open('data/main/dev_main.csv', 'r', encoding='utf8') as f:
+    with open(path_dev, 'r', encoding='utf8') as f:
         csv_reader = csv.reader(f)
         for row in csv_reader:
             text_ids.append(row[0])
-    with open(path_out.rstrip('.csv') + '_' + granularity + '.csv', 'w', encoding='utf8') as f:
+    # write results to file
+    fname_out = 'results_{granularity}_{xperc}_{timestamp}.csv'
+    fname_out = fname_out.format(granularity=granularity, xperc=xperc, timestamp=get_timestamp())
+    with open(os.path.join(path_out_dir, fname_out), 'w', encoding='utf8') as f:
         csv_writer = csv.writer(f)
-        csv_writer.writerow(["text_id", "label_pred", "label_true", "granularity_index"])
+        csv_writer.writerow(["text_id", "label_pred", "label_true", "granularity"])
         for text_id, label_pred, label_true in zip(text_ids, predictions, y_dev):
             csv_writer.writerow([text_id, label_pred, label_true, granularity])
 
@@ -195,6 +145,7 @@ def write_to_file(predictions, y_dev, granularity, path_out):
 def main():
     print('Parse cmd args...')
     args = parse_cmd_args()
+    xperc = get_xperc(args)
     for granularity in ["binary", "ternary", "finegrained"]:
         print('Load training and test data...')
         X_train, y_train, X_dev, y_dev = load_data(args.path_train, args.path_dev, granularity)
@@ -203,7 +154,8 @@ def main():
         print('Predict on dev-set...')
         predictions = svm_predict(svm, X_dev)
         print('Write to output file...')
-        write_to_file(predictions, y_dev, granularity, args.path_out)
+        write_to_file(predictions, y_dev, granularity, args.path_dev, args.path_out_dir, xperc)
+        print('Done.')
 
 
 if __name__ == '__main__':
