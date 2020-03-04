@@ -553,7 +553,7 @@ class Ex3Parser(Parser):
             tweet_id, text = json.loads(line)
             if tweet_id not in id_to_label:
                 continue
-            ex3_label = id_to_label[tweet_id]
+            ex3_label = id_to_label[tweet_id].strip()
             self.language = self.ex3_lang_to_label[ex3_label]
             self.label_ternary = lang_to_label['ternary'][self.language if self.language == 'german' else 'other']
             self.label_finegrained = lang_to_label['finegrained'][self.language]
