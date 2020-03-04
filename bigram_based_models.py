@@ -1,4 +1,5 @@
 import os
+import re
 import csv
 import numpy as np
 import argparse
@@ -15,8 +16,22 @@ def parse_cmd_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--path_train", type=str, help="Path to train data.")
     parser.add_argument("-d", "--path_dev", type=str, help="Path to dev data.")
-    parser.add_argument("-o", "--path_out", type=str, help="Path to output file containing predictions.")
+    parser.add_argument("-o", "--path_out_dir", type=str, help="Path to output directory.")
     return parser.parse_args()
+
+
+def get_xperc(args):
+    """Get the number of examples per class.
+
+    Args:
+        args: argparse-argument object
+    """
+    result = re.search(r'(\d+)\.csv$', args.path_train)
+    if result:
+        return int(result.group(1))
+    else:
+        msg = 'Error: Number of examples per class could not be read from train_path. train_path: {}'
+        raise Exception(msg.format(args.path_train))
 
 
 def load_dataset(path, granularity):
@@ -41,8 +56,8 @@ def load_dataset(path, granularity):
         for i, line in enumerate(f):
             columns = line.strip('\n').split(', ')
             # text_id, label_binary, label_ternary, label_finegrained = columns[:4]
-            repr = np.array([int(float(i)) for i in columns[4:]], dtype=int)
-            X_list.append(repr)
+            text_repr = np.array([int(float(i)) for i in columns[4:]], dtype=int)
+            X_list.append(text_repr)
             y_list.append(columns[gran_to_idx[granularity]])
             if i % 10000 == 0 and i != 0:
                 print('Loaded 10000 rows from file...')
@@ -56,8 +71,8 @@ def load_data(path_trainset, path_devset, granularity):
     """Load training data into numpy arrays.
 
     Args:
-        path_train: str
-        path_dev: str
+        path_trainset: str
+        path_devset: str
         granularity: str
     Return: Tuple containing:
         X_train: 2D-Array
@@ -70,7 +85,6 @@ def load_data(path_trainset, path_devset, granularity):
     print('Loading devset...')
     X_dev, y_dev = load_dataset(path_devset, granularity)
     return X_train, y_train, X_dev, y_dev
-
 
 
 def train_svm(args, X, y):
@@ -100,7 +114,7 @@ def svm_predict(svm, X_dev):
     return svm.predict(X_dev)
 
 
-def write_to_file(predictions, y_dev, granularity, path_dev, path_out_dir):
+def write_to_file(predictions, y_dev, granularity, path_dev, path_out_dir, xperc):
     """Write predictions to file.
 
     Args:
@@ -109,6 +123,7 @@ def write_to_file(predictions, y_dev, granularity, path_dev, path_out_dir):
         granularity: str
         path_dev: str
         path_out_dir: str
+        xperc: int, number of examples per class
     """
     # Load text-ids
     text_ids = []
@@ -117,7 +132,8 @@ def write_to_file(predictions, y_dev, granularity, path_dev, path_out_dir):
         for row in csv_reader:
             text_ids.append(row[0])
     # write results to file
-    fname_out = 'results_{granularity}_{timestamp}.csv'
+    fname_out = 'results_{granularity}_{xperc}_{timestamp}.csv'
+    fname_out = fname_out.format(granularity=granularity, xperc=xperc, timestamp=get_timestamp())
     with open(os.path.join(path_out_dir, fname_out), 'w', encoding='utf8') as f:
         csv_writer = csv.writer(f)
         csv_writer.writerow(["text_id", "label_pred", "label_true", "granularity"])
@@ -128,6 +144,7 @@ def write_to_file(predictions, y_dev, granularity, path_dev, path_out_dir):
 def main():
     print('Parse cmd args...')
     args = parse_cmd_args()
+    xperc = get_xperc(args)
     for granularity in ["binary", "ternary", "finegrained"]:
         print('Load training and test data...')
         X_train, y_train, X_dev, y_dev = load_data(args.path_train, args.path_dev, granularity)
@@ -136,7 +153,7 @@ def main():
         print('Predict on dev-set...')
         predictions = svm_predict(svm, X_dev)
         print('Write to output file...')
-        write_to_file(predictions, y_dev, granularity, args.path_out)
+        write_to_file(predictions, y_dev, granularity, args.path_dev, args.path_out_dir, xperc)
         print('Done.')
 
 
