@@ -34,9 +34,6 @@ def load_id_to_label(path, limit=None):
     with open(path, 'r', encoding='utf8') as f:
         csv_reader = csv.reader(f)
         for row in csv_reader:
-            # if limit is not None:
-            #     if line_counter > limit:
-            #         break
             try:
                 text_id, text, masked, label_binary, label_ternary, label_finegrained, source = row
                 int_text_id, int_label_binary, int_label_ternary, int_label_finegrained = int(text_id), int(label_binary), int(label_ternary), int(label_finegrained)
@@ -59,31 +56,32 @@ def load_id_to_label(path, limit=None):
     return id_to_label
 
 
-def load_id_to_repr(path, id_to_label):
+def load_data(path, granularity):
     """Load mapping of text-ids to bigram representations.
 
     Args:
         path: str
-        id_to_label: {text_id<int>: list(label<int>)}
     Return: Tuple containing
         id_to_repr: {text-id<str>: multi-hot-representation<ndarray>}
         id_list_ordered: list of str
     """
-    id_to_repr = {}
-    id_list_ordered = []
+    X_train = []
+    y_train = []
+    gran_to_idx = {
+        'binary': 1,
+        'ternary': 2,
+        'finegrained': 3
+    }
     with open(path, 'r', encoding='utf8') as f:
         for line in f:
-            if len(id_to_repr) == len(id_to_label):
-                break
-            if len(id_to_repr) % 10 == 0:
-                print('Num loaded: {}'.format(len(id_to_repr)))
             columns = line.strip('\n').split(', ')
-            text_id = columns[0]
-            if text_id in id_to_label:
-                repr = np.array([int(float(i)) for i in columns[1:]])
-                id_to_repr[text_id] = repr
-                id_list_ordered.append(text_id)
-    return id_to_repr, id_list_ordered
+            # text_id, label_binary, label_ternary, label_finegrained = columns[:4]
+            repr = np.array([int(float(i)) for i in columns[4:]], dtype=int)
+            X_train.append(repr)
+            y_train.append(columns[gran_to_idx[granularity]])
+    X_train = np.array(X_train, dtype=int)
+    y_train = np.array(y_train, dtype=int)
+    return X_train, y_train
 
 
 def load_data(path_train, path_dev, granularity="binary"):
