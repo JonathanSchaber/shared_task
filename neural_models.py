@@ -95,8 +95,8 @@ def create_char_to_idx(path_train):
     Args:
         path_train: str
     """
-    i = 0
-    char_to_idx = {}
+    i = 1
+    char_to_idx = {'<PAD>': 0}
     reader = csv.reader(open(path_train, 'r', encoding='utf8'))
     for row in reader:
         text = row[1]
