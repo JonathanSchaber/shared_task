@@ -8,6 +8,7 @@ from torch import nn
 from utils import get_timestamp
 torch.set_num_threads(10)
 
+
 def parse_cmd_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
@@ -136,36 +137,32 @@ def train_model(config):
     path_train = config['path_train']
     num_epochs = config['num_epochs']
     lr = config['learning_rate']
-    num_classes = config['num_classes']
-    dropout = config['dropout']
-    hidden_gru_size = config['hidden_gru_size']
-    num_gru_layers = config['num_gru_layers']
-    # if not os.path.exists('char_to_idx.json'):
-    #     print('Create char to idx mapping...')
+    model_params = config['model_params']
     create_char_to_idx(path_train)
-    # if not os.path.exists('max_len.json'):
-    #     print('Compute maximum length text...')
     calc_max_length_trainset(path_train)
     print('Load char to idx mapping...')
     char_to_idx = load_char_to_idx()
     print('Load max length...')
     max_length = load_max_len()
     print('Initiate model...')
-    model = SeqToLabelModel(char_to_idx, embedding_dim=config['embedding_dim'], hidden_gru_size=hidden_gru_size,
-                            num_gru_layers=num_gru_layers, num_classes=num_classes, dropout=dropout)
+
+    model = models['SeqToLabelModelOnlyHidden'](char_to_idx, **model_params)
     print('Prepare optimizer and criterion...')
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('Device: {}'.format(device))
     num_batches = get_num_batches(path_train, batch_size)
-
+    cur_epoch = 0
+    cur_batch = 0
     print('Start training...')
     for epoch in range(1, num_epochs + 1):
         print('*** Start epoch [{}/{}] ***'.format(epoch, num_epochs))
         train_reader = csv.reader(open(path_train, 'r', encoding='utf8'))
         losses = []
+        cur_epoch = epoch
         for batch_num in range(num_batches):
+            cur_batch = batch_num
             x, y = get_next_batch(csv_reader=train_reader, batch_size=batch_size,
                                    granularity=granularity, char_to_idx=char_to_idx, max_length=max_length)
             if len(x) == 0:
@@ -194,14 +191,36 @@ def train_model(config):
                 msg = 'Epoch [{}/{}], batch [{}/{}], avg. loss: {:.4f}'
                 print(msg.format(epoch, num_epochs, batch_num, num_batches, avg_loss))
                 losses = []
+            if batch_num % 10 == 0 and batch_num != 0:
+                print('Saving current model to disk...')
+                save_model(model, config, args.server, cur_epoch, cur_batch)
 
-    return model
+    return model, cur_epoch, cur_batch
 
 
-class SeqToLabelModel(nn.Module):
+class SeqToLabelModelConcatAll(nn.Module):
 
     def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
-        super(SeqToLabelModel, self).__init__()
+        super(SeqToLabelModelConcatAll, self).__init__()
+        self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
+        self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size,
+                                      num_layers=num_gru_layers, batch_first=True, bidirectional=False)
+        self.linear = nn.Linear(hidden_gru_size, num_classes)
+
+    def forward(self, x):
+        embeds = self.embedding(x)
+        seq_output, h_n = self.char_lang_model(embeds)
+        import pdb; pdb.set_trace()
+        all_in_one = torch.cat(torch.cat(seq_output, dim=0), h_n, dim=0)
+        import pdb; pdb.set_trace()
+        output = self.linear(torch.squeeze(all_in_one))
+        return output
+
+
+class SeqToLabelModelOnlyHidden(nn.Module):
+
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
+        super(SeqToLabelModelOnlyHidden, self).__init__()
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size,
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=False)
@@ -214,28 +233,45 @@ class SeqToLabelModel(nn.Module):
         return output
 
 
-def save_model(trained_model, config, use_server_paths):
+def save_model(trained_model, config, use_server_paths, num_epochs, num_batches):
     if use_server_paths:
         path_out = '/home/user/jgoldz/storage/shared_task/models'
     else:
         path_out = 'models'
-    fname = '{model_name}_{config_id}_{timestamp}.model'.format(model_name=config['model_name'],
-                                                                config_id=config['config_id'],
-                                                                timestamp=get_timestamp())
+    fname = '{model_name}_{config_id}_{num_epochs}_{num_batches}_{timestamp}.model'.format(
+        model_name=config['model_name'], config_id=config['config_id'],
+        num_epochs=num_epochs, num_batches=num_batches,
+        timestamp=get_timestamp())
     fpath = os.path.join(path_out, fname)
     torch.save(trained_model, fpath)
     print('Model saved to {}'.format(fpath))
 
 
+args = None
+
+
+models = {
+    'SeqToLabelModelOnlyHidden': SeqToLabelModelOnlyHidden,
+    'SeqToLabelModelConcatAll': SeqToLabelModelConcatAll
+}
+
+
+get_next_batch_funcs = {
+    'get_next_batch_cnn': get_next_batch_cnn,
+    'get_next_batch_rnn': get_next_batch_rnn
+}
+
+
 def main():
+    global args
     print('Parse cmd line args...')
     args = parse_cmd_args()
     print('Loading config from {}...'.format(args.path_config))
     config = load_config(args.path_config)
     print('Initiate training procedure...')
-    trained_model = train_model(config)
+    trained_model, num_epochs, num_batches = train_model(config)
     print('Saving trained model...')
-    save_model(trained_model, config, args.server)
+    save_model(trained_model, config, args.server, num_epochs, num_batches)
 
 
 if __name__ == '__main__':
