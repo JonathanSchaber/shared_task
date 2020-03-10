@@ -53,7 +53,7 @@ def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length)
     for _ in range(batch_size):
         try:
             row = next(csv_reader)
-            text_idxs = [char_to_idx[char] for char in row[1]]
+            text_idxs = [char_to_idx[char] for char in row[1]][:max_length]
             label = row[index]
             x_item = np.zeros(max_length)
             for i, idx in enumerate(text_idxs):
