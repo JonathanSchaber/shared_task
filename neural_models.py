@@ -50,7 +50,7 @@ def get_next_batch_cnn(csv_reader, batch_size, granularity, char_to_idx, max_len
         index = 2 + 3
     else:
         raise Exception('ERROR: Granularity level not known.')
-    for i in range(batch_size):
+    for _ in range(batch_size):
         try:
             row = next(csv_reader)
             text_idxs = [char_to_idx[char] for char in row[1]]
@@ -67,6 +67,7 @@ def get_next_batch_cnn(csv_reader, batch_size, granularity, char_to_idx, max_len
     y = np.array(y_list, dtype=int)
     return x, y
 
+
 def get_next_batch_rnn(csv_reader, batch_size, granularity, char_to_idx, max_length=None):
     """
     Lazy loading of batches. Returns
@@ -76,6 +77,7 @@ def get_next_batch_rnn(csv_reader, batch_size, granularity, char_to_idx, max_len
         batch_size: int
         granularity: str
         char_to_idx: {str: int}
+        max_length: int or None
     """
     x_list = []
     y_list = []
@@ -87,7 +89,7 @@ def get_next_batch_rnn(csv_reader, batch_size, granularity, char_to_idx, max_len
         index = 2 + 3
     else:
         raise Exception('ERROR: Granularity level not known.')
-    for i in range(batch_size):
+    for _ in range(batch_size):
         try:
             row = next(csv_reader)
             x_item = np.array([char_to_idx[char] for char in row[1]])
