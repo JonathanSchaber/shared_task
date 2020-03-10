@@ -29,7 +29,7 @@ def load_config(path):
         return json.load(f)
 
 
-def get_next_batch_cnn(csv_reader, batch_size, granularity, char_to_idx, max_length):
+def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length):
     """
     Lazy loading of batches. Returns
 
@@ -58,42 +58,6 @@ def get_next_batch_cnn(csv_reader, batch_size, granularity, char_to_idx, max_len
             x_item = np.zeros(max_length)
             for i, idx in enumerate(text_idxs):
                 x_item[i] = idx
-            x_list.append(x_item)
-            y_list.append(int(label))
-        except StopIteration:
-            break
-
-    x = np.array(x_list, dtype=int)
-    y = np.array(y_list, dtype=int)
-    return x, y
-
-
-def get_next_batch_rnn(csv_reader, batch_size, granularity, char_to_idx, max_length=None):
-    """
-    Lazy loading of batches. Returns
-
-    Args:
-        csv_reader: csv-reader object
-        batch_size: int
-        granularity: str
-        char_to_idx: {str: int}
-        max_length: int or None
-    """
-    x_list = []
-    y_list = []
-    if granularity == "binary":
-        index = 0 + 3
-    elif granularity == "ternary":
-        index = 1 + 3
-    elif granularity == "finegrained":
-        index = 2 + 3
-    else:
-        raise Exception('ERROR: Granularity level not known.')
-    for _ in range(batch_size):
-        try:
-            row = next(csv_reader)
-            x_item = np.array([char_to_idx[char] for char in row[1]])
-            label = row[index]
             x_list.append(x_item)
             y_list.append(int(label))
         except StopIteration:
@@ -173,16 +137,13 @@ def train_model(config):
     path_train = config['path_train']
     num_epochs = config['num_epochs']
     lr = config['learning_rate']
-    max_len_text = config['max_len_text']
-    get_next_batch_func = get_next_batch_funcs[config['get_next_batch_func']]
     model_params = config['model_params']
     create_char_to_idx(path_train)
     calc_max_length_trainset(path_train)
     print('Load char to idx mapping...')
     char_to_idx = load_char_to_idx()
     print('Load max length...')
-    # max_length = load_max_len()
-    max_length = max_len_text
+    max_length = load_max_len() if 'max_len_text' not in config else config['max_len_text']
     print('Initiate model...')
 
     model = models['SeqToLabelModelOnlyHidden'](char_to_idx, **model_params)
@@ -202,8 +163,8 @@ def train_model(config):
         cur_epoch = epoch
         for batch_num in range(num_batches):
             cur_batch = batch_num
-            x, y = get_next_batch_func(csv_reader=train_reader, batch_size=batch_size,
-                                       granularity=granularity, char_to_idx=char_to_idx, max_length=max_length)
+            x, y = get_next_batch(csv_reader=train_reader, batch_size=batch_size,
+                                  granularity=granularity, char_to_idx=char_to_idx, max_length=max_length)
             if len(x) == 0:
                 print('WARNING: Empty batch.')
                 continue
@@ -292,12 +253,6 @@ args = None
 models = {
     'SeqToLabelModelOnlyHidden': SeqToLabelModelOnlyHidden,
     'SeqToLabelModelConcatAll': SeqToLabelModelConcatAll
-}
-
-
-get_next_batch_funcs = {
-    'get_next_batch_cnn': get_next_batch_cnn,
-    'get_next_batch_rnn': get_next_batch_rnn
 }
 
 
