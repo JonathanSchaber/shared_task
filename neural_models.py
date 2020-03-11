@@ -9,6 +9,12 @@ from utils import get_timestamp
 torch.set_num_threads(10)
 
 
+"""
+Call:
+python3 neural_models.py -c model_configs/config_seq2label_1.json -s
+"""
+
+
 def parse_cmd_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
