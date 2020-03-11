@@ -13,9 +13,36 @@ def parse_cmd_args():
     return parser.parse_args()
 
 
+def process_predictions_file(pred_file):
+    """Processes pred_file with the following structure:
+    text_id, label_binary, label_ternary, label_finegrained, pred_binary, pred_ternary, pred_finegrained, text, masked, source
+
+    Args:
+        pred_file: str
+    """
+    true_bin = 0
+    false_bin = 0
+    true_ter = 0
+    false_ter = 0
+    true_fine = 0
+    false_fine = 0
+
+    with open(pred_file, 'r', encoding='utf-8') as f:
+        csv_reader = csv.reader(f)
+        for line in csv_reader:
+            text_id, label_binary, label_ternary, label_finegrained, pred_binary, pred_ternary, pred_finegrained, text, masked, source = line
+            if label_binary == pred_binary: true_bin += 1 else: false_bin += 1
+            if pred_ternary == "NULL": 
+                continue
+            else:
+                if label_ternary == pred_ternary: true_ter += 1 else: false_ter += 1
+                if pred_finegrained == "NULL":
+                    continue
+                else:
+                    if label_finegrained == pred_finegrained: true_fine += 1 else: false_ter += 1
+
 def compare_line_by_line(gold_path, predicted_path):
     """Compares the gold lables to the predicted ones.
-        Returns the counts.
  
     Args:
         gold_path: str, path to gold csv file
