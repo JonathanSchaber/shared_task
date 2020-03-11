@@ -32,22 +32,20 @@ def process_predictions_file(pred_file):
 
     with open(pred_file, 'r', encoding='utf-8') as f:
         csv_reader = csv.reader(f)
-        for line in csv_reader:
+        for i, line in enumerate(csv_reader):
             text_id, label_binary, label_ternary, label_finegrained, pred_binary, pred_ternary, pred_finegrained, text, masked, source = line
+            if i == 0:
+                if not pred_ternary == "NULL": TER = True 
+                if not pred_finegrained == "NULL": FINE = True 
+
             if label_binary == pred_binary: true_bin += 1 
             else: false_bin += 1
-            if pred_ternary == "NULL": 
-                continue
-            else:
-                TER = True
+            if TER: 
                 if label_ternary == pred_ternary: true_ter += 1 
                 else: false_ter += 1
-                if pred_finegrained == "NULL":
-                    continue
-                else:
-                    FINE = True
-                    if label_finegrained == pred_finegrained: true_fine += 1 
-                    else: false_ter += 1
+            if FINE:
+                if label_finegrained == pred_finegrained: true_fine += 1 
+                else: false_ter += 1
 
     if true_bin != 0:
         print('Accuracy binary: {}'.format((true_bin/(true_bin + false_bin)*100)))
