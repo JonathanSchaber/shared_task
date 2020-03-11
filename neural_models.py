@@ -9,12 +9,6 @@ from utils import get_timestamp
 torch.set_num_threads(10)
 
 
-"""
-Call:
-python3 neural_models.py -c model_configs/config_seq2label_1.json -s
-"""
-
-
 def parse_cmd_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
@@ -59,7 +53,7 @@ def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length)
     for _ in range(batch_size):
         try:
             row = next(csv_reader)
-            text_idxs = [char_to_idx.get(char, 'unk') for char in row[1]][:max_length]
+            text_idxs = [char_to_idx[char] for char in row[1]][:max_length]
             label = row[index]
             x_item = np.zeros(max_length)
             for i, idx in enumerate(text_idxs):
@@ -113,7 +107,6 @@ def create_char_to_idx(path_train):
             else:
                 char_to_idx[char] = i
                 i += 1
-    char_to_idx['unk'] = i
     with open('char_to_idx.json', 'w', encoding='utf8') as f:
         json.dump(char_to_idx, f)
     idx_to_char = {val: key for key, val in char_to_idx.items()}
