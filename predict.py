@@ -76,7 +76,7 @@ def predict_on_input(model, model_type, path_in, config, max_examples):
         reader = csv.reader(open(path_in, 'r', encoding='utf8'))
         for i, row in enumerate(reader):
             text_id, text, masked, label_binary, label_ternary, label_finegrained, source = row
-            text_idxs = [char_to_idx[char] for char in text]
+            text_idxs = [char_to_idx.get(char, 'unk') for char in text][:max_length]
             x = np.zeros(max_length)
             for j, idx in enumerate(text_idxs):
                 x[j] = idx
