@@ -86,6 +86,7 @@ Number of examples:
 7. `python create_train_subcorpus.py -i data/main/dev_main_bigr_repr.csv -g <granularity> -n num_ex_per_clas`
     - outputfile: `data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv`
 8. `python bigram_based_models.py -t data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -d data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -o results/`
+9. `python evaluation.py -p <predicted-file>`
 
 ### Server
 1. activate the conda environment
@@ -98,6 +99,7 @@ Number of examples:
 7. `python create_train_subcorpus.py -i /home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr.csv -g <granularity> -n <num_ex_per_clas>`
     - outputfile: `/home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv`
 8. `python bigram_based_models.py -t /home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -d /home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -o results/`
+9. `python evaluation.py -p <predicted-file>`
 
 ## Linguistic Considerations
 
