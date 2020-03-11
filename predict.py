@@ -10,7 +10,7 @@ from bigram_based_models import *
 
 Example call: 
 python3 predict.py -m <path_to_model> -t <torch or sklearn> -i <path_input_data> -o <path_output_file>
-python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_1_1_30_Tue_Mar_10_12:36:00_2020.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o testpred.csv
+python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_1_1_30_Tue_Mar_10_12:36:00_2020.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o testpred.csv -c /home/user/jgoldz/shared_task/model_configs/config_seq2label_1.json
 """
 
 
@@ -22,6 +22,7 @@ def parse_cmd_args():
     # parser.add_argument('-l', '--location', type=str, help='Either "local", "midgard" or "rattle"')
     parser.add_argument('-i', '--path_in', type=str, help='Path to input file.')
     parser.add_argument('-o', '--path_out', type=str, help='Path to output file.')
+    parser.add_argument('-c', '--path_config', type=str, help='Path to config file.')
     return parser.parse_args()
 
 
@@ -55,17 +56,18 @@ def get_num_examples(path_in):
     return i
 
 
-def predict_on_input(model, model_type, path_in, max_examples):
+def predict_on_input(model, model_type, path_in, config, max_examples):
     """Make prediction on the input data with the given model.
 
     Args:
         model: either torch.nn.Model or sklearn-model
         model_type: str
         path_in: str
+        config: dict
         max_examples: int
     """
     char_to_idx = load_char_to_idx()
-    max_len = load_max_len()
+    max_length = load_max_len() if 'max_len_text' not in config else config['max_len_text']
     if not max_examples:
         max_examples = get_num_examples(path_in)
     predictions = []
@@ -74,7 +76,7 @@ def predict_on_input(model, model_type, path_in, max_examples):
         for i, row in enumerate(reader):
             text_id, text, masked, label_binary, label_ternary, label_finegrained, source = row
             text_idxs = [char_to_idx[char] for char in text]
-            x = np.zeros(max_len)
+            x = np.zeros(max_length)
             for j, idx in enumerate(text_idxs):
                 x[j] = idx
             output = model(torch.LongTensor([x]))
@@ -106,7 +108,7 @@ def main():
     print('Loading model...')
     model = load_model(args.path_model, args.type)
     print('Make predictions...')
-    predictions = predict_on_input(model, args.type, args.path_in, 4000)
+    predictions = predict_on_input(model, args.type, args.path_in, config, 4000)
     print('Write Predictions to file...')
     write_preds_to_file(predictions, args.path_out)
 
