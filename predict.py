@@ -1,4 +1,5 @@
 import csv
+import json
 import numpy as np
 import torch
 import torch.nn
@@ -102,9 +103,21 @@ def write_preds_to_file(predictions, path_out):
             writer.writerow(row)
 
 
+def load_config(path_config):
+    """Load the config.
+
+    Args:
+        path_config: str
+    """
+    with open(path_config, 'r', encoding='utf8') as f:
+        return json.load(f)
+
+
 def main():
     print('Parsing command line args...')
     args = parse_cmd_args()
+    print('Loading config...')
+    config = load_config(args.path_config)
     print('Loading model...')
     model = load_model(args.path_model, args.type)
     print('Make predictions...')
