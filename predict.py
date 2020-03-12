@@ -1,4 +1,6 @@
 import csv
+import json
+import numpy as np
 import torch
 import torch.nn
 from neural_models import *
@@ -9,6 +11,7 @@ from bigram_based_models import *
 
 Example call: 
 python3 predict.py -m <path_to_model> -t <torch or sklearn> -i <path_input_data> -o <path_output_file>
+python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_1_1_30_Tue_Mar_10_12:36:00_2020.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o testpred.csv -c /home/user/jgoldz/shared_task/model_configs/config_seq2label_1.json
 """
 
 
@@ -20,6 +23,7 @@ def parse_cmd_args():
     # parser.add_argument('-l', '--location', type=str, help='Either "local", "midgard" or "rattle"')
     parser.add_argument('-i', '--path_in', type=str, help='Path to input file.')
     parser.add_argument('-o', '--path_out', type=str, help='Path to output file.')
+    parser.add_argument('-c', '--path_config', type=str, help='Path to config file.')
     return parser.parse_args()
 
 
@@ -53,38 +57,42 @@ def get_num_examples(path_in):
     return i
 
 
-def predict_on_input(model, model_type, path_in):
+def predict_on_input(model, model_type, path_in, config, max_examples):
     """Make prediction on the input data with the given model.
 
     Args:
         model: either torch.nn.Model or sklearn-model
         model_type: str
         path_in: str
+        config: dict
+        max_examples: int
     """
     char_to_idx = load_char_to_idx()
-    max_len = load_max_len()
-    num_examples = get_num_examples(path_in)
+    max_length = load_max_len() if 'max_len_text' not in config else config['max_len_text']
+    if not max_examples:
+        max_examples = get_num_examples(path_in)
     predictions = []
     if model_type == 'torch':
         reader = csv.reader(open(path_in, 'r', encoding='utf8'))
         for i, row in enumerate(reader):
             text_id, text, masked, label_binary, label_ternary, label_finegrained, source = row
-            text_idxs = [char_to_idx[char] for char in text]
-            x = torch.zeros(max_len)
-            for i, idx in enumerate(text_idxs):
-                x[i] = idx
-                output = model(torch.LongTensor([x]))
-                max_prob = max(output)
-                prediction = list(output).index(max_prob)
-                pred_binary = prediction if prediction <= 1 else 1
-                pred_ternary = prediction if prediction <= 2 else 2
-                pred_finegrained = prediction
-                predictions.append((text_id, label_binary, label_ternary, label_finegrained, pred_binary,
-                                    pred_ternary, pred_finegrained, text, masked, source))
-                if i == num_examples - 1:
-                    print('Predicted on exampe [{}/{}]'.format(i, num_examples))
-                else:
-                    print('Predicted on exampe [{}/{}]\r'.format(i, num_examples), end='\r')
+            text_idxs = [char_to_idx.get(char, 'unk') for char in text][:max_length]
+            x = np.zeros(max_length)
+            for j, idx in enumerate(text_idxs):
+                x[j] = idx
+            output = model(torch.LongTensor([x]))
+            max_prob = max(output)
+            prediction = list(output).index(max_prob)
+            pred_binary = prediction if prediction <= 1 else 1
+            pred_ternary = prediction if prediction <= 2 else 2
+            pred_finegrained = prediction
+            predictions.append((text_id, label_binary, label_ternary, label_finegrained, pred_binary,
+                                pred_ternary, pred_finegrained, text, masked, source))
+            if i == max_examples - 1:
+                print('Predicted on example [{}/{}]'.format(i, max_examples))
+                break
+            else:
+                print('Predicted on example [{}/{}]\r'.format(i, max_examples), end='\r')
     return predictions
 
 
@@ -95,13 +103,25 @@ def write_preds_to_file(predictions, path_out):
             writer.writerow(row)
 
 
+def load_config(path_config):
+    """Load the config.
+
+    Args:
+        path_config: str
+    """
+    with open(path_config, 'r', encoding='utf8') as f:
+        return json.load(f)
+
+
 def main():
     print('Parsing command line args...')
     args = parse_cmd_args()
+    print('Loading config...')
+    config = load_config(args.path_config)
     print('Loading model...')
     model = load_model(args.path_model, args.type)
     print('Make predictions...')
-    predictions = predict_on_input(model, args.type, args.path_in)
+    predictions = predict_on_input(model, args.type, args.path_in, config, 4000)
     print('Write Predictions to file...')
     write_preds_to_file(predictions, args.path_out)
 
