@@ -150,10 +150,10 @@ def train_model(config):
     print('Load char to idx mapping...')
     char_to_idx = load_char_to_idx()
     print('Load max length...')
-    max_length = load_max_len() if 'max_len_text' not in config else config['max_len_text']
+    max_length = load_max_len() if 'max_length_text' not in config else config['max_length_text']
     print('Initiate model...')
 
-    model = models['SeqToLabelModelOnlyHidden'](char_to_idx, **model_params)
+    model = models[config['model_name']](char_to_idx, **model_params)
     print('Prepare optimizer and criterion...')
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
@@ -175,6 +175,7 @@ def train_model(config):
             if len(x) == 0:
                 print('WARNING: Empty batch.')
                 continue
+
             x_train = torch.LongTensor(x).to(device)
             y_train = torch.LongTensor(y).to(device)
 
@@ -198,7 +199,7 @@ def train_model(config):
                 msg = 'Epoch [{}/{}], batch [{}/{}], avg. loss: {:.4f}'
                 print(msg.format(epoch, num_epochs, batch_num, num_batches, avg_loss))
                 losses = []
-            if batch_num % 10 == 0 and batch_num != 0:
+            if batch_num % 100 == 0 and batch_num != 0 or batch_num == 20 or batch_num == 50:
                 print('Saving current model to disk...')
                 save_model(model, config, args.server, cur_epoch, cur_batch)
 
@@ -221,6 +222,22 @@ class SeqToLabelModelConcatAll(nn.Module):
         all_in_one = torch.cat(torch.cat(seq_output, dim=0), h_n, dim=0)
         import pdb; pdb.set_trace()
         output = self.linear(torch.squeeze(all_in_one))
+        return output
+
+
+class SeqToLabelModelOnlyHiddenBiDeep(nn.Module):
+
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
+        super(SeqToLabelModelOnlyHiddenBiDeep, self).__init__()
+        self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
+        self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
+                                      num_layers=num_gru_layers, batch_first=True, bidirectional=True)
+        self.linear = nn.Linear(hidden_gru_size*2*num_gru_layers, num_classes)
+
+    def forward(self, x):
+        embeds = self.embedding(x)
+        seq_output, h_n = self.char_lang_model(embeds)
+        output = self.linear(torch.reshape(h_n, (64, -1)))
         return output
 
 
@@ -259,7 +276,8 @@ args = None
 
 models = {
     'SeqToLabelModelOnlyHidden': SeqToLabelModelOnlyHidden,
-    'SeqToLabelModelConcatAll': SeqToLabelModelConcatAll
+    'SeqToLabelModelConcatAll': SeqToLabelModelConcatAll,
+    'SeqToLabelModelOnlyHiddenBiDeep': SeqToLabelModelOnlyHiddenBiDeep
 }
 
 

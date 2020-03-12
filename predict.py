@@ -11,7 +11,7 @@ from bigram_based_models import *
 
 Example call: 
 python3 predict.py -m <path_to_model> -t <torch or sklearn> -i <path_input_data> -o <path_output_file>
-python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_1_1_30_Tue_Mar_10_12:36:00_2020.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o testpred.csv -c /home/user/jgoldz/shared_task/model_configs/config_seq2label_1.json
+python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_1_1_30_Wed_Mar_11_21:55:12_2020.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o testpred.csv -c /home/user/jgoldz/shared_task/model_configs/config_seq2label_1.json
 """
 
 
@@ -68,7 +68,7 @@ def predict_on_input(model, model_type, path_in, config, max_examples):
         max_examples: int
     """
     char_to_idx = load_char_to_idx()
-    max_length = load_max_len() if 'max_len_text' not in config else config['max_len_text']
+    max_length = load_max_len() if 'max_length_text' not in config else config['max_length_text']
     if not max_examples:
         max_examples = get_num_examples(path_in)
     predictions = []
@@ -76,7 +76,7 @@ def predict_on_input(model, model_type, path_in, config, max_examples):
         reader = csv.reader(open(path_in, 'r', encoding='utf8'))
         for i, row in enumerate(reader):
             text_id, text, masked, label_binary, label_ternary, label_finegrained, source = row
-            text_idxs = [char_to_idx.get(char, 'unk') for char in text][:max_length]
+            text_idxs = [char_to_idx.get(char, char_to_idx['unk']) for char in text][:max_length]
             x = np.zeros(max_length)
             for j, idx in enumerate(text_idxs):
                 x[j] = idx
