@@ -47,7 +47,7 @@ def process_predictions_file(pred_file):
                 else: false_ter += 1
             if FINE:
                 if label_finegrained == pred_finegrained: true_fine += 1 
-                else: false_ter += 1
+                else: false_fine += 1
 
     if true_bin != 0:
         print('Accuracy binary: {}'.format((true_bin/(true_bin + false_bin)*100)))
