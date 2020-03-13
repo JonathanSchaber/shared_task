@@ -145,6 +145,7 @@ def train_model(config):
     num_epochs = config['num_epochs']
     lr = config['learning_rate']
     model_params = config['model_params']
+    early_stopping = config.get('early_stopping', False)
     create_char_to_idx(path_train)
     calc_max_length_trainset(path_train)
     print('Load char to idx mapping...')
@@ -162,6 +163,8 @@ def train_model(config):
     num_batches = get_num_batches(path_train, batch_size)
     cur_epoch = 0
     cur_batch = 0
+    avg_batch_losses = []
+    avg_epoch_losses = []
     print('Start training...')
     for epoch in range(1, num_epochs + 1):
         print('*** Start epoch [{}/{}] ***'.format(epoch, num_epochs))
@@ -198,10 +201,19 @@ def train_model(config):
                 avg_loss = np.mean(losses)
                 msg = 'Epoch [{}/{}], batch [{}/{}], avg. loss: {:.4f}'
                 print(msg.format(epoch, num_epochs, batch_num, num_batches, avg_loss))
+                avg_batch_losses.append(avg_loss)
                 losses = []
             if batch_num % 10000 == 0 and batch_num != 0 or batch_num == 20 or batch_num == 50:
                 print('Saving current model to disk...')
                 save_model(model, config, args.server, cur_epoch, cur_batch, finale_true=False)
+
+        avg_epoch_losses.append(np.mean(avg_batch_losses))
+        avg_batch_losses = []
+        print('Avg loss of epoch {}:  {:.4f}'.format(epoch - 1, avg_epoch_losses[-1]))
+        if early_stopping:
+            if avg_epoch_losses[-1] >= avg_epoch_losses[-2]:
+                print('EARLY STOPPING! Avg loss this epoch: {:.4f}, last epoch: {:.4f}'.format(
+                    avg_epoch_losses[-1], avg_epoch_losses[-2]))
 
     return model, cur_epoch, cur_batch
 
