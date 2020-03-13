@@ -10,6 +10,8 @@ from bigram_based_models import *
 Example call: 
 python3 predict.py -m <path_to_model> -t <torch or sklearn> -i <path_input_data> -o <path_output_file>
 python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_1_1_30_Wed_Mar_11_21:55:12_2020.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o testpred.csv -c /home/user/jgoldz/shared_task/model_configs/config_seq2label_1.json
+
+python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_2_2_55500_Thu_Mar_12_05:41:10_2020.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o dev_pred_seq2label_2.csv -c /home/user/jgoldz/shared_task/model_configs/config_seq2label_2.json
 """
 
 
@@ -119,7 +121,7 @@ def main():
     print('Loading model...')
     model = load_model(args.path_model, args.type)
     print('Make predictions...')
-    predictions = predict_on_input(model, args.type, args.path_in, config, 4000)
+    predictions = predict_on_input(model, args.type, args.path_in, config, 2000)
     print('Write Predictions to file...')
     write_preds_to_file(predictions, args.path_out)
 
