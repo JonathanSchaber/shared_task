@@ -214,6 +214,8 @@ def train_model(config):
             if avg_epoch_losses[-1] >= avg_epoch_losses[-2]:
                 print('EARLY STOPPING! Avg loss this epoch: {:.4f}, last epoch: {:.4f}'.format(
                     avg_epoch_losses[-1], avg_epoch_losses[-2]))
+                print('STOP TRAINING.')
+                break
 
     return model, cur_epoch, cur_batch
 
