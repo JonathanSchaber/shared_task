@@ -208,19 +208,17 @@ def train_model(config):
 
 class SeqToLabelModelConcatAll(nn.Module):
 
-    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout, max_len_text):
         super(SeqToLabelModelConcatAll, self).__init__()
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size,
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=False)
-        self.linear = nn.Linear(hidden_gru_size, num_classes)
+        self.linear = nn.Linear(max_len_text*hidden_gru_size, num_classes)
 
     def forward(self, x):
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
-        import pdb; pdb.set_trace()
-        all_in_one = torch.cat(torch.cat(seq_output, dim=0), h_n, dim=0)
-        import pdb; pdb.set_trace()
+        all_in_one = torch.reshape(seq_output, (64, -1))
         output = self.linear(torch.squeeze(all_in_one))
         return output
 
@@ -242,6 +240,7 @@ class SeqToLabelModelOnlyHiddenBiDeep(nn.Module):
 
 
 class SeqToLabelModelOnlyHidden(nn.Module):
+    """The best model until now was this but without dropout applied!"""
 
     def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
         super(SeqToLabelModelOnlyHidden, self).__init__()
