@@ -19,6 +19,8 @@ def process_predictions_file(pred_file):
 
     Args:
         pred_file: str
+    Return:
+        None
     """
     true_bin = 0
     false_bin = 0
