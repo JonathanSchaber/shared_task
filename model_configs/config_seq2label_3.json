@@ -10,8 +10,8 @@
   "model_params": {
     "num_classes": 2,
     "dropout": 0.1,
-    "embedding_dim": 50,
-    "hidden_gru_size": 50,
+    "embedding_dim": 100,
+    "hidden_gru_size": 100,
     "num_gru_layers": 2
   }
 }
