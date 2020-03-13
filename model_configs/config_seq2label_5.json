@@ -1,0 +1,19 @@
+{
+  "model_name": "SeqToLabelModelConcatAll",
+  "config_id": "seq2label_binary_5",
+  "batch_size": 64,
+  "granularity": "binary",
+  "max_length_text": 100,
+  "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
+  "num_epochs": 2,
+  "learning_rate": 0.001,
+  "model_params": {
+    "num_classes": 2,
+    "dropout": 0.1,
+    "embedding_dim": 50,
+    "hidden_gru_size": 50,
+    "num_gru_layers": 1,
+    "max_len_text": 100,
+    "batch_size": 64
+  }
+}
