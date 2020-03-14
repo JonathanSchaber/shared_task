@@ -1,0 +1,18 @@
+{
+  "model_name": "CNNOnly",
+  "config_id": "CNNOnly_binary_1",
+  "batch_size": 64,
+  "granularity": "binary",
+  "max_length_text": 100,
+  "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
+  "num_epochs": 2,
+  "learning_rate": 0.001,
+  "model_params": {
+    "num_classes": 2,
+    "dropout": 0.1,
+    "embedding_dim": 100,
+    "filtersizes": [2, 3, 4],
+    "max_len_text": 100,
+    "batch_size": 64
+  }
+}
