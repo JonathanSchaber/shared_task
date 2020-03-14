@@ -13,7 +13,7 @@ Example call:
 python3 predict.py -m <path_to_model> -t <torch or sklearn> -i <path_input_data> -o <path_output_file>
 python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_1_1_30_Wed_Mar_11_21:55:12_2020.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o testpred.csv -c /home/user/jgoldz/shared_task/model_configs/config_seq2label_1.json
 
-python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_2_2_55500_Thu_Mar_12_05:41:10_2020.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o dev_pred_seq2label_2.csv -c /home/user/jgoldz/shared_task/model_configs/config_seq2label_2.json
+python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_4_2_30000_Fri_Mar_13_19:12:47_2020_endFalse.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_4/dev_pred_seq2label_4.csv -c /home/user/jgoldz/shared_task/model_configs/config_seq2label_4.json
 """
 
 
@@ -86,8 +86,14 @@ def predict_on_input(model, model_type, path_in, config, max_examples):
             max_prob = max(output)
             prediction = list(output).index(max_prob)
             pred_binary = prediction if prediction <= 1 else 1
-            pred_ternary = prediction if prediction <= 2 else 2
-            pred_finegrained = prediction
+            if config['granularity'] != 'binary':
+                pred_ternary = prediction if prediction <= 2 else 2
+                if config['granularity'] == 'finegrained':
+                    pred_finegrained = prediction
+                else:
+                    pred_finegrained= None
+            else:
+                pred_ternary = None
             predictions.append((text_id, label_binary, label_ternary, label_finegrained, pred_binary,
                                 pred_ternary, pred_finegrained, text, masked, source))
             if i == max_examples - 1:
