@@ -274,7 +274,8 @@ class SeqToLabelModelOnlyHidden(nn.Module):
 
 class CNNOnly(nn.Module):
 
-    def __init__(self, char_to_idx, embedding_dim, filtersizes, num_classes, dropout, max_len_text, batch_size):
+    def __init__(self, char_to_idx, embedding_dim, filtersizes, padding, stride, num_out_channels, inbetw_lin_size,
+                 num_classes, dropout, max_len_text, batch_size):
         super(CNNOnly, self).__init__()
         self.filtersizes = filtersizes
         self.num_classes = num_classes
@@ -283,16 +284,88 @@ class CNNOnly(nn.Module):
         self.batch_size = batch_size
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.conv1 = nn.Sequential(
-            nn.Conv2d(1, 5, kernel_size=(filtersizes[0], embedding_dim), stride=1, padding=2),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[0], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(1, 5, kernel_size=(filtersizes[1], embedding_dim), stride=1, padding=2),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[1], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv3 = nn.Sequential(
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[2], embedding_dim), stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv4 = nn.Sequential(
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[3], embedding_dim), stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+
+        # self.linear = nn.Linear(1520, num_classes)
+        self.conv1_out_size = (embedding_dim * max_len_text - filtersizes[0] + 2 * padding) / (stride) + 1
+        self.conv2_out_size = (embedding_dim * max_len_text - filtersizes[1] + 2 * padding) / (stride) + 1
+        self.conv3_out_size = (embedding_dim * max_len_text - filtersizes[2] + 2 * padding) / (stride) + 1
+        self.conv4_out_size = (embedding_dim * max_len_text - filtersizes[3] + 2 * padding) / (stride) + 1
+
+        self.conv1_out_flat_size = num_out_channels * self.conv1_out_size
+        self.conv2_out_flat_size = num_out_channels * self.conv2_out_size
+        self.conv3_out_flat_size = num_out_channels * self.conv3_out_size
+        self.conv4_out_flat_size = num_out_channels * self.conv4_out_size
+
+        self.conv_concat_size = self.conv1_out_flat_size + self.conv2_out_flat_size + \
+                                self.conv3_out_flat_size + self.conv4_out_flat_size
+
+        self.classifier_layers = nn.Sequential(
+            nn.Dropout(self.dropout_rt),
+            nn.Linear(self.conv_concat_size, inbetw_lin_size),
+            nn.ReLU(inplace=True),
+            nn.Dropout(self.dropout_rt),
+            nn.Linear(inbetw_lin_size, num_classes),
+        )
+
+    def forward(self, x):
+        embeds = self.embedding(x)
+        embeds_add_dim = embeds[:, None, :, :]
+        import pdb; pdb.set_trace()
+        output_conv1 = self.conv1(embeds_add_dim)
+        output_conv2 = self.conv2(embeds_add_dim)
+        output_conv3 = self.conv3(embeds_add_dim)
+        output_conv4 = self.conv4(embeds_add_dim)
+        import pdb; pdb.set_trace()
+        oconv1_re = torch.reshape(output_conv1, (64, -1))
+        oconv2_re = torch.reshape(output_conv2, (64, -1))
+        oconv3_re = torch.reshape(output_conv3, (64, -1))
+        oconv4_re = torch.reshape(output_conv4, (64, -1))
+        import pdb; pdb.set_trace()
+        feat_vec = torch.cat((oconv1_re, oconv2_re, oconv3_re, oconv4_re), dim=1)
+        output = self.classifier_layers(feat_vec)
+        return output
+
+
+class CNNHierarch(nn.Module):
+
+    def __init__(self, char_to_idx, embedding_dim, filtersizes, num_classes, dropout, max_len_text, batch_size):
+        super(CNNOnly, self).__init__()
+        self.filtersizes = filtersizes
+        self.num_classes = num_classes
+        self.dropout_rt = dropout
+        self.max_len_text = max_len_text
+        self.batch_size = batch_size
+        self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
+        self.conv_l1_1 = nn.Sequential(
+            nn.Conv2d(1, 5, kernel_size=(filtersizes[0], embedding_dim), stride=1, padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv_l1_2 = nn.Sequential(
+            nn.Conv2d(1, 5, kernel_size=(filtersizes[1], embedding_dim), stride=1, padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv_l1_3 = nn.Sequential(
             nn.Conv2d(1, 5, kernel_size=(filtersizes[2], embedding_dim), stride=1, padding=2),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
