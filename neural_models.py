@@ -305,41 +305,43 @@ class CNNOnly(nn.Module):
         )
 
         # self.linear = nn.Linear(1520, num_classes)
-        self.conv1_out_size = (embedding_dim * max_len_text - filtersizes[0] + 2 * padding) / (stride) + 1
-        self.conv2_out_size = (embedding_dim * max_len_text - filtersizes[1] + 2 * padding) / (stride) + 1
-        self.conv3_out_size = (embedding_dim * max_len_text - filtersizes[2] + 2 * padding) / (stride) + 1
-        self.conv4_out_size = (embedding_dim * max_len_text - filtersizes[3] + 2 * padding) / (stride) + 1
-
-        self.conv1_out_flat_size = num_out_channels * self.conv1_out_size
-        self.conv2_out_flat_size = num_out_channels * self.conv2_out_size
-        self.conv3_out_flat_size = num_out_channels * self.conv3_out_size
-        self.conv4_out_flat_size = num_out_channels * self.conv4_out_size
-
-        self.conv_concat_size = self.conv1_out_flat_size + self.conv2_out_flat_size + \
-                                self.conv3_out_flat_size + self.conv4_out_flat_size
+        # self.conv1_out_size = (embedding_dim * max_len_text - filtersizes[0] + 2 * padding) / (stride) + 1
+        # self.conv2_out_size = (embedding_dim * max_len_text - filtersizes[1] + 2 * padding) / (stride) + 1
+        # self.conv3_out_size = (embedding_dim * max_len_text - filtersizes[2] + 2 * padding) / (stride) + 1
+        # self.conv4_out_size = (embedding_dim * max_len_text - filtersizes[3] + 2 * padding) / (stride) + 1
+        #
+        # self.conv1_out_flat_size = num_out_channels * self.conv1_out_size
+        # self.conv2_out_flat_size = num_out_channels * self.conv2_out_size
+        # self.conv3_out_flat_size = num_out_channels * self.conv3_out_size
+        # self.conv4_out_flat_size = num_out_channels * self.conv4_out_size
+        #
+        # self.conv_concat_size = int(self.conv1_out_flat_size + self.conv2_out_flat_size + \
+        #                         self.conv3_out_flat_size + self.conv4_out_flat_size)
 
         self.classifier_layers = nn.Sequential(
             nn.Dropout(self.dropout_rt),
-            nn.Linear(self.conv_concat_size, inbetw_lin_size),
+            # nn.Linear(self.conv_concat_size, inbetw_lin_size),
+            nn.Linear(4040, inbetw_lin_size),
             nn.ReLU(inplace=True),
             nn.Dropout(self.dropout_rt),
             nn.Linear(inbetw_lin_size, num_classes),
         )
 
     def forward(self, x):
+        batch_size = x.shape[0]
         embeds = self.embedding(x)
         embeds_add_dim = embeds[:, None, :, :]
-        import pdb; pdb.set_trace()
+
         output_conv1 = self.conv1(embeds_add_dim)
         output_conv2 = self.conv2(embeds_add_dim)
         output_conv3 = self.conv3(embeds_add_dim)
         output_conv4 = self.conv4(embeds_add_dim)
-        import pdb; pdb.set_trace()
-        oconv1_re = torch.reshape(output_conv1, (64, -1))
-        oconv2_re = torch.reshape(output_conv2, (64, -1))
-        oconv3_re = torch.reshape(output_conv3, (64, -1))
-        oconv4_re = torch.reshape(output_conv4, (64, -1))
-        import pdb; pdb.set_trace()
+
+        oconv1_re = torch.reshape(output_conv1, (batch_size, -1))
+        oconv2_re = torch.reshape(output_conv2, (batch_size, -1))
+        oconv3_re = torch.reshape(output_conv3, (batch_size, -1))
+        oconv4_re = torch.reshape(output_conv4, (batch_size, -1))
+
         feat_vec = torch.cat((oconv1_re, oconv2_re, oconv3_re, oconv4_re), dim=1)
         output = self.classifier_layers(feat_vec)
         return output
@@ -387,7 +389,7 @@ class CNNHierarch(nn.Module):
         output_conv1 = self.conv1(embeds_add_dim)
         output_conv2 = self.conv2(embeds_add_dim)
         output_conv3 = self.conv3(embeds_add_dim)
-
+        import pdb; pdb.set_trace()
         oconv1_re = torch.reshape(output_conv1, (64, -1))
         oconv2_re = torch.reshape(output_conv2, (64, -1))
         oconv3_re = torch.reshape(output_conv3, (64, -1))
