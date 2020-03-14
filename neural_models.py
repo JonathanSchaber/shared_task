@@ -274,33 +274,45 @@ class SeqToLabelModelOnlyHidden(nn.Module):
 
 class CNNOnly(nn.Module):
 
-    def __init__(self, char_to_idx, embedding_dim, num_classes, dropout):
+    def __init__(self, char_to_idx, embedding_dim, filtersizes, num_classes, dropout, max_len_text, batch_size):
         super(CNNOnly, self).__init__()
+        self.filtersizes = filtersizes
+        self.num_classes = num_classes
+        self.dropout_rt = dropout
+        self.max_len_text = max_len_text
+        self.batch_size = batch_size
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.conv1 = nn.Sequential(
-            nn.Conv2d(1, 5, kernel_size=(2, embedding_dim), stride=1, padding=2),
+            nn.Conv2d(1, 5, kernel_size=(filtersizes[0], embedding_dim), stride=1, padding=2),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(1, 5, kernel_size=(3, embedding_dim), stride=1, padding=2),
+            nn.Conv2d(1, 5, kernel_size=(filtersizes[1], embedding_dim), stride=1, padding=2),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv3 = nn.Sequential(
-            nn.Conv2d(1, 5, kernel_size=(4, embedding_dim), stride=1, padding=2),
+            nn.Conv2d(1, 5, kernel_size=(filtersizes[2], embedding_dim), stride=1, padding=2),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
 
+        self.linear = nn.Linear(1520, num_classes)
+
     def forward(self, x):
         embeds = self.embedding(x)
-        import pdb; pdb.set_trace()
-        output_conv1 = self.conv1(embeds)
-        output_conv2 = self.conv2(embeds)
-        output_conv3 = self.conv3(embeds)
-        import pdb; pdb.set_trace()
-        output = 2
+        embeds_add_dim = embeds[:, None, :, :]
+        output_conv1 = self.conv1(embeds_add_dim)
+        output_conv2 = self.conv2(embeds_add_dim)
+        output_conv3 = self.conv3(embeds_add_dim)
+
+        oconv1_re = torch.reshape(output_conv1, (64, -1))
+        oconv2_re = torch.reshape(output_conv2, (64, -1))
+        oconv3_re = torch.reshape(output_conv3, (64, -1))
+
+        feat_vec = torch.cat((oconv1_re, oconv2_re, oconv3_re), dim=1)
+        output = self.linear(feat_vec)
         return output
 
 
@@ -324,7 +336,8 @@ args = None
 models = {
     'SeqToLabelModelOnlyHidden': SeqToLabelModelOnlyHidden,
     'SeqToLabelModelConcatAll': SeqToLabelModelConcatAll,
-    'SeqToLabelModelOnlyHiddenBiDeep': SeqToLabelModelOnlyHiddenBiDeep
+    'SeqToLabelModelOnlyHiddenBiDeep': SeqToLabelModelOnlyHiddenBiDeep,
+    'CNNOnly': CNNOnly
 }
 
 
