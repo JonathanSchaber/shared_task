@@ -349,8 +349,9 @@ class CNNOnly(nn.Module):
 
 class CNNHierarch(nn.Module):
 
-    def __init__(self, char_to_idx, embedding_dim, filtersizes, num_classes, dropout, max_len_text, batch_size):
-        super(CNNOnly, self).__init__()
+    def __init__(self, char_to_idx, embedding_dim, filtersizes, padding, stride, num_out_channels, inbetw_lin_size_1,
+                 inbetw_lin_size_2, out_lin_size, num_classes, dropout, max_len_text, batch_size):
+        super(CNNHierarch, self).__init__()
         self.filtersizes = filtersizes
         self.num_classes = num_classes
         self.dropout_rt = dropout
@@ -358,45 +359,100 @@ class CNNHierarch(nn.Module):
         self.batch_size = batch_size
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.conv_l1_1 = nn.Sequential(
-            nn.Conv2d(1, 5, kernel_size=(filtersizes[0], embedding_dim), stride=1, padding=2),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[0], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv_l1_2 = nn.Sequential(
-            nn.Conv2d(1, 5, kernel_size=(filtersizes[1], embedding_dim), stride=1, padding=2),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[1], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv_l1_3 = nn.Sequential(
-            nn.Conv2d(1, 5, kernel_size=(filtersizes[2], embedding_dim), stride=1, padding=2),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[2], embedding_dim), stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv_l1_4 = nn.Sequential(
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[3], embedding_dim), stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv_l2_1 = nn.Sequential(
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[0], embedding_dim), stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv_l2_2 = nn.Sequential(
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[1], embedding_dim), stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv_l2_3 = nn.Sequential(
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[2], embedding_dim), stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv_l2_4 = nn.Sequential(
+            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[3], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
 
-        # self.linear = nn.Linear(1520, num_classes)
-
-        self.classifier_layers = nn.Sequential(
+        self.lin_layers_1 = nn.Sequential(
             nn.Dropout(self.dropout_rt),
-            nn.Linear(1520, 1000),
+            # nn.Linear(self.conv_concat_size, inbetw_lin_size),
+            nn.Linear(4040, inbetw_lin_size_1),
             nn.ReLU(inplace=True),
             nn.Dropout(self.dropout_rt),
-            nn.Linear(1000, num_classes),
+            nn.Linear(inbetw_lin_size_1, out_lin_size),
+        )
+
+        self.lin_layers_2 = nn.Sequential(
+            nn.Dropout(self.dropout_rt),
+            # nn.Linear(self.conv_concat_size, inbetw_lin_size),
+            nn.Linear(4040, inbetw_lin_size_2),
+            nn.ReLU(inplace=True),
+            nn.Dropout(self.dropout_rt),
+            nn.Linear(inbetw_lin_size_2, num_classes),
         )
 
     def forward(self, x):
+        batch_size = x.shape[0]
         embeds = self.embedding(x)
         embeds_add_dim = embeds[:, None, :, :]
-        output_conv1 = self.conv1(embeds_add_dim)
-        output_conv2 = self.conv2(embeds_add_dim)
-        output_conv3 = self.conv3(embeds_add_dim)
         import pdb; pdb.set_trace()
-        oconv1_re = torch.reshape(output_conv1, (64, -1))
-        oconv2_re = torch.reshape(output_conv2, (64, -1))
-        oconv3_re = torch.reshape(output_conv3, (64, -1))
-
-        feat_vec = torch.cat((oconv1_re, oconv2_re, oconv3_re), dim=1)
-        output = self.classifier_layers(feat_vec)
-        return output
+        output_conv1 = self.conv_l1_1(embeds_add_dim)
+        output_conv2 = self.conv_l1_2(embeds_add_dim)
+        output_conv3 = self.conv_l1_3(embeds_add_dim)
+        output_conv4 = self.conv_l1_4(embeds_add_dim)
+        import pdb;
+        pdb.set_trace()
+        oconv1_re = torch.reshape(output_conv1, (batch_size, -1))
+        oconv2_re = torch.reshape(output_conv2, (batch_size, -1))
+        oconv3_re = torch.reshape(output_conv3, (batch_size, -1))
+        oconv4_re = torch.reshape(output_conv4, (batch_size, -1))
+        import pdb;
+        pdb.set_trace()
+        concat_vec = torch.cat((oconv1_re, oconv2_re, oconv3_re, oconv4_re), dim=1)
+        output_lin_1 = self.lin_layers_1(concat_vec)
+        import pdb;
+        pdb.set_trace()
+        output_conv_l2_1 = self.conv_l2_1(output_lin_1)
+        output_conv_l2_2 = self.conv_l2_2(output_lin_1)
+        output_conv_l2_3 = self.conv_l2_3(output_lin_1)
+        output_conv_l2_4 = self.conv_l2_4(output_lin_1)
+        import pdb;
+        pdb.set_trace()
+        oconv1_re2 = torch.reshape(output_conv_l2_1, (batch_size, -1))
+        oconv2_re2 = torch.reshape(output_conv_l2_2, (batch_size, -1))
+        oconv3_re2 = torch.reshape(output_conv_l2_3, (batch_size, -1))
+        oconv4_re2 = torch.reshape(output_conv_l2_4, (batch_size, -1))
+        import pdb;
+        pdb.set_trace()
+        concat_vec2 = torch.cat((oconv1_re2, oconv2_re2, oconv3_re2, oconv4_re2), dim=1)
+        output_lin_2 = self.lin_layers_1(concat_vec2)
+        return output_lin_2
 
 
 def save_model(trained_model, config, use_server_paths, num_epochs, num_batches, finale_true):
