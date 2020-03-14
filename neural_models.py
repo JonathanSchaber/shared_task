@@ -298,7 +298,15 @@ class CNNOnly(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
 
-        self.linear = nn.Linear(1520, num_classes)
+        # self.linear = nn.Linear(1520, num_classes)
+
+        self.classifier_layers = nn.Sequential(
+            nn.Dropout(self.dropout_rt),
+            nn.Linear(1520, 1000),
+            nn.ReLU(inplace=True),
+            nn.Dropout(self.dropout_rt),
+            nn.Linear(1000, num_classes),
+        )
 
     def forward(self, x):
         embeds = self.embedding(x)
@@ -312,7 +320,7 @@ class CNNOnly(nn.Module):
         oconv3_re = torch.reshape(output_conv3, (64, -1))
 
         feat_vec = torch.cat((oconv1_re, oconv2_re, oconv3_re), dim=1)
-        output = self.linear(feat_vec)
+        output = self.classifier_layers(feat_vec)
         return output
 
 
