@@ -91,9 +91,9 @@ def predict_on_input(model, model_type, path_in, config, max_examples):
                 if config['granularity'] == 'finegrained':
                     pred_finegrained = prediction
                 else:
-                    pred_finegrained= None
+                    pred_finegrained = 'NULL'
             else:
-                pred_ternary = None
+                pred_ternary = 'NULL'
             predictions.append((text_id, label_binary, label_ternary, label_finegrained, pred_binary,
                                 pred_ternary, pred_finegrained, text, masked, source))
             if i == max_examples - 1:
