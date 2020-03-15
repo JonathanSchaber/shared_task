@@ -274,41 +274,41 @@ class SeqToLabelModelOnlyHidden(nn.Module):
 
 class CNNOnly(nn.Module):
 
-    def __init__(self, char_to_idx, embedding_dim, filtersizes, padding, stride, num_out_channels, inbetw_lin_size,
+    def __init__(self, char_to_idx, embedding_dim, filter_sizes, padding, stride, num_out_channels, inbetw_lin_size,
                  num_classes, dropout, max_len_text, batch_size):
         super(CNNOnly, self).__init__()
-        self.filtersizes = filtersizes
+        self.filter_sizes = filter_sizes
         self.num_classes = num_classes
         self.dropout_rt = dropout
         self.max_len_text = max_len_text
         self.batch_size = batch_size
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.conv1 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[0], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[0], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[1], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[1], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv3 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[2], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[2], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv4 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[3], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[3], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
 
         # self.linear = nn.Linear(1520, num_classes)
-        # self.conv1_out_size = (embedding_dim * max_len_text - filtersizes[0] + 2 * padding) / (stride) + 1
-        # self.conv2_out_size = (embedding_dim * max_len_text - filtersizes[1] + 2 * padding) / (stride) + 1
-        # self.conv3_out_size = (embedding_dim * max_len_text - filtersizes[2] + 2 * padding) / (stride) + 1
-        # self.conv4_out_size = (embedding_dim * max_len_text - filtersizes[3] + 2 * padding) / (stride) + 1
+        # self.conv1_out_size = (embedding_dim * max_len_text - filter_sizes[0] + 2 * padding) / (stride) + 1
+        # self.conv2_out_size = (embedding_dim * max_len_text - filter_sizes[1] + 2 * padding) / (stride) + 1
+        # self.conv3_out_size = (embedding_dim * max_len_text - filter_sizes[2] + 2 * padding) / (stride) + 1
+        # self.conv4_out_size = (embedding_dim * max_len_text - filter_sizes[3] + 2 * padding) / (stride) + 1
         #
         # self.conv1_out_flat_size = num_out_channels * self.conv1_out_size
         # self.conv2_out_flat_size = num_out_channels * self.conv2_out_size
@@ -349,52 +349,52 @@ class CNNOnly(nn.Module):
 
 class CNNHierarch(nn.Module):
 
-    def __init__(self, char_to_idx, embedding_dim, filtersizes, padding, stride, num_out_channels, inbetw_lin_size_1,
+    def __init__(self, char_to_idx, embedding_dim, filter_sizes, padding, stride, num_out_channels, inbetw_lin_size_1,
                  inbetw_lin_size_2, out_lin_size, num_classes, dropout, max_len_text, batch_size):
         super(CNNHierarch, self).__init__()
-        self.filtersizes = filtersizes
+        self.filter_sizes = filter_sizes
         self.num_classes = num_classes
         self.dropout_rt = dropout
         self.max_len_text = max_len_text
         self.batch_size = batch_size
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.conv_l1_1 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[0], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[0], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv_l1_2 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[1], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[1], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv_l1_3 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[2], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[2], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv_l1_4 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[3], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[3], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv_l2_1 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[0], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[0], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv_l2_2 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[1], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[1], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv_l2_3 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[2], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[2], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv_l2_4 = nn.Sequential(
-            nn.Conv2d(1, num_out_channels, kernel_size=(filtersizes[3], embedding_dim), stride=stride, padding=padding),
+            nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[3], embedding_dim), stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
@@ -469,6 +469,90 @@ def save_model(trained_model, config, use_server_paths, num_epochs, num_batches,
     print('Model saved to {}'.format(fpath))
 
 
+class CNNBlock(nn.Module):
+
+    def __init__(self, filter_sizes, padding, stride, num_in_channels, num_out_channels, dropout, max_len_text):
+        super(CNNBlock, self).__init__()
+        self.filter_sizes = filter_sizes
+        self.dropout_rt = dropout
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[0][0], filter_sizes[0][1]),
+                      stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[1][0], filter_sizes[1][1]),
+                      stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[2][0], filter_sizes[2][1]),
+                      stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv4 = nn.Sequential(
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[3][0], filter_sizes[3][1]),
+                      stride=stride, padding=padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+
+    def forward(self, x):
+        output_conv1 = self.conv1(x)
+        output_conv2 = self.conv2(x)
+        output_conv3 = self.conv3(x)
+        output_conv4 = self.conv4(x)
+        return output_conv1, output_conv2, output_conv3, output_conv4
+
+
+class LinBlock(nn.Module):
+
+    def __init__(self, in_lin_size, inbetw_lin_size, out_lin_size, dropout):
+        super(LinBlock, self).__init__()
+        self.dropout_rt = dropout
+
+        self.lin_layers_1 = nn.Sequential(
+            nn.Dropout(self.dropout_rt),
+            nn.Linear(in_lin_size, inbetw_lin_size),
+            nn.ReLU(inplace=True),
+            nn.Dropout(self.dropout_rt),
+            nn.Linear(inbetw_lin_size, out_lin_size),
+        )
+
+
+class GRUCNN(nn.Module):
+
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout, max_len_text,
+                 batch_size, filter_sizes, padding, stride, num_in_channels, num_out_channels, in_lin_sizes,
+                 inbetw_lin_sizes, out_lin_sizes):
+        super(GRUCNN, self).__init__()
+        self.batch_size = batch_size if self.training else 1
+        self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
+        self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
+                                      num_layers=num_gru_layers, batch_first=True, bidirectional=True)
+        self.CNNBlock1 = CNNBlock(filter_sizes=filter_sizes, padding=padding, stride=stride,
+                                  num_in_channels=num_in_channels, num_out_channels=num_out_channels,
+                                  dropout=dropout, max_len_text=max_len_text)
+        self.CNNBlock2 = CNNBlock(filter_sizes=filter_sizes, padding=padding, stride=stride,
+                                  num_in_channels=num_in_channels, num_out_channels=num_out_channels,
+                                  dropout=dropout, max_len_text=max_len_text)
+        self.LinBlock1 = LinBlock(in_lin_size=in_lin_sizes[0], inbetw_lin_size=inbetw_lin_sizes[0],
+                                  out_lin_size=out_lin_sizes[0], dropout=dropout)
+        self.LinBlock2 = LinBlock(in_lin_size=in_lin_sizes[1], inbetw_lin_size=inbetw_lin_sizes[1],
+                                  out_lin_size=num_classes, dropout=dropout)
+
+    def forward(self, x):
+        embeds = self.embedding(x)
+        seq_output, h_n = self.char_lang_model(embeds)
+        # all_in_one = torch.reshape(seq_output, (1, -1)) for eval of old models
+        all_in_one = torch.reshape(seq_output, (self.batch_size, -1))
+        output = self.linear(torch.squeeze(all_in_one))
+        return output
+
+
 args = None
 
 
@@ -476,7 +560,9 @@ models = {
     'SeqToLabelModelOnlyHidden': SeqToLabelModelOnlyHidden,
     'SeqToLabelModelConcatAll': SeqToLabelModelConcatAll,
     'SeqToLabelModelOnlyHiddenBiDeep': SeqToLabelModelOnlyHiddenBiDeep,
-    'CNNOnly': CNNOnly
+    'CNNOnly': CNNOnly,
+    'CNNHierarch': CNNHierarch,
+    'RNNCNN': GRUCNN
 }
 
 
