@@ -471,7 +471,7 @@ def save_model(trained_model, config, use_server_paths, num_epochs, num_batches,
 
 class CNNBlock(nn.Module):
 
-    def __init__(self, filter_sizes, padding, stride, num_in_channels, num_out_channels, dropout, max_len_text):
+    def __init__(self, filter_sizes, padding, stride, num_in_channels, num_out_channels, dropout):
         super(CNNBlock, self).__init__()
         self.filter_sizes = filter_sizes
         self.dropout_rt = dropout
@@ -526,30 +526,32 @@ class LinBlock(nn.Module):
 class GRUCNN(nn.Module):
 
     def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout, max_len_text,
-                 batch_size, filter_sizes, padding, stride, num_in_channels, num_out_channels, in_lin_sizes,
-                 inbetw_lin_sizes, out_lin_sizes):
+                 batch_size, filter_sizes, padding, stride, num_in_channels, num_out_channels, in_lin_size,
+                 inbetw_lin_size):
         super(GRUCNN, self).__init__()
         self.batch_size = batch_size if self.training else 1
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=True)
-        self.CNNBlock1 = CNNBlock(filter_sizes=filter_sizes, padding=padding, stride=stride,
+        self.cnn_block = CNNBlock(filter_sizes=filter_sizes, padding=padding, stride=stride,
                                   num_in_channels=num_in_channels, num_out_channels=num_out_channels,
-                                  dropout=dropout, max_len_text=max_len_text)
-        self.CNNBlock2 = CNNBlock(filter_sizes=filter_sizes, padding=padding, stride=stride,
-                                  num_in_channels=num_in_channels, num_out_channels=num_out_channels,
-                                  dropout=dropout, max_len_text=max_len_text)
-        self.LinBlock1 = LinBlock(in_lin_size=in_lin_sizes[0], inbetw_lin_size=inbetw_lin_sizes[0],
-                                  out_lin_size=out_lin_sizes[0], dropout=dropout)
-        self.LinBlock2 = LinBlock(in_lin_size=in_lin_sizes[1], inbetw_lin_size=inbetw_lin_sizes[1],
-                                  out_lin_size=num_classes, dropout=dropout)
+                                  dropout=dropout)
+        self.link_block = LinBlock(in_lin_size=in_lin_size, inbetw_lin_size=inbetw_lin_size,
+                                   out_lin_size=num_classes, dropout=dropout)
 
     def forward(self, x):
+        batch_size = x.shape[0]
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
-        # all_in_one = torch.reshape(seq_output, (1, -1)) for eval of old models
-        all_in_one = torch.reshape(seq_output, (self.batch_size, -1))
-        output = self.linear(torch.squeeze(all_in_one))
+        seq_outputs = torch.reshape(seq_output, (batch_size, -1))
+        import pdb; pdb.set_trace()
+        all_in_one = torch.cat((seq_outputs, h_n), dim=0)
+        import pdb; pdb.set_trace()
+        cnn_out = self.cnn_block(all_in_one)
+        import pdb; pdb.set_trace()
+        cnn_out_flat = torch.reshape(cnn_out, (batch_size, -1))
+        import pdb; pdb.set_trace()
+        output = self.linear(torch.squeeze(cnn_out_flat))
         return output
 
 
@@ -562,7 +564,7 @@ models = {
     'SeqToLabelModelOnlyHiddenBiDeep': SeqToLabelModelOnlyHiddenBiDeep,
     'CNNOnly': CNNOnly,
     'CNNHierarch': CNNHierarch,
-    'RNNCNN': GRUCNN
+    'GRUCNN': GRUCNN
 }
 
 
