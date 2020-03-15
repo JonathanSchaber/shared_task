@@ -1,8 +1,8 @@
 {
-  "model_name": "CNNOnly",
-  "config_id": "CNNOnly_binary_1",
+  "model_name": "CNNHierarch",
+  "config_id": "CNNHierarch_finegrained_1",
   "batch_size": 64,
-  "granularity": "binary",
+  "granularity": "finegrained",
   "max_length_text": 100,
   "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
   "num_epochs": 2,
@@ -17,6 +17,8 @@
     "num_out_channels": 10,
     "padding": 2,
     "stride": 1,
-    "inbetw_lin_size": 1000
+    "inbetw_lin_size_1": 2000,
+    "out_lin_size": 1500,
+    "inbetw_lin_size_2": 500
   }
 }
