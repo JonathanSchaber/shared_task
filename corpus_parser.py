@@ -770,9 +770,9 @@ class SBDEParser(Parser):
         writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
         next(reader)
         for row in reader:
-            masked_text, masked_strings = self.cleaner.mask(row[3])
+            masked_text, masked_strings = self.cleaner.mask(row[4])
             cleaned_text = self.cleaner.clean(masked_text)
-            if cleaned_text == '':
+            if cleaned_text == '' or cleaned_text == 'Not Available':
                 continue
             self.writerow(writer, cleaned_text, masked_strings, self.label_binary,
                           self.label_ternary, self.label_finegrained, self.corpus_name)
