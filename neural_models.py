@@ -471,30 +471,30 @@ def save_model(trained_model, config, use_server_paths, num_epochs, num_batches,
 
 class CNNBlock(nn.Module):
 
-    def __init__(self, filter_sizes, padding, stride, num_in_channels, num_out_channels, dropout):
+    def __init__(self, filter_sizes_dim_1, filter_sizes_dim_2, padding, stride, num_in_channels, num_out_channels, dropout):
         super(CNNBlock, self).__init__()
-        self.filter_sizes = filter_sizes
+        self.filter_sizes = filter_sizes_dim_1
         self.dropout_rt = dropout
         self.conv1 = nn.Sequential(
-            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[0][0], filter_sizes[0][1]),
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes_dim_1[0], filter_sizes_dim_2[0]),
                       stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[1][0], filter_sizes[1][1]),
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes_dim_1[1], filter_sizes_dim_2[1]),
                       stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv3 = nn.Sequential(
-            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[2][0], filter_sizes[2][1]),
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes_dim_1[2], filter_sizes_dim_2[2]),
                       stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv4 = nn.Sequential(
-            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[3][0], filter_sizes[3][1]),
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes_dim_1[3], filter_sizes_dim_2[3]),
                       stride=stride, padding=padding),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
@@ -522,6 +522,9 @@ class LinBlock(nn.Module):
             nn.Linear(inbetw_lin_size, out_lin_size),
         )
 
+    def forward(self, x):
+        return self.lin_layers_1(x)
+
 
 class GRUCNN(nn.Module):
 
@@ -530,28 +533,29 @@ class GRUCNN(nn.Module):
                  inbetw_lin_size):
         super(GRUCNN, self).__init__()
         self.batch_size = batch_size if self.training else 1
+        self.filter_sizes_dim_2 = 4*[hidden_gru_size * 2 * num_gru_layers]
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=True)
-        self.cnn_block = CNNBlock(filter_sizes=filter_sizes, padding=padding, stride=stride,
-                                  num_in_channels=num_in_channels, num_out_channels=num_out_channels,
-                                  dropout=dropout)
-        self.link_block = LinBlock(in_lin_size=in_lin_size, inbetw_lin_size=inbetw_lin_size,
-                                   out_lin_size=num_classes, dropout=dropout)
+        self.cnn_block = CNNBlock(filter_sizes_dim_1=filter_sizes, filter_sizes_dim_2=self.filter_sizes_dim_2,
+                                  padding=padding, stride=stride, num_in_channels=num_in_channels,
+                                  num_out_channels=num_out_channels, dropout=dropout)
+        self.lin_block = LinBlock(in_lin_size=in_lin_size, inbetw_lin_size=inbetw_lin_size,
+                                  out_lin_size=num_classes, dropout=dropout)
 
     def forward(self, x):
         batch_size = x.shape[0]
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
-        seq_outputs = torch.reshape(seq_output, (batch_size, -1))
-        import pdb; pdb.set_trace()
-        all_in_one = torch.cat((seq_outputs, h_n), dim=0)
-        import pdb; pdb.set_trace()
-        cnn_out = self.cnn_block(all_in_one)
-        import pdb; pdb.set_trace()
-        cnn_out_flat = torch.reshape(cnn_out, (batch_size, -1))
-        import pdb; pdb.set_trace()
-        output = self.linear(torch.squeeze(cnn_out_flat))
+        hn_re = torch.reshape(h_n, (64, -1))[:, None, :]
+        all_in_one = torch.cat((seq_output, hn_re), dim=1)[:, None, :, :]
+        cnn_out1, cnn_out2, cnn_out3, cnn_out4 = self.cnn_block(all_in_one)
+        cnn_out_flat1 = torch.reshape(cnn_out1, (batch_size, -1))
+        cnn_out_flat2 = torch.reshape(cnn_out2, (batch_size, -1))
+        cnn_out_flat3 = torch.reshape(cnn_out3, (batch_size, -1))
+        cnn_out_flat4 = torch.reshape(cnn_out4, (batch_size, -1))
+        feat_vec = torch.cat((cnn_out_flat1, cnn_out_flat2, cnn_out_flat3, cnn_out_flat4), dim=1)
+        output = self.lin_block(feat_vec)
         return output
 
 
