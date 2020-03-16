@@ -249,9 +249,10 @@ class SeqToLabelModelOnlyHiddenBiDeep(nn.Module):
         self.linear = nn.Linear(hidden_gru_size*2*num_gru_layers, num_classes)
 
     def forward(self, x):
+        batch_size = x.shape[0]
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
-        output = self.linear(torch.reshape(h_n, (64, -1)))
+        output = self.linear(torch.reshape(h_n, (batch_size, -1)))
         return output
 
 
