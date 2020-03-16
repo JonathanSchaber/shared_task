@@ -547,7 +547,7 @@ class GRUCNN(nn.Module):
         batch_size = x.shape[0]
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
-        hn_re = torch.reshape(h_n, (64, -1))[:, None, :]
+        hn_re = torch.reshape(h_n, (batch_size, -1))[:, None, :]
         all_in_one = torch.cat((seq_output, hn_re), dim=1)[:, None, :, :]
         cnn_out1, cnn_out2, cnn_out3, cnn_out4 = self.cnn_block(all_in_one)
         cnn_out_flat1 = torch.reshape(cnn_out1, (batch_size, -1))
