@@ -1,0 +1,24 @@
+{
+  "model_name": "CNNHierarch",
+  "config_id": "CNNHierarch_finegrained_1",
+  "batch_size": 256,
+  "granularity": "binary",
+  "max_length_text": 300,
+  "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
+  "num_epochs": 5,
+  "learning_rate": 0.0001,
+  "model_params": {
+    "num_classes": 2,
+    "dropout": 0.1,
+    "embedding_dim": 100,
+    "filter_sizes": [2, 3, 4, 5],
+    "max_len_text": 100,
+    "batch_size": 64,
+    "num_out_channels": 10,
+    "padding": 2,
+    "stride": 1,
+    "inbetw_lin_size_1": 2000,
+    "out_lin_size": 1500,
+    "inbetw_lin_size_2": 500
+  }
+}
