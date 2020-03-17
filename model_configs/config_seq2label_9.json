@@ -1,0 +1,17 @@
+{
+  "model_name": "SeqToLabelModelOnlyHiddenBiDeep",
+  "config_id": "seq2label_ternary_9",
+  "batch_size": 64,
+  "granularity": "ternary",
+  "max_length_text": 300,
+  "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
+  "num_epochs": 4,
+  "learning_rate": 0.001,
+  "model_params": {
+    "num_classes": 3,
+    "dropout": 0.1,
+    "embedding_dim": 200,
+    "hidden_gru_size": 200,
+    "num_gru_layers": 1
+  }
+}
