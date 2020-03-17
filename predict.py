@@ -13,7 +13,7 @@ Example call:
 python3 predict.py -m <path_to_model> -t <torch or sklearn> -i <path_input_data> -o <path_output_file>
 python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_1_1_30_Wed_Mar_11_21:55:12_2020.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o testpred.csv -c /home/user/jgoldz/shared_task/model_configs/config_seq2label_1.json
 
-python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_4_2_30000_Fri_Mar_13_19:12:47_2020_endFalse.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o /home/user/jgoldz/storage/shared_task/models/SeqToLabelModelOnlyHidden_seq2label_binary_4/dev_pred_seq2label_4.csv -c /home/user/jgoldz/shared_task/model_configs/config_seq2label_4.json
+python3 predict.py -m /home/user/jgoldz/storage/shared_task/models/CNNOnly_CNNOnly_binary_1/CNNOnly_CNNOnly_binary_1_2_55540_Sun_Mar_15_00:35:35_2020_endTrue.model -t torch -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o /home/user/jgoldz/storage/shared_task/models/CNNOnly_CNNOnly_binary_1/predict_on_entire_devset.csv -c model_configs/config_cnnonly_1.json
 """
 
 
@@ -82,7 +82,7 @@ def predict_on_input(model, model_type, path_in, config, max_examples):
             x = np.zeros(max_length)
             for j, idx in enumerate(text_idxs):
                 x[j] = idx
-            output = model(torch.LongTensor([x]))
+            output = torch.squeeze(model(torch.LongTensor([x])))
             max_prob = max(output)
             prediction = list(output).index(max_prob)
             pred_binary = prediction if prediction <= 1 else 1
@@ -94,6 +94,7 @@ def predict_on_input(model, model_type, path_in, config, max_examples):
                     pred_finegrained = 'NULL'
             else:
                 pred_ternary = 'NULL'
+                pred_finegrained = 'NULL'
             predictions.append((text_id, label_binary, label_ternary, label_finegrained, pred_binary,
                                 pred_ternary, pred_finegrained, text, masked, source))
             if i == max_examples - 1:
@@ -129,7 +130,7 @@ def main():
     print('Loading model...')
     model = load_model(args.path_model, args.type)
     print('Make predictions...')
-    predictions = predict_on_input(model, args.type, args.path_in, config, 2000)
+    predictions = predict_on_input(model, args.type, args.path_in, config, None)
     print('Write Predictions to file...')
     write_preds_to_file(predictions, args.path_out)
 
