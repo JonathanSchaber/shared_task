@@ -256,6 +256,23 @@ class SeqToLabelModelOnlyHiddenBiDeep(nn.Module):
         return output
 
 
+class SeqToLabelModelOnlyHiddenUniDeep(nn.Module):
+
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
+        super(SeqToLabelModelOnlyHiddenUniDeep, self).__init__()
+        self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
+        self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
+                                      num_layers=num_gru_layers, batch_first=True, bidirectional=False)
+        self.linear = nn.Linear(hidden_gru_size*num_gru_layers, num_classes)
+
+    def forward(self, x):
+        batch_size = x.shape[0]
+        embeds = self.embedding(x)
+        seq_output, h_n = self.char_lang_model(embeds)
+        output = self.linear(torch.reshape(h_n, (batch_size, -1)))
+        return output
+
+
 class SeqToLabelModelOnlyHidden(nn.Module):
     """The best model until now was this but without dropout and without early stopping applied!"""
 
@@ -569,7 +586,8 @@ models = {
     'SeqToLabelModelOnlyHiddenBiDeep': SeqToLabelModelOnlyHiddenBiDeep,
     'CNNOnly': CNNOnly,
     'CNNHierarch': CNNHierarch,
-    'GRUCNN': GRUCNN
+    'GRUCNN': GRUCNN,
+    'SeqToLabelModelOnlyHiddenUniDeep': SeqToLabelModelOnlyHiddenUniDeep
 }
 
 
