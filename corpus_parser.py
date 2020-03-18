@@ -786,8 +786,8 @@ class SBDEParser(Parser):
 
 
 class GSWIDParser(Parser):
-    num_lines = 2312
-    path_in = 'data/gswid2020/train_tweets.full.csv'
+    num_lines = 23110
+    path_in = 'data/gswid2020/train_tweets.full.no_header.10.csv'
     path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
     path_out = 'data/main/gswid2020_parsed.csv'
     path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
@@ -805,7 +805,7 @@ class GSWIDParser(Parser):
             self.path_out = self.path_out_server
         reader = csv.reader(open(self.path_in, 'r', encoding='utf8'), delimiter=',')
         writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
-        next(reader)
+        # next(reader)
         for row in reader:
             tweed_id, label, text = row
             masked_text, masked_strings = self.cleaner.mask(text)
