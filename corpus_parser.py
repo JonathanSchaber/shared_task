@@ -4,6 +4,7 @@ import csv
 import json
 import argparse
 import xml.etree.ElementTree as ET
+import emoji
 
 
 """
@@ -53,10 +54,12 @@ class Cleaner:
         'MASK_HASHTAG': re.compile(r'# ?.+?(?=\b)')  # TODO: match only hashtags with starting word boundary
     }
 
+    emoji_regex = emoji.get_emoji_regexp()
+
     @classmethod
     def clean(cls, raw_text):
         """Clean raw text. Can be overwritten by corpus specific cleaner."""
-        return re.sub(r'\s', ' ', raw_text)
+        return re.sub(r'\s+', ' ', re.sub(cls.emoji_regex, '', raw_text)).strip()
 
     @classmethod
     def mask(cls, unmasked_text):
