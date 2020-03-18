@@ -74,7 +74,7 @@ class Cleaner:
 
         masked_text = unmasked_text
         for mask, mask_pattern in cls.mask_dict.items():
-            masked_text = re.sub(mask_pattern, mask, masked_text)
+            masked_text = re.sub(mask_pattern, '', masked_text)
 
         return masked_text, masked_strings
 
@@ -800,7 +800,7 @@ class GSWIDParser(Parser):
         if self.use_server_paths:
             self.path_in = self.path_in_server
             self.path_out = self.path_out_server
-        reader = csv.reader(open(self.path_in, 'r', encoding='utf8'), delimiter='\t')
+        reader = csv.reader(open(self.path_in, 'r', encoding='utf8'), delimiter=',')
         writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
         next(reader)
         for row in reader:
@@ -857,7 +857,8 @@ def main():
                HamburgDTBParser, LeipzigParserBAR, LeipzigParserDE, LeipzigParserEN,
                LeipzigParserFR, LeipzigParserFRR, LeipzigParserFRY, LeipzigParserGSW,
                LeipzigParserITA, LeipzigParserLMO, LeipzigParserLTZ, LeipzigParserNDS,
-               LeipzigParserNLD, LeipzigParserNOR, LeipzigParserSWE, LeipzigParserYID]
+               LeipzigParserNLD, LeipzigParserNOR, LeipzigParserSWE, LeipzigParserYID,
+               GSWIDParser]
 
     for parser_type in parsers:
         parser = parser_type(args.server)
