@@ -35,6 +35,19 @@ def load_config(path):
         return json.load(f)
 
 
+def adjust_text_len(text, max_len):
+    """Multiply text_idxs until max-len.
+
+    Args:
+        text_idxs: str
+        max_len: int
+    """
+    while len(text) < max_len:
+        text += (" " + text)
+    text = text[:max_len]
+    return text
+
+
 def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length):
     """
     Lazy loading of batches. Returns
@@ -59,7 +72,8 @@ def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length)
     for _ in range(batch_size):
         try:
             row = next(csv_reader)
-            text_idxs = [char_to_idx.get(char, 'unk') for char in row[1]][:max_length]
+            adjust_text = adjust_text_len(row[1], max_length)
+            text_idxs = [char_to_idx.get(char, 'unk') for char in adjust_text]
             label = row[index]
             x_item = np.zeros(max_length)
             for i, idx in enumerate(text_idxs):
