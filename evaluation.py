@@ -87,7 +87,7 @@ def process_predictions_file(pred_file):
             print('No correct finegrained predictions...')
    
     if len(false_preds) > 0:
-        with open(pred_file.rstrip(".csv") + "_FALSE_ONES.csv", "w", encoding="utf-8") as f:
+        with open(pred_file.rstrip(".csv") + "_FALSE_PREDS_BINARY.csv", "w", encoding="utf-8") as f:
             csv_writer = csv.writer(f)
             for line in false_preds:
                 csv.writerow(line)
