@@ -167,6 +167,10 @@ class LeipzigCleanerFRY(LeipzigCleaner):
     pass
 
 
+class GSWIDCleaner(Cleaner):
+    pass
+
+
 # *****************************
 # ********** Parsers **********
 # *****************************
@@ -771,6 +775,37 @@ class SBDEParser(Parser):
         next(reader)
         for row in reader:
             masked_text, masked_strings = self.cleaner.mask(row[4])
+            cleaned_text = self.cleaner.clean(masked_text)
+            if cleaned_text == '' or cleaned_text == 'Not Available':
+                continue
+            self.writerow(writer, cleaned_text, masked_strings, self.label_binary,
+                          self.label_ternary, self.label_finegrained, self.corpus_name)
+
+
+class GSWIDParser(Parser):
+    num_lines = 2312
+    path_in = 'data/gswid2020/train_tweets.full.csv'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
+    path_out = 'data/main/gswid2020_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
+    language = 'swiss_german'
+    corpus_name = 'gswid2020'
+    label_binary = lang_to_label['binary'][language]
+    label_ternary = lang_to_label['ternary'][language]
+    label_finegrained = lang_to_label['finegrained'][language]
+    cleaner = GSWIDCleaner()
+
+    def copy_to_main_file(self):
+        """Copy the loaded file to the main file."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
+        reader = csv.reader(open(self.path_in, 'r', encoding='utf8'), delimiter='\t')
+        writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
+        next(reader)
+        for row in reader:
+            tweed_id, label, text = row
+            masked_text, masked_strings = self.cleaner.mask(text)
             cleaned_text = self.cleaner.clean(masked_text)
             if cleaned_text == '' or cleaned_text == 'Not Available':
                 continue
