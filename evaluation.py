@@ -22,11 +22,14 @@ def process_predictions_file(pred_file):
     Return:
         None
     """
-    true_bin = 0
-    false_bin = 0
-    true_ter = 0
-    false_ter = 0
-    true_fine = 0
+    bin_true_pos = 0
+    bin_false_pos = 0
+    bin_true_neg = 0
+    bin_false_neg = 0
+
+    ter_true = 0
+    ter_false = 0
+    fine_true = 0
     false_fine = 0
 
     TER = False
@@ -40,27 +43,38 @@ def process_predictions_file(pred_file):
                 if not pred_ternary == "NULL": TER = True 
                 if not pred_finegrained == "NULL": FINE = True 
 
-            if label_binary == pred_binary: true_bin += 1 
-            else: false_bin += 1
-            if TER: 
-                if label_ternary == pred_ternary: true_ter += 1 
-                else: false_ter += 1
-            if FINE:
-                if label_finegrained == pred_finegrained: true_fine += 1 
-                else: false_fine += 1
+            if label_binary == "1" and pred_binary == "1": bin_true_pos += 1
+            elif label_binary == "1" and pred_binary == "0": bin_false_neg += 1
+            elif label_binary == "0" and pred_binary == "1": bin_false_pos += 1
+            elif label_binary == "0" and pred_binary == "0": bin_true_neg += 1
 
-    if true_bin != 0:
-        print('Accuracy binary: {}'.format((true_bin/(true_bin + false_bin)*100)))
-    else:
-        print('No correct binary predictions...')
+            if TER: 
+                if label_ternary == pred_ternary: ter_true += 1 
+                else: ter_false += 1
+            if FINE:
+                if label_finegrained == pred_finegrained: fine_true += 1 
+                else: false_fine += 1
+    
+    bin_prec = bin_true_pos / (bin_true_pos + bin_false_pos)
+    bin_rec = bin_true_pos / (bin_true_pos + bin_false_neg)
+    bin_acc = (bin_true_pos + bin_true_neg) / (bin_true_neg + bin_false_pos + bin_true_neg + bin_false_neg)
+    bin_f1 = 2 * (bin_prec * bin_rec) / (bin_prec + bin_rec)
+    
+    print("=============== RESULTS BINARY ===============")
+    print("Precision: " + str(100 * bin_prec) + "%")
+    print("Recall: " + str(100 * bin_rec) + "%")
+    print("Accuracy: " + str(100 * bin_acc) + "%")
+    print("F1: " + str(100 * bin_f1))
+    print("==============================================\n")
+
     if TER:
-        if true_ter != 0:
-            print('Accuracy ternary: {}'.format((true_ter/(true_ter + false_ter)*100)))
+        if ter_true != 0:
+            print('Accuracy ternary: {}'.format((ter_true/(ter_true + ter_false)*100)))
         else:
             print('No correct ternary predictions...')
     if FINE:
-        if true_fine != 0:
-            print('Accuracy finegrained: {}'.format((true_fine/(true_fine + false_fine)*100)))
+        if fine_true != 0:
+            print('Accuracy finegrained: {}'.format((fine_true/(fine_true + false_fine)*100)))
         else:
             print('No correct finegrained predictions...')
     
