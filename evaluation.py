@@ -65,7 +65,7 @@ def process_predictions_file(pred_file):
     
     bin_prec = bin_true_pos / (bin_true_pos + bin_false_pos)
     bin_rec = bin_true_pos / (bin_true_pos + bin_false_neg)
-    bin_acc = (bin_true_pos + bin_true_neg) / (bin_true_neg + bin_false_pos + bin_true_neg + bin_false_neg)
+    bin_acc = (bin_true_pos + bin_true_neg) / (bin_true_pos + bin_false_pos + bin_true_neg + bin_false_neg)
     bin_f1 = 2 * (bin_prec * bin_rec) / (bin_prec + bin_rec)
     
     print("=============== RESULTS BINARY ===============")
@@ -90,7 +90,7 @@ def process_predictions_file(pred_file):
         with open(pred_file.rstrip(".csv") + "_FALSE_PREDS_BINARY.csv", "w", encoding="utf-8") as f:
             csv_writer = csv.writer(f)
             for line in false_preds:
-                csv.writerow(line)
+                csv_writer.writerow(line)
 
 def compare_line_by_line(gold_path, predicted_path):
     """Compares the gold lables to the predicted ones.
