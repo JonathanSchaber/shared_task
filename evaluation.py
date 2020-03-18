@@ -32,7 +32,7 @@ def process_predictions_file(pred_file):
     ter_true = 0
     ter_false = 0
     fine_true = 0
-    false_fine = 0
+    fine_false = 0
 
     TER = False
     FINE = False
@@ -61,7 +61,7 @@ def process_predictions_file(pred_file):
                 else: ter_false += 1
             if FINE:
                 if label_finegrained == pred_finegrained: fine_true += 1 
-                else: false_fine += 1
+                else: fine_false += 1
     
     bin_prec = bin_true_pos / (bin_true_pos + bin_false_pos)
     bin_rec = bin_true_pos / (bin_true_pos + bin_false_neg)
@@ -82,7 +82,7 @@ def process_predictions_file(pred_file):
             print('No correct ternary predictions...')
     if FINE:
         if fine_true != 0:
-            print('Accuracy finegrained: {}'.format((fine_true/(fine_true + false_fine)*100)))
+            print('Accuracy finegrained: {}'.format((fine_true/(fine_true + fine_false)*100)))
         else:
             print('No correct finegrained predictions...')
    
