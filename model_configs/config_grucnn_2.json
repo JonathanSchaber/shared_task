@@ -1,0 +1,26 @@
+{
+  "model_name": "GRUCNN",
+  "config_id": "grucnn_ternary_2",
+  "batch_size": 64,
+  "granularity": "ternary",
+  "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
+  "num_epochs": 5,
+  "max_length_text": 300,
+  "learning_rate": 0.0001,
+  "model_params": {
+    "num_classes": 3,
+    "dropout": 0.1,
+    "embedding_dim": 100,
+    "hidden_gru_size": 100,
+    "num_gru_layers": 1,
+    "max_len_text": 300,
+    "batch_size": 64,
+    "filter_sizes": [2, 3, 4, 5],
+    "padding": 2,
+    "stride": 1,
+    "num_in_channels": 1,
+    "num_out_channels": 10,
+    "in_lin_size": 6060,
+    "inbetw_lin_size": 1000
+  }
+}

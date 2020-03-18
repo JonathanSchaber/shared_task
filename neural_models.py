@@ -6,7 +6,6 @@ import numpy as np
 import torch
 from torch import nn
 from utils import get_timestamp
-torch.set_num_threads(10)
 
 
 """
@@ -22,6 +21,8 @@ def parse_cmd_args():
     parser.add_argument("-d", "--path_dev", type=str, help="Path to dev data.")
     parser.add_argument('-s', '--server', action='store_true', default=False, help='Use server paths.')
     parser.add_argument("-c", "--path_config", type=str, help="Path to hyperparamter/config file (json).")
+    parser.add_argument('-n', '--num_threads', type=int, default=10,
+                        help='Set the number of threads to use for training by torch.')
     return parser.parse_args()
 
 
@@ -526,33 +527,33 @@ def save_model(trained_model, config, use_server_paths, num_epochs, num_batches,
 
 class CNNBlock(nn.Module):
 
-    def __init__(self, filter_sizes_dim_1, filter_sizes_dim_2, padding, stride, num_in_channels, num_out_channels, dropout):
+    def __init__(self, filter_sizes, embedding_dim, stride, num_in_channels, num_out_channels, dropout):
         super(CNNBlock, self).__init__()
-        self.filter_sizes = filter_sizes_dim_1
+        self.filter_sizes = filter_sizes
         self.dropout_rt = dropout
         self.conv1 = nn.Sequential(
-            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes_dim_1[0], filter_sizes_dim_2[0]),
-                      stride=stride, padding=padding),
+            nn.Conv1d(num_in_channels, num_out_channels, kernel_size=filter_sizes[0] * embedding_dim,
+                      stride=stride * embedding_dim, padding=(filter_sizes[0] - 1) * embedding_dim),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
+            nn.MaxPool1d(kernel_size=2, stride=2)
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes_dim_1[1], filter_sizes_dim_2[1]),
-                      stride=stride, padding=padding),
+            nn.Conv1d(num_in_channels, num_out_channels, kernel_size=filter_sizes[1] * embedding_dim,
+                      stride=stride * embedding_dim, padding=(filter_sizes[1] - 1) * embedding_dim),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
+            nn.MaxPool1d(kernel_size=2, stride=2)
         )
         self.conv3 = nn.Sequential(
-            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes_dim_1[2], filter_sizes_dim_2[2]),
-                      stride=stride, padding=padding),
+            nn.Conv1d(num_in_channels, num_out_channels, kernel_size=filter_sizes[2] * embedding_dim,
+                      stride=stride * embedding_dim, padding=(filter_sizes[2] - 1) * embedding_dim),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
+            nn.MaxPool1d(kernel_size=2, stride=2)
         )
         self.conv4 = nn.Sequential(
-            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes_dim_1[3], filter_sizes_dim_2[3]),
-                      stride=stride, padding=padding),
+            nn.Conv1d(num_in_channels, num_out_channels, kernel_size=filter_sizes[3] * embedding_dim,
+                      stride=stride * embedding_dim, padding=(filter_sizes[3] - 1) * embedding_dim),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
+            nn.MaxPool1d(kernel_size=2, stride=2)
         )
 
     def forward(self, x):
@@ -591,10 +592,9 @@ class GRUCNN(nn.Module):
         self.filter_sizes_dim_2 = 4*[hidden_gru_size * 2 * num_gru_layers]
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
-                                      num_layers=num_gru_layers, batch_first=True, bidirectional=True)
-        self.cnn_block = CNNBlock(filter_sizes_dim_1=filter_sizes, filter_sizes_dim_2=self.filter_sizes_dim_2,
-                                  padding=padding, stride=stride, num_in_channels=num_in_channels,
-                                  num_out_channels=num_out_channels, dropout=dropout)
+                                      num_layers=num_gru_layers, batch_first=True, bidirectional=False)
+        self.cnn_block = CNNBlock(filter_sizes=filter_sizes, stride=stride, num_in_channels=num_in_channels,
+                                  num_out_channels=num_out_channels, dropout=dropout, embedding_dim=embedding_dim)
         self.lin_block = LinBlock(in_lin_size=in_lin_size, inbetw_lin_size=inbetw_lin_size,
                                   out_lin_size=num_classes, dropout=dropout)
 
@@ -604,12 +604,16 @@ class GRUCNN(nn.Module):
         seq_output, h_n = self.char_lang_model(embeds)
         hn_re = torch.reshape(h_n, (batch_size, -1))[:, None, :]
         all_in_one = torch.cat((seq_output, hn_re), dim=1)[:, None, :, :]
-        cnn_out1, cnn_out2, cnn_out3, cnn_out4 = self.cnn_block(all_in_one)
+        all_in_one_flat = torch.reshape(all_in_one, (batch_size, 1, -1))
+        cnn_out1, cnn_out2, cnn_out3, cnn_out4 = self.cnn_block(all_in_one_flat)
+
         cnn_out_flat1 = torch.reshape(cnn_out1, (batch_size, -1))
         cnn_out_flat2 = torch.reshape(cnn_out2, (batch_size, -1))
         cnn_out_flat3 = torch.reshape(cnn_out3, (batch_size, -1))
         cnn_out_flat4 = torch.reshape(cnn_out4, (batch_size, -1))
+
         feat_vec = torch.cat((cnn_out_flat1, cnn_out_flat2, cnn_out_flat3, cnn_out_flat4), dim=1)
+
         output = self.lin_block(feat_vec)
         return output
 
@@ -632,6 +636,7 @@ def main():
     global args
     print('Parse cmd line args...')
     args = parse_cmd_args()
+    torch.set_num_threads(args.num_threads)
     print('Loading config from {}...'.format(args.path_config))
     config = load_config(args.path_config)
     print('Initiate training procedure...')
