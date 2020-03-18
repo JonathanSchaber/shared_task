@@ -45,15 +45,15 @@ def process_predictions_file(pred_file):
                 if not pred_ternary == "NULL": TER = True 
                 if not pred_finegrained == "NULL": FINE = True 
 
-            if label_binary == "1" and pred_binary == "1":
+            if label_binary == "0" and pred_binary == "0":
                 bin_true_pos += 1
-            elif label_binary == "1" and pred_binary == "0":
+            elif label_binary == "0" and pred_binary == "1":
                 bin_false_neg += 1
                 false_preds.append(line)
-            elif label_binary == "0" and pred_binary == "1":
+            elif label_binary == "1" and pred_binary == "0":
                 bin_false_pos += 1
                 false_preds.append(line)
-            elif label_binary == "0" and pred_binary == "0":
+            elif label_binary == "1" and pred_binary == "1":
                 bin_true_neg += 1
 
             if TER: 
