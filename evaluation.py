@@ -22,6 +22,8 @@ def process_predictions_file(pred_file):
     Return:
         None
     """
+    false_preds = []
+
     bin_true_pos = 0
     bin_false_pos = 0
     bin_true_neg = 0
@@ -43,10 +45,16 @@ def process_predictions_file(pred_file):
                 if not pred_ternary == "NULL": TER = True 
                 if not pred_finegrained == "NULL": FINE = True 
 
-            if label_binary == "1" and pred_binary == "1": bin_true_pos += 1
-            elif label_binary == "1" and pred_binary == "0": bin_false_neg += 1
-            elif label_binary == "0" and pred_binary == "1": bin_false_pos += 1
-            elif label_binary == "0" and pred_binary == "0": bin_true_neg += 1
+            if label_binary == "1" and pred_binary == "1":
+                bin_true_pos += 1
+            elif label_binary == "1" and pred_binary == "0":
+                bin_false_neg += 1
+                false_preds.append(line)
+            elif label_binary == "0" and pred_binary == "1":
+                bin_false_pos += 1
+                false_preds.append(line)
+            elif label_binary == "0" and pred_binary == "0":
+                bin_true_neg += 1
 
             if TER: 
                 if label_ternary == pred_ternary: ter_true += 1 
@@ -77,7 +85,12 @@ def process_predictions_file(pred_file):
             print('Accuracy finegrained: {}'.format((fine_true/(fine_true + false_fine)*100)))
         else:
             print('No correct finegrained predictions...')
-    
+   
+    if len(false_preds) > 0:
+        with open(pred_file.rstrip(".csv") + "_FALSE_ONES.csv", "w", encoding="utf-8") as f:
+            csv_writer = csv.writer(f)
+            for line in false_preds:
+                csv.writerow(line)
 
 def compare_line_by_line(gold_path, predicted_path):
     """Compares the gold lables to the predicted ones.
