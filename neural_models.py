@@ -23,6 +23,7 @@ def parse_cmd_args():
     parser.add_argument("-c", "--path_config", type=str, help="Path to hyperparamter/config file (json).")
     parser.add_argument('-n', '--num_threads', type=int, default=10,
                         help='Set the number of threads to use for training by torch.')
+    parser.add_argument('-r', '--rattle', action='store_true', help='Use rattle paths.')
     return parser.parse_args()
 
 
@@ -154,6 +155,8 @@ def load_max_len():
 
 
 def train_model(config):
+    if args.rattle:
+        config['path_train'] = '/srv/scratch3/jgoldz_jschab/shared_task/data/main/train_main.csv'
     batch_size = config['batch_size']
     granularity = config['granularity']
     path_train = config['path_train']
@@ -173,7 +176,8 @@ def train_model(config):
     print('Prepare optimizer and criterion...')
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    # device = 'cpu'
     print('Device: {}'.format(device))
     num_batches = get_num_batches(path_train, batch_size)
     cur_epoch = 0
