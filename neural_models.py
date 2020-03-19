@@ -157,6 +157,8 @@ def load_max_len():
 def train_model(config):
     if args.rattle:
         config['path_train'] = '/srv/scratch3/jgoldz_jschab/shared_task/data/main/train_main.csv'
+    if not args.rattle and not args.server:
+        config['path_train'] = 'data/main/train_main.csv'
     batch_size = config['batch_size']
     granularity = config['granularity']
     path_train = config['path_train']
