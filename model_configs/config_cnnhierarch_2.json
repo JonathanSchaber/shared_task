@@ -1,7 +1,7 @@
 {
   "model_name": "CNNHierarch",
   "config_id": "CNNHierarch_ternary_1",
-  "batch_size": 256,
+  "batch_size": 64,
   "granularity": "ternary",
   "max_length_text": 300,
   "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
