@@ -6,7 +6,7 @@
   "max_length_text": 300,
   "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
   "num_epochs": 5,
-  "learning_rate": 0.0001,
+  "learning_rate": 0.0005,
   "model_params": {
     "num_classes": 3,
     "dropout": 0.1,
