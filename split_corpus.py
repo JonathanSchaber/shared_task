@@ -14,9 +14,11 @@ to get a train test split of 0.8 using the default paths.
 def parse_cmd_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--path_in", type=str, default='data/main/main.csv', help="Path to main.csv")
-    parser.add_argument("-o", "--path_out", type=str, default='data/main/', help="Path to output directory.")
+    parser.add_argument("-i", "--path_in", type=str, help="Path to main.csv")
+    parser.add_argument("-o", "--path_out", type=str, help="Path to output directory.")
     parser.add_argument('-r', '--ratio', type=float, default=0.95, help='Train-dev ratio.')
+    parser.add_argument('-s', '--server', action='store_true', default=False,
+                        help='Indicate if server paths should be used.')
     return parser.parse_args()
 
 
