@@ -190,9 +190,12 @@ def train_model(config):
         train_reader = csv.reader(open(path_train, 'r', encoding='utf8'))
         losses = []
         cur_epoch = epoch
+        if epoch > 2:
+            for g in optimizer.param_groups:
+                g['lr'] = 0.0001
         for batch_num in range(num_batches):
             cur_batch = batch_num
-            batch_size = 4 * batch_size if epoch > 2 else batch_size
+            # batch_size = 4 * batch_size if epoch > 2 else batch_size
             x, y = get_next_batch(csv_reader=train_reader, batch_size=batch_size,
                                   granularity=granularity, char_to_idx=char_to_idx, max_length=max_length)
             if len(x) == 0:
