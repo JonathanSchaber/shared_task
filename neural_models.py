@@ -221,7 +221,7 @@ def train_model(config):
                 print(msg.format(epoch, num_epochs, batch_num, num_batches, avg_loss))
                 avg_batch_losses.append(avg_loss)
                 losses = []
-            if batch_num % 10000 == 0 and batch_num != 0 or batch_num == 20 or batch_num == 50:
+            if batch_num % 10000 == 0 and batch_num != 0:
                 print('Saving current model to disk...')
                 save_model(model, config, args.server, args.rattle, cur_epoch, cur_batch, finale_true=False)
 
