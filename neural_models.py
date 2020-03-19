@@ -171,14 +171,12 @@ def train_model(config):
     print('Load max length...')
     max_length = load_max_len() if 'max_length_text' not in config else config['max_length_text']
     print('Initiate model...')
-
-    model = models[config['model_name']](char_to_idx, **model_params)
+    device = 'cuda:6' if torch.cuda.is_available() else 'cpu'
+    print('Device: {}'.format(device))
+    model = models[config['model_name']](char_to_idx, **model_params).to(device)
     print('Prepare optimizer and criterion...')
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
-    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    # device = 'cpu'
-    print('Device: {}'.format(device))
     num_batches = get_num_batches(path_train, batch_size)
     cur_epoch = 0
     cur_batch = 0
@@ -225,7 +223,7 @@ def train_model(config):
                 losses = []
             if batch_num % 10000 == 0 and batch_num != 0 or batch_num == 20 or batch_num == 50:
                 print('Saving current model to disk...')
-                save_model(model, config, args.server, cur_epoch, cur_batch, finale_true=False)
+                save_model(model, config, args.server, args.rattle, cur_epoch, cur_batch, finale_true=False)
 
         avg_epoch_losses.append(np.mean(avg_batch_losses))
         avg_batch_losses = []
@@ -515,10 +513,12 @@ class CNNHierarch(nn.Module):
         return self.final_layer(final_feat_vec)
 
 
-def save_model(trained_model, config, use_server_paths, num_epochs, num_batches, finale_true):
+def save_model(trained_model, config, use_server_paths, use_rattle_paths, num_epochs, num_batches, finale_true):
     if use_server_paths:
         path_out = '/home/user/jgoldz/storage/shared_task/models'
-    else:
+    elif use_rattle_paths:
+        path_out = '/srv/scratch3/jgoldz_jschab/shared_task/models'
+    if not use_server_paths and not use_rattle_paths:
         path_out = 'models'
     fname = '{model_name}_{config_id}_{num_epochs}_{num_batches}_{timestamp}_end{finale_true}.model'.format(
         model_name=config['model_name'], config_id=config['config_id'],
@@ -646,7 +646,7 @@ def main():
     print('Initiate training procedure...')
     trained_model, num_epochs, num_batches = train_model(config)
     print('Saving trained model...')
-    save_model(trained_model, config, args.server, num_epochs, num_batches, finale_true=True)
+    save_model(trained_model, config, args.server, args.rattle, num_epochs, num_batches, finale_true=True)
 
 
 if __name__ == '__main__':
