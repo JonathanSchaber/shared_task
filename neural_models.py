@@ -232,7 +232,7 @@ def train_model(config):
 
         avg_epoch_losses.append(np.mean(avg_batch_losses))
         avg_batch_losses = []
-        print('Avg loss of epoch {}:  {:.4f}'.format(epoch - 1, avg_epoch_losses[-1]))
+        print('Avg loss of epoch {}:  {:.4f}'.format(epoch, avg_epoch_losses[-1]))
         if early_stopping:
             if avg_epoch_losses[-1] >= avg_epoch_losses[-2]:
                 print('EARLY STOPPING! Avg loss this epoch: {:.4f}, last epoch: {:.4f}'.format(
@@ -460,25 +460,25 @@ class CNNHierarch(nn.Module):
 
         self.lin_layers_per_filter_1 = nn.Sequential(
             nn.Dropout(self.dropout_rt),
-            nn.Linear(750, 100),
+            nn.Linear(300, 100),
             nn.ReLU(inplace=True),
         )
 
         self.lin_layers_per_filter_2 = nn.Sequential(
             nn.Dropout(self.dropout_rt),
-            nn.Linear(760, 100),
+            nn.Linear(304, 100),
             nn.ReLU(inplace=True),
         )
 
         self.lin_layers_per_filter_3 = nn.Sequential(
             nn.Dropout(self.dropout_rt),
-            nn.Linear(770, 100),
+            nn.Linear(308, 100),
             nn.ReLU(inplace=True),
         )
 
         self.lin_layers_per_filter_4 = nn.Sequential(
             nn.Dropout(self.dropout_rt),
-            nn.Linear(780, 100),
+            nn.Linear(312, 100),
             nn.ReLU(inplace=True),
         )
 
@@ -624,6 +624,24 @@ class GRUCNN(nn.Module):
         feat_vec = torch.cat((cnn_out_flat1, cnn_out_flat2, cnn_out_flat3, cnn_out_flat4), dim=1)
 
         output = self.lin_block(feat_vec)
+        return output
+
+
+class TransformerLin(nn.Module):
+
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout, max_len_text,
+                 batch_size, filter_sizes, padding, stride, num_in_channels, num_out_channels, in_lin_size,
+                 inbetw_lin_size):
+        super(GRUCNN, self).__init__()
+        self.batch_size = batch_size if self.training else 1
+        self.transformer = self.load_pretrained(path_transformer)
+        self.lin_block = LinBlock(in_lin_size=in_lin_size, inbetw_lin_size=inbetw_lin_size,
+                                  out_lin_size=num_classes, dropout=dropout)
+
+    def forward(self, x):
+        batch_size = x.shape[0]
+        transformer_out = self.transformer(x)
+        output = self.lin_block(transformer_out)
         return output
 
 
