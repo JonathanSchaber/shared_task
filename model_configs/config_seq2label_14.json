@@ -1,0 +1,17 @@
+{
+  "model_name": "SeqToLabelModelOnlyHidden",
+  "config_id": "seq2label_finegrained_14",
+  "batch_size": 64,
+  "granularity": "finegrained",
+  "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
+  "num_epochs": 15,
+  "max_length_text": 100,
+  "learning_rate": 0.001,
+  "model_params": {
+    "num_classes": 16,
+    "dropout": 0.1,
+    "embedding_dim": 200,
+    "hidden_gru_size": 200,
+    "num_gru_layers": 1
+  }
+}
