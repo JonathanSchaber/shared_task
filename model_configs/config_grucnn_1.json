@@ -20,7 +20,7 @@
     "stride": 1,
     "num_in_channels": 1,
     "num_out_channels": 10,
-    "in_lin_size": 12080,
+    "in_lin_size": 6060,
     "inbetw_lin_size": 4000
   }
 }

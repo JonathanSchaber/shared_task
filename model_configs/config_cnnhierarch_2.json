@@ -10,11 +10,11 @@
   "model_params": {
     "num_classes": 3,
     "dropout": 0.1,
-    "embedding_dim": 150,
+    "embedding_dim": 100,
     "filter_sizes": [2, 3, 4, 5],
     "max_len_text": 300,
     "batch_size": 64,
-    "num_out_channels": 10,
+    "num_out_channels": 4,
     "padding": 2,
     "stride": 1,
     "inbetw_lin_size_1": 2000,
