@@ -1,6 +1,6 @@
 {
   "model_name": "SeqToLabelModelOnlyHidden",
-  "config_id": "seq2label_finegrained_11",
+  "config_id": "seq2label_finegrained_12",
   "batch_size": 64,
   "granularity": "finegrained",
   "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
