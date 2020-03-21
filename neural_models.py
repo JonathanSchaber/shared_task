@@ -2,7 +2,9 @@ import os
 import argparse
 import json
 import csv
+import random
 import numpy as np
+import sklearn
 import torch
 from torch import nn
 from utils import get_timestamp
@@ -19,13 +21,14 @@ def parse_cmd_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--path_train", type=str, help="Path to train data.")
     parser.add_argument("-d", "--path_dev", type=str, help="Path to dev data.")
-    parser.add_argument('-s', '--server', action='store_true', default=False, help='Use server paths.')
+    parser.add_argument('-l', '--location', type=str, help='"local", "midgard" or "rattle". '
+                                                           'Indicate which paths will be used.')
     parser.add_argument("-c", "--path_config", type=str, help="Path to hyperparamter/config file (json).")
     parser.add_argument('-n', '--num_threads', type=int, default=10,
                         help='Set the number of threads to use for training by torch.')
-    parser.add_argument('-r', '--rattle', action='store_true', help='Use rattle paths.')
     parser.add_argument('-g', '--gpu_num', type=int, default=0, help='The number of the gpu to be used.')
     parser.add_argument('-s', '--device', type=str, help='"cpu" or "cuda". Device to be used.')
+    parser.add_argument('-p', '--num_predictions', type=int, help='Number of predictions to make for eval on devset.')
     return parser.parse_args()
 
 
@@ -40,10 +43,10 @@ def load_config(path):
 
 
 def adjust_text_len(text, max_len):
-    """Multiply text_idxs until max-len.
+    """Multiply char_idxs until max-len.
 
     Args:
-        text_idxs: str
+        char_idxs: str
         max_len: int
     """
     while len(text) < max_len:
@@ -77,10 +80,10 @@ def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length)
         try:
             row = next(csv_reader)
             adjust_text = adjust_text_len(row[1], max_length)
-            text_idxs = [char_to_idx.get(char, 'unk') for char in adjust_text]
+            char_idxs = [char_to_idx.get(char, 'unk') for char in adjust_text]
             label = row[index]
             x_item = np.zeros(max_length)
-            for i, idx in enumerate(text_idxs):
+            for i, idx in enumerate(char_idxs):
                 x_item[i] = idx
             x_list.append(x_item)
             y_list.append(int(label))
@@ -157,13 +160,14 @@ def load_max_len():
 
 
 def train_model(config):
-    if args.rattle:
-        config['path_train'] = '/srv/scratch3/jgoldz_jschab/shared_task/data/main/train_main.csv'
-    if not args.rattle and not args.server:
-        config['path_train'] = 'data/main/train_main.csv'
+    if args.location == 'local':
+        path_train = config['path_train']['local']
+    elif args.location == 'midgard':
+        path_train = config['path_train']['midgard']
+    elif args.location == 'rattle':
+        path_train = config['path_train']['rattle']
     batch_size = config['batch_size']
     granularity = config['granularity']
-    path_train = config['path_train']
     num_epochs = config['num_epochs']
     lr = config['learning_rate']
     model_params = config['model_params']
@@ -180,6 +184,7 @@ def train_model(config):
         torch.set_num_threads(args.num_threads)
     elif args.device == 'cuda':
         assert torch.cuda.is_available()
+        assert isinstance(args.gpu_num, int)
         device = 'cuda:{}'.format(args.gpu_num)
     else:
         print('No device information in command line arguments. Inferring...')
@@ -195,6 +200,7 @@ def train_model(config):
     cur_batch = 0
     avg_batch_losses = []
     avg_epoch_losses = []
+    all_dev_results = []  # list of dicts
     print('Start training...')
     for epoch in range(1, num_epochs + 1):
         print('*** Start epoch [{}/{}] ***'.format(epoch, num_epochs))
@@ -247,14 +253,75 @@ def train_model(config):
         avg_epoch_losses.append(np.mean(avg_batch_losses))
         avg_batch_losses = []
         print('Avg loss of epoch {}:  {:.4f}'.format(epoch, avg_epoch_losses[-1]))
+        print('Predict on devsubset...')
+        epoch_results = predict_on_devsubset(model, char_to_idx, max_length, args.path_dev, args.num_predictions,
+                                             device)
+        all_dev_results.append(epoch_results)
         if early_stopping:
-            if avg_epoch_losses[-1] >= avg_epoch_losses[-2]:
-                print('EARLY STOPPING! Avg loss this epoch: {:.4f}, last epoch: {:.4f}'.format(
-                    avg_epoch_losses[-1], avg_epoch_losses[-2]))
+            f1_cur = epoch_results['f1']
+            f1_last = all_dev_results[-2]['f1']
+            if f1_last >= f1_cur:
+                print('EARLY STOPPING! F1 score for this epoch: {:.2f}, last epoch: {:.2f}'.format(f1_cur, f1_last))
                 print('STOP TRAINING.')
                 break
 
-    return model, cur_epoch, cur_batch
+    return model, cur_epoch, cur_batch, all_dev_results
+
+
+def get_n_random_examples(path_devset, num_predictions):
+    """Extract n random examples from given dataset.
+
+    Args:
+        path_devset: str
+        num_predictions: int
+    """
+    len_devset = len([0 for _ in open(path_devset, 'r', encoding='utf8')])
+    # draw random examples
+    draws = set()
+    while len(draws) < num_predictions:
+        draws.add(random.randint(0, len_devset))
+    # extract drawn examples from file
+    drawn_examples = []
+    fdev = open(path_devset, 'r', encoding='utf8')
+    for i, row in csv.reader(fdev):
+        if i in draws:
+            drawn_examples.append(row)
+    return drawn_examples
+
+
+def predict_on_devsubset(model, char_to_idx, max_length, path_devset, num_predictions, device):
+    """Predict on subset of devset with given model.
+
+    Args:
+        model: nn.Model
+        char_to_idx: {str: int}
+        max_length: int
+        path_devset: str
+        num_predictions: int, number examples used for prediction
+        device: 'cuda:<n>' or 'cpu'
+    """
+    results = {}
+    preds_binary = []
+    trues_binary = []
+    model.eval()
+    drawn_examples = get_n_random_examples(path_devset, num_predictions)
+    for i, (text_id, text, masked, label_binary, label_ternary, label_finegrained, source) in enumerate(drawn_examples):
+        char_idxs = [char_to_idx.get(char, char_to_idx['unk']) for char in text][:max_length]
+        x = np.zeros(max_length)
+        for j, idx in enumerate(char_idxs):
+            x[j] = idx
+        output = torch.squeeze(model(torch.LongTensor([x]).to(device)))
+        max_prob = max(output)
+        prediction = list(output).index(max_prob)
+        pred_binary = prediction if prediction <= 1 else 1
+        preds_binary.append(pred_binary)
+        trues_binary.append(label_binary)
+    model.train()
+    results['f1_score'] = sklearn.metrics.f1_score(trues_binary, preds_binary)
+    results['accuracy'] = sklearn.metrics.accuracy_score(trues_binary, preds_binary)
+    results['recall'] = sklearn.metrics.recall_score(trues_binary, preds_binary)
+    results['precision'] = sklearn.metrics.precision_score(trues_binary, preds_binary)
+    return results
 
 
 class SeqToLabelModelConcatAll(nn.Module):
@@ -532,20 +599,33 @@ class CNNHierarch(nn.Module):
         return self.final_layer(final_feat_vec)
 
 
-def save_model(trained_model, config, use_server_paths, use_rattle_paths, num_epochs, num_batches, finale_true):
-    if use_server_paths:
-        path_out = '/home/user/jgoldz/storage/shared_task/models'
-    elif use_rattle_paths:
-        path_out = '/srv/scratch3/jgoldz_jschab/shared_task/models'
-    if not use_server_paths and not use_rattle_paths:
+def save_model(trained_model, config, location, num_epochs, num_batches, all_dev_results,
+               finale_true):
+    if location == 'local':
         path_out = 'models'
-    fname = '{model_name}_{config_id}_{num_epochs}_{num_batches}_{timestamp}_end{finale_true}.model'.format(
+    elif location == 'midgard':
+        path_out = '/home/user/jgoldz/storage/shared_task/models'
+    elif location == 'rattle':
+        path_out = '/srv/scratch3/jgoldz_jschab/shared_task/models'
+    else:
+        raise Exception('Error! Location "{}" not known.'.format(location))
+    time_stamp = get_timestamp()
+    fname_model = '{model_name}_{config_id}_{num_epochs}_{num_batches}_{timestamp}_end{finale_true}.model'.format(
         model_name=config['model_name'], config_id=config['config_id'],
         num_epochs=num_epochs, num_batches=num_batches,
-        timestamp=get_timestamp(), finale_true=finale_true)
-    fpath = os.path.join(path_out, fname)
-    torch.save(trained_model, fpath)
-    print('Model saved to {}'.format(fpath))
+        timestamp=time_stamp, finale_true=finale_true)
+    fpath_model = os.path.join(path_out, fname_model)
+    torch.save(trained_model, fpath_model)
+    fname_dev_results = '{model_name}_{config_id}_{num_epochs}_{num_batches}_{timestamp}_end{finale_true}.results'.\
+        format(model_name=config['model_name'], config_id=config['config_id'],
+        num_epochs=num_epochs, num_batches=num_batches,
+        timestamp=time_stamp, finale_true=finale_true)
+    fpath_dev_results = os.path.join(path_out, fname_dev_results)
+    with open(fpath_dev_results, 'w', encoding='utf8') as f:
+        for epoch_result in all_dev_results:
+            f.write(str(epoch_result) + '\n')
+    print('Model saved to {}'.format(fpath_model))
+    print('Devresults saved to {}'.format(fpath_dev_results))
 
 
 class CNNBlock(nn.Module):
@@ -680,9 +760,10 @@ def main():
     print('Loading config from {}...'.format(args.path_config))
     config = load_config(args.path_config)
     print('Initiate training procedure...')
-    trained_model, num_epochs, num_batches = train_model(config)
+    trained_model, num_epochs, num_batches, all_dev_results = train_model(config)
     print('Saving trained model...')
-    save_model(trained_model, config, args.server, args.rattle, num_epochs, num_batches, finale_true=True)
+    save_model(trained_model, config, args.location, num_epochs, num_batches, all_dev_results,
+               finale_true=True)
 
 
 if __name__ == '__main__':
