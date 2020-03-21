@@ -25,7 +25,7 @@ def parse_cmd_args():
     parser.add_argument('-n', '--num_threads', type=int, default=10,
                         help='Set the number of threads to use for training by torch.')
     parser.add_argument('-g', '--gpu_num', type=int, default=0, help='The number of the gpu to be used.')
-    parser.add_argument('-s', '--device', type=str, help='"cpu" or "cuda". Device to be used.')
+    parser.add_argument('-d', '--device', type=str, help='"cpu" or "cuda". Device to be used.')
     parser.add_argument('-p', '--num_predictions', type=int, default=1000,
                         help='Number of predictions to make for eval on devset.')
     return parser.parse_args()
@@ -165,6 +165,8 @@ def train_model(config):
         path_train = config['path_train']['midgard']
     elif args.location == 'rattle':
         path_train = config['path_train']['rattle']
+    else:
+        raise Exception('Error! Location {} not known.'.format(args.location))
     batch_size = config['batch_size']
     granularity = config['granularity']
     num_epochs = config['num_epochs']
@@ -351,14 +353,21 @@ class SeqToLabelModelOnlyHiddenBiDeep(nn.Module):
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=True)
-        self.linear = nn.Linear(hidden_gru_size*2*num_gru_layers, num_classes)
+        self.in_lin_size = hidden_gru_size*num_gru_layers
+        self.in_betw_size = int(self.in_lin_size / 2)
+        self.linblock1 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                 out_lin_size=50, dropout=dropout)
+        self.linblock2 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                  out_lin_size=50, dropout=dropout)
+        self.linear = nn.Linear(100, num_classes)
 
     def forward(self, x):
-        batch_size = x.shape[0]
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
-        output = self.linear(torch.reshape(h_n, (batch_size, -1)))
-        return output
+        out1 = self.linblock1(h_n[0])
+        out2 = self.linblock2(h_n[0])
+        out = self.linear(torch.cat((out1, out2), dim=1))
+        return out
 
 
 class SeqToLabelModelOnlyHiddenUniDeep(nn.Module):
