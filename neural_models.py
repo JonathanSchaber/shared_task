@@ -19,8 +19,6 @@ python3 neural_models.py -c model_configs/config_seq2label_1.json -s
 def parse_cmd_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--path_train", type=str, help="Path to train data.")
-    parser.add_argument("-d", "--path_dev", type=str, help="Path to dev data.")
     parser.add_argument('-l', '--location', type=str, help='"local", "midgard" or "rattle". '
                                                            'Indicate which paths will be used.')
     parser.add_argument("-c", "--path_config", type=str, help="Path to hyperparamter/config file (json).")
@@ -46,7 +44,7 @@ def adjust_text_len(text, max_len):
     """Multiply char_idxs until max-len.
 
     Args:
-        char_idxs: str
+        text: str
         max_len: int
     """
     while len(text) < max_len:
@@ -254,7 +252,7 @@ def train_model(config):
         avg_batch_losses = []
         print('Avg loss of epoch {}:  {:.4f}'.format(epoch, avg_epoch_losses[-1]))
         print('Predict on devsubset...')
-        epoch_results = predict_on_devsubset(model, char_to_idx, max_length, args.path_dev, args.num_predictions,
+        epoch_results = predict_on_devsubset(model, char_to_idx, max_length, config['path_dev'], args.num_predictions,
                                              device)
         print('F1-Score: {:.2f}\nAccuracy: {:.2f}\nPrecision: {:.2f}\nRecall: {:.2f}'.format(
             epoch_results['f1_score'], epoch_results['accuracy'], epoch_results['precision'], epoch_results['recall']))
