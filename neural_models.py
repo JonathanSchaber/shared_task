@@ -26,7 +26,8 @@ def parse_cmd_args():
                         help='Set the number of threads to use for training by torch.')
     parser.add_argument('-g', '--gpu_num', type=int, default=0, help='The number of the gpu to be used.')
     parser.add_argument('-s', '--device', type=str, help='"cpu" or "cuda". Device to be used.')
-    parser.add_argument('-p', '--num_predictions', type=int, help='Number of predictions to make for eval on devset.')
+    parser.add_argument('-p', '--num_predictions', type=int, default=1000,
+                        help='Number of predictions to make for eval on devset.')
     return parser.parse_args()
 
 
@@ -252,7 +253,7 @@ def train_model(config):
         avg_batch_losses = []
         print('Avg loss of epoch {}:  {:.4f}'.format(epoch, avg_epoch_losses[-1]))
         print('Predict on devsubset...')
-        epoch_results = predict_on_devsubset(model, char_to_idx, max_length, config['path_dev'], args.num_predictions,
+        epoch_results = predict_on_devsubset(model, char_to_idx, max_length, config['path_dev'][args.location], args.num_predictions,
                                              device)
         print('F1-Score: {:.2f}\nAccuracy: {:.2f}\nPrecision: {:.2f}\nRecall: {:.2f}'.format(
             epoch_results['f1_score'], epoch_results['accuracy'], epoch_results['precision'], epoch_results['recall']))
@@ -283,7 +284,7 @@ def get_n_random_examples(path_devset, num_predictions):
     # extract drawn examples from file
     drawn_examples = []
     fdev = open(path_devset, 'r', encoding='utf8')
-    for i, row in csv.reader(fdev):
+    for i, row in enumerate(csv.reader(fdev)):
         if i in draws:
             drawn_examples.append(row)
     return drawn_examples
@@ -315,7 +316,7 @@ def predict_on_devsubset(model, char_to_idx, max_length, path_devset, num_predic
         prediction = list(output).index(max_prob)
         pred_binary = prediction if prediction <= 1 else 1
         preds_binary.append(pred_binary)
-        trues_binary.append(label_binary)
+        trues_binary.append(int(label_binary))
     model.train()
     results['f1_score'] = sklearn.metrics.f1_score(trues_binary, preds_binary)
     results['accuracy'] = sklearn.metrics.accuracy_score(trues_binary, preds_binary)
