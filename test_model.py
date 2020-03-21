@@ -2,6 +2,7 @@ import os
 
 from predict import load_model, get_num_examples, predict_on_input
 from corpus_parser import Parser
+from swiss_char_checker import check_sentences
 
 # General Pipeline: specify model -> specify test set -> specify if with char-checker -> specify if written to file
 
@@ -73,12 +74,14 @@ def process_predictions_file(pred_file):
 
 
 
+def predict_on_test_set(model, config, test_set):
 
 
 def main():
     print("Reading in command-line args...")
     args = parse_cmd_args()
     print("Evaluate on test set...")
+    results = predict_on_test_set(args.model, args.config, test_set)
     if args.write == True:
         print("Writing to file {}.".format(XYZ))
     print("Done.")
