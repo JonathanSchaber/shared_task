@@ -248,7 +248,7 @@ def train_model(config):
                 losses = []
             if batch_num % 10000 == 0 and batch_num != 0:
                 print('Saving current model to disk...')
-                save_model(model, config, args.server, args.rattle, cur_epoch, cur_batch, finale_true=False)
+                save_model(model, config, args.location, cur_epoch, cur_batch, finale_true=False)
 
         avg_epoch_losses.append(np.mean(avg_batch_losses))
         avg_batch_losses = []
@@ -256,6 +256,8 @@ def train_model(config):
         print('Predict on devsubset...')
         epoch_results = predict_on_devsubset(model, char_to_idx, max_length, args.path_dev, args.num_predictions,
                                              device)
+        print('F1-Score: {:.2f}\nAccuracy: {:.2f}\nPrecision: {:.2f}\nRecall: {:.2f}'.format(
+            epoch_results['f1_score'], epoch_results['accuracy'], epoch_results['precision'], epoch_results['recall']))
         all_dev_results.append(epoch_results)
         if early_stopping:
             f1_cur = epoch_results['f1']
@@ -599,8 +601,8 @@ class CNNHierarch(nn.Module):
         return self.final_layer(final_feat_vec)
 
 
-def save_model(trained_model, config, location, num_epochs, num_batches, all_dev_results,
-               finale_true):
+def save_model(trained_model, config, location, num_epochs, num_batches, all_dev_results=None,
+               finale_true=False):
     if location == 'local':
         path_out = 'models'
     elif location == 'midgard':
@@ -616,16 +618,17 @@ def save_model(trained_model, config, location, num_epochs, num_batches, all_dev
         timestamp=time_stamp, finale_true=finale_true)
     fpath_model = os.path.join(path_out, fname_model)
     torch.save(trained_model, fpath_model)
-    fname_dev_results = '{model_name}_{config_id}_{num_epochs}_{num_batches}_{timestamp}_end{finale_true}.results'.\
-        format(model_name=config['model_name'], config_id=config['config_id'],
-        num_epochs=num_epochs, num_batches=num_batches,
-        timestamp=time_stamp, finale_true=finale_true)
-    fpath_dev_results = os.path.join(path_out, fname_dev_results)
-    with open(fpath_dev_results, 'w', encoding='utf8') as f:
-        for epoch_result in all_dev_results:
-            f.write(str(epoch_result) + '\n')
     print('Model saved to {}'.format(fpath_model))
-    print('Devresults saved to {}'.format(fpath_dev_results))
+    if all_dev_results:
+        fname_dev_results = '{model_name}_{config_id}_{num_epochs}_{num_batches}_{timestamp}_end{finale_true}.results'.\
+            format(model_name=config['model_name'], config_id=config['config_id'],
+            num_epochs=num_epochs, num_batches=num_batches,
+            timestamp=time_stamp, finale_true=finale_true)
+        fpath_dev_results = os.path.join(path_out, fname_dev_results)
+        with open(fpath_dev_results, 'w', encoding='utf8') as f:
+            for epoch_result in all_dev_results:
+                f.write(str(epoch_result) + '\n')
+        print('Dev-results saved to {}'.format(fpath_dev_results))
 
 
 class CNNBlock(nn.Module):
