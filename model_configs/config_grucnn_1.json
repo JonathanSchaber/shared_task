@@ -3,7 +3,11 @@
   "config_id": "grucnn_binary_1",
   "batch_size": 64,
   "granularity": "binary",
-  "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
+  "path_train": {
+    "local": "data/main/train_main.csv",
+    "midgard": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
+    "rattle": "/srv/scratch3/jgoldz_jschab/shared_task/data/main/train_main.csv"
+  },
   "num_epochs": 2,
   "max_length_text": 300,
   "learning_rate": 0.001,

@@ -4,7 +4,11 @@
   "batch_size": 64,
   "granularity": "binary",
   "max_length_text": 300,
-  "path_train": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
+  "path_train": {
+    "local": "data/main/train_main.csv",
+    "midgard": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
+    "rattle": "/srv/scratch3/jgoldz_jschab/shared_task/data/main/train_main.csv"
+  },",
   "num_epochs": 2,
   "learning_rate": 0.001,
   "model_params": {
