@@ -24,6 +24,8 @@ def parse_cmd_args():
     parser.add_argument('-n', '--num_threads', type=int, default=10,
                         help='Set the number of threads to use for training by torch.')
     parser.add_argument('-r', '--rattle', action='store_true', help='Use rattle paths.')
+    parser.add_argument('-g', '--gpu_num', type=int, default=0, help='The number of the gpu to be used.')
+    parser.add_argument('-s', '--device', type=str, help='"cpu" or "cuda". Device to be used.')
     return parser.parse_args()
 
 
@@ -172,9 +174,18 @@ def train_model(config):
     char_to_idx = load_char_to_idx()
     print('Load max length...')
     max_length = load_max_len() if 'max_length_text' not in config else config['max_length_text']
-    print('Initiate model...')
-    device = 'cuda:6' if torch.cuda.is_available() else 'cpu'
+    print('Determince device...')
+    if args.device == 'cpu':
+        device = 'cpu'
+        torch.set_num_threads(args.num_threads)
+    elif args.device == 'cuda':
+        assert torch.cuda.is_available()
+        device = 'cuda:{}'.format(args.gpu_num)
+    else:
+        print('No device information in command line arguments. Inferring...')
+        device = 'cuda:{}'.format(args.gpu_num) if torch.cuda.is_available() else 'cpu'
     print('Device: {}'.format(device))
+    print('Initiate model...')
     model = models[config['model_name']](char_to_idx, **model_params).to(device)
     print('Prepare optimizer and criterion...')
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -666,7 +677,6 @@ def main():
     global args
     print('Parse cmd line args...')
     args = parse_cmd_args()
-    torch.set_num_threads(args.num_threads)
     print('Loading config from {}...'.format(args.path_config))
     config = load_config(args.path_config)
     print('Initiate training procedure...')
