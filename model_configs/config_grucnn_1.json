@@ -8,6 +8,11 @@
     "midgard": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
     "rattle": "/srv/scratch3/jgoldz_jschab/shared_task/data/main/train_main.csv"
   },
+  "path_dev": {
+    "local": "data/main/dev_main.csv",
+    "midgard": "/home/user/jgoldz/storage/shared_task/data/main/dev_main.csv",
+    "rattle": "/srv/scratch3/jgoldz_jschab/shared_task/data/main/dev_main.csv"
+  },
   "num_epochs": 2,
   "max_length_text": 300,
   "learning_rate": 0.001,
