@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.nn
 from neural_models import *
-from bigram_based_models import *
+# from bigram_based_models import *
 
 
 """Script to let given model predict on given data.
@@ -26,18 +26,23 @@ def parse_cmd_args():
     parser.add_argument('-i', '--path_in', type=str, help='Path to input file.')
     parser.add_argument('-o', '--path_out', type=str, help='Path to output file.')
     parser.add_argument('-c', '--path_config', type=str, help='Path to config file.')
+    parser.add_argument('-g', '--gpu', type=int, default=0, help='Number of the gpu to be used.')
     return parser.parse_args()
 
 
-def load_model(path_model, model_type):
+def load_model(path_model, model_type, device):
     """Load the model from disk.
 
     Args:
         path_model: str
         model_type: str
+        device: str
     """
     if model_type == 'torch':
-        model = torch.load(path_model)
+        model = torch.load(path_model).to(device)
+        if hasattr(model, 'linblocks'):
+            for linblock in model.linblocks:
+                linblock.to(device)
         model.eval()
         return model
     elif model_type == 'sklearn':
@@ -59,7 +64,7 @@ def get_num_examples(path_in):
     return i
 
 
-def predict_on_input(model, model_type, path_in, config, max_examples):
+def predict_on_input(model, model_type, path_in, config, max_examples, device):
     """Make prediction on the input data with the given model.
 
     Args:
@@ -68,6 +73,7 @@ def predict_on_input(model, model_type, path_in, config, max_examples):
         path_in: str
         config: dict
         max_examples: int
+        device: str
     """
     char_to_idx = load_char_to_idx()
     max_length = load_max_len() if 'max_length_text' not in config else config['max_length_text']
@@ -82,7 +88,7 @@ def predict_on_input(model, model_type, path_in, config, max_examples):
             x = np.zeros(max_length)
             for j, idx in enumerate(text_idxs):
                 x[j] = idx
-            output = torch.squeeze(model(torch.LongTensor([x])))
+            output = torch.squeeze(model(torch.LongTensor([x]).to(device)))
             max_prob = max(output)
             prediction = list(output).index(max_prob)
             pred_binary = prediction if prediction <= 1 else 1
@@ -128,9 +134,10 @@ def main():
     print('Loading config...')
     config = load_config(args.path_config)
     print('Loading model...')
-    model = load_model(args.path_model, args.type)
+    device = 'cuda:{}'.format(args.gpu) if torch.cuda.is_available() else 'cpu'
+    model = load_model(args.path_model, args.type, device)
     print('Make predictions...')
-    predictions = predict_on_input(model, args.type, args.path_in, config, None)
+    predictions = predict_on_input(model, args.type, args.path_in, config, None, device)
     print('Write Predictions to file...')
     write_preds_to_file(predictions, args.path_out)
 
