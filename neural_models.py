@@ -4,8 +4,8 @@ import json
 import csv
 import random
 import numpy as np
-import sklearn
 import torch
+from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score
 from torch import nn
 from utils import get_timestamp
 
@@ -321,10 +321,10 @@ def predict_on_devsubset(model, char_to_idx, max_length, path_devset, num_predic
         preds_binary.append(pred_binary)
         trues_binary.append(int(label_binary))
     model.train()
-    results['f1_score'] = sklearn.metrics.f1_score(trues_binary, preds_binary)
-    results['accuracy'] = sklearn.metrics.accuracy_score(trues_binary, preds_binary)
-    results['recall'] = sklearn.metrics.recall_score(trues_binary, preds_binary)
-    results['precision'] = sklearn.metrics.precision_score(trues_binary, preds_binary)
+    results['f1_score'] = f1_score(trues_binary, preds_binary)
+    results['accuracy'] = accuracy_score(trues_binary, preds_binary)
+    results['recall'] = recall_score(trues_binary, preds_binary)
+    results['precision'] = precision_score(trues_binary, preds_binary)
     return results
 
 
