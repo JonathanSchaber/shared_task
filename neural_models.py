@@ -347,6 +347,30 @@ class SeqToLabelModelConcatAll(nn.Module):
         return output
 
 
+class SeqToLabelModelOnlyHiddenBiDeepOriginal(nn.Module):
+
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
+        super(SeqToLabelModelOnlyHiddenBiDeepOriginal, self).__init__()
+        self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
+        self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
+                                      num_layers=num_gru_layers, batch_first=True, bidirectional=True)
+        self.in_lin_size = hidden_gru_size * num_gru_layers
+        self.in_betw_size = int(self.in_lin_size / 2)
+        self.linblock1 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                  out_lin_size=50, dropout=dropout)
+        self.linblock2 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                  out_lin_size=50, dropout=dropout)
+        self.linear = nn.Linear(100, num_classes)
+
+    def forward(self, x):
+        embeds = self.embedding(x)
+        seq_output, h_n = self.char_lang_model(embeds)
+        out1 = self.linblock1(h_n[0])
+        out2 = self.linblock2(h_n[0])
+        out = self.linear(torch.cat((out1, out2), dim=1))
+        return out
+
+
 class SeqToLabelModelOnlyHiddenBiDeep(nn.Module):
 
     def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
@@ -762,7 +786,8 @@ models = {
     'CNNOnly': CNNOnly,
     'CNNHierarch': CNNHierarch,
     'GRUCNN': GRUCNN,
-    'SeqToLabelModelOnlyHiddenUniDeep': SeqToLabelModelOnlyHiddenUniDeep
+    'SeqToLabelModelOnlyHiddenUniDeep': SeqToLabelModelOnlyHiddenUniDeep,
+    'SeqToLabelModelOnlyHiddenBiDeepOriginal': SeqToLabelModelOnlyHiddenBiDeepOriginal
 }
 
 
