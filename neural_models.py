@@ -180,6 +180,7 @@ def train_model(config):
     print('Load max length...')
     max_length = load_max_len() if 'max_length_text' not in config else config['max_length_text']
     print('Determince device...')
+    global device
     if args.device == 'cpu':
         device = 'cpu'
         torch.set_num_threads(args.num_threads)
@@ -257,7 +258,7 @@ def train_model(config):
         print('Predict on devsubset...')
         epoch_results = predict_on_devsubset(model, char_to_idx, max_length, config['path_dev'][args.location], args.num_predictions,
                                              device)
-        print('F1-Score: {:.2f}\nAccuracy: {:.2f}\nPrecision: {:.2f}\nRecall: {:.2f}'.format(
+        print('F1-Score: {:.3f}\nAccuracy: {:.3f}\nPrecision: {:.3f}\nRecall: {:.3f}'.format(
             epoch_results['f1_score'], epoch_results['accuracy'], epoch_results['precision'], epoch_results['recall']))
         all_dev_results.append(epoch_results)
         if early_stopping:
@@ -353,20 +354,21 @@ class SeqToLabelModelOnlyHiddenBiDeep(nn.Module):
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=True)
-        self.in_lin_size = hidden_gru_size*num_gru_layers
-        self.in_betw_size = int(self.in_lin_size / 2)
-        self.linblock1 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
-                                 out_lin_size=50, dropout=dropout)
-        self.linblock2 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
-                                  out_lin_size=50, dropout=dropout)
-        self.linear = nn.Linear(100, num_classes)
+        self.linblock_in_size = hidden_gru_size
+        self.linblock_in_betw_size = hidden_gru_size
+        self.linblock_out_size = int(self.linblock_in_betw_size / 2) if self.linblock_in_betw_size > 100 else 50
+        self.linblocks = [LinBlock(in_lin_size=self.linblock_in_size, inbetw_lin_size=self.linblock_in_betw_size,
+                                   out_lin_size=self.linblock_out_size, dropout=dropout).to(device)
+                          for _ in range(num_gru_layers*2)]
+        self.linear = nn.Linear(self.linblock_out_size*num_gru_layers*2, num_classes)
 
     def forward(self, x):
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
-        out1 = self.linblock1(h_n[0])
-        out2 = self.linblock2(h_n[0])
-        out = self.linear(torch.cat((out1, out2), dim=1))
+        lin_outputs = []
+        for i, h_n_i in enumerate(h_n):
+            lin_outputs.append(self.linblocks[i](h_n_i))
+        out = self.linear(torch.cat(lin_outputs, dim=1))
         return out
 
 
