@@ -267,7 +267,7 @@ def train_model(config):
             f1_cur = epoch_results['f1']
             f1_last = all_dev_results[-2]['f1']
             if f1_last >= f1_cur:
-                print('EARLY STOPPING! F1 score for this epoch: {:.2f}, last epoch: {:.2f}'.format(f1_cur, f1_last))
+                print('EARLY STOPPING! F1 score for this epoch: {:.3f}, last epoch: {:.3f}'.format(f1_cur, f1_last))
                 print('STOP TRAINING.')
                 return model, cur_epoch, cur_batch, all_dev_results
 
