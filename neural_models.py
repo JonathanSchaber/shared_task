@@ -26,6 +26,7 @@ def parse_cmd_args():
                         help='Set the number of threads to use for training by torch.')
     parser.add_argument('-g', '--gpu_num', type=int, default=0, help='The number of the gpu to be used.')
     parser.add_argument('-d', '--device', type=str, help='"cpu" or "cuda". Device to be used.')
+    parser.add_argument('-u', '--user', type=str, help='"janis" or "joni". Device to be used.')
     parser.add_argument('-p', '--num_predictions', type=int, default=1000,
                         help='Number of predictions to make for eval on devset.')
     return parser.parse_args()
@@ -636,13 +637,16 @@ class CNNHierarch(nn.Module):
 
 
 def save_model(trained_model, config, location, num_epochs, num_batches, all_dev_results=None,
-               finale_true=False):
+               finale_true=False, user=args.user):
     if location == 'local':
         path_out = 'models'
     elif location == 'midgard':
         path_out = '/home/user/jgoldz/storage/shared_task/models'
     elif location == 'rattle':
-        path_out = '/srv/scratch3/jgoldz_jschab/shared_task/models'
+        if user == "janis":
+            path_out = '/srv/scratch3/jgoldz_jschab/shared_task/models'
+        elif user == "joni":
+            path_out = '/srv/scratch3/jschab_jgoldz/shared_task/models'
     else:
         raise Exception('Error! Location "{}" not known.'.format(location))
     time_stamp = get_timestamp()
