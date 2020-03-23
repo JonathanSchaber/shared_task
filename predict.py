@@ -88,9 +88,9 @@ def predict_on_input(model, model_type, path_in, config, max_examples, device):
             x = np.zeros(max_length)
             for j, idx in enumerate(text_idxs):
                 x[j] = idx
-            output = torch.squeeze(model(torch.LongTensor([x]).to(device)))
-            max_prob = max(output)
-            prediction = list(output).index(max_prob)
+            output_raw = model(torch.LongTensor([x]).to(device))
+            output = torch.squeeze(output_raw)
+            max_prob, prediction = torch.max(output, 0)
             pred_binary = prediction if prediction <= 1 else 1
             if config['granularity'] != 'binary':
                 pred_ternary = prediction if prediction <= 2 else 2
