@@ -196,7 +196,7 @@ def train_model(config):
     model = models[config['model_name']](char_to_idx, **model_params).to(device)
     print('Prepare optimizer and criterion...')
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.NLLLoss()
     num_batches = get_num_batches(path_train, batch_size)
     cur_epoch = 0
     cur_batch = 0
@@ -319,7 +319,7 @@ def predict_on_devsubset(model, char_to_idx, max_length, path_devset, num_predic
         prediction = list(output).index(max_prob)
         pred_binary = prediction if prediction <= 1 else 1
         preds_binary.append(pred_binary)
-        trues_binary.append(int(label_binary))
+        trues_binary.append(float(label_binary))
     model.train()
     results['f1_score'] = f1_score(trues_binary, preds_binary)
     results['accuracy'] = accuracy_score(trues_binary, preds_binary)
@@ -337,6 +337,7 @@ class SeqToLabelModelConcatAll(nn.Module):
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=False)
         self.linear = nn.Linear(max_len_text*hidden_gru_size, num_classes)
         self.batch_size = batch_size if self.training else 1
+        self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         embeds = self.embedding(x)
@@ -361,6 +362,7 @@ class SeqToLabelModelOnlyHiddenBiDeepOriginal(nn.Module):
         self.linblock2 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
                                   out_lin_size=50, dropout=dropout)
         self.linear = nn.Linear(100, num_classes)
+        self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         embeds = self.embedding(x)
@@ -368,7 +370,8 @@ class SeqToLabelModelOnlyHiddenBiDeepOriginal(nn.Module):
         out1 = self.linblock1(h_n[0])
         out2 = self.linblock2(h_n[0])
         out = self.linear(torch.cat((out1, out2), dim=1))
-        return out
+        out_proba = self.logsoftmax(out)
+        return out_proba
 
 
 class SeqToLabelModelOnlyHiddenBiDeep(nn.Module):
@@ -385,6 +388,7 @@ class SeqToLabelModelOnlyHiddenBiDeep(nn.Module):
                                    out_lin_size=self.linblock_out_size, dropout=dropout).to(device)
                           for _ in range(num_gru_layers*2)]
         self.linear = nn.Linear(self.linblock_out_size*num_gru_layers*2, num_classes)
+        self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         embeds = self.embedding(x)
@@ -393,7 +397,8 @@ class SeqToLabelModelOnlyHiddenBiDeep(nn.Module):
         for i, h_n_i in enumerate(h_n):
             lin_outputs.append(self.linblocks[i](h_n_i))
         out = self.linear(torch.cat(lin_outputs, dim=1))
-        return out
+        out_proba = self.logsoftmax(out)
+        return out_proba
 
 
 class SeqToLabelModelOnlyHiddenUniDeep(nn.Module):
@@ -404,13 +409,15 @@ class SeqToLabelModelOnlyHiddenUniDeep(nn.Module):
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=False)
         self.linear = nn.Linear(hidden_gru_size*num_gru_layers, num_classes)
+        self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         batch_size = x.shape[0]
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
         output = self.linear(torch.reshape(h_n, (batch_size, -1)))
-        return output
+        out_proba = self.logsoftmax(output)
+        return out_proba
 
 
 class SeqToLabelModelOnlyHidden(nn.Module):
@@ -422,12 +429,14 @@ class SeqToLabelModelOnlyHidden(nn.Module):
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=False)
         self.linear = nn.Linear(hidden_gru_size, num_classes)
+        self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
         output = self.linear(torch.squeeze(h_n))
-        return output
+        out_proba = self.logsoftmax(output)
+        return out_proba
 
 
 class CNNOnly(nn.Module):
@@ -461,6 +470,7 @@ class CNNOnly(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
+        self.logsoftmax = nn.LogSoftmax(dim=1)
 
         # self.linear = nn.Linear(1520, num_classes)
         # self.conv1_out_size = (embedding_dim * max_len_text - filter_sizes[0] + 2 * padding) / (stride) + 1
@@ -502,7 +512,8 @@ class CNNOnly(nn.Module):
 
         feat_vec = torch.cat((oconv1_re, oconv2_re, oconv3_re, oconv4_re), dim=1)
         output = self.classifier_layers(feat_vec)
-        return output
+        out_proba = self.logsoftmax(output)
+        return out_proba
 
 
 class CNNHierarch(nn.Module):
@@ -603,6 +614,7 @@ class CNNHierarch(nn.Module):
             nn.Dropout(self.dropout_rt),
             nn.Linear(400, num_classes),
         )
+        self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         batch_size = x.shape[0]
@@ -632,7 +644,9 @@ class CNNHierarch(nn.Module):
 
         final_feat_vec = torch.cat((lin_out1, lin_out2, lin_out3, lin_out4), dim=1)
 
-        return self.final_layer(final_feat_vec)
+        output = self.final_layer(final_feat_vec)
+        out_proba = self.logsoftmax(output)
+        return out_proba
 
 
 def save_model(trained_model, config, location, num_epochs, num_batches, all_dev_results=None,
@@ -737,6 +751,7 @@ class GRUCNN(nn.Module):
                                   num_out_channels=num_out_channels, dropout=dropout, embedding_dim=embedding_dim)
         self.lin_block = LinBlock(in_lin_size=in_lin_size, inbetw_lin_size=inbetw_lin_size,
                                   out_lin_size=num_classes, dropout=dropout)
+        self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         batch_size = x.shape[0]
@@ -755,7 +770,8 @@ class GRUCNN(nn.Module):
         feat_vec = torch.cat((cnn_out_flat1, cnn_out_flat2, cnn_out_flat3, cnn_out_flat4), dim=1)
 
         output = self.lin_block(feat_vec)
-        return output
+        out_proba = self.logsoftmax(output)
+        return out_proba
 
 
 class TransformerLin(nn.Module):
