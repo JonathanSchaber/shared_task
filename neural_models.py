@@ -168,6 +168,7 @@ def train_model(config):
         path_train = config['path_train']['rattle']
     else:
         raise Exception('Error! Location {} not known.'.format(args.location))
+    assert args.user == 'janis' or args.user == 'joni'
     batch_size = config['batch_size']
     granularity = config['granularity']
     num_epochs = config['num_epochs']
@@ -315,10 +316,10 @@ def predict_on_devsubset(model, char_to_idx, max_length, path_devset, num_predic
         x = np.zeros(max_length)
         for j, idx in enumerate(char_idxs):
             x[j] = idx
-        output = torch.squeeze(model(torch.LongTensor([x]).to(device)))
-        max_prob = max(output)
-        prediction = list(output).index(max_prob)
-        pred_binary = prediction if prediction <= 1 else 1
+        output_raw = model(torch.LongTensor([x]).to(device))
+        output = torch.squeeze(output_raw)
+        max_prob, prediction = torch.max(output, 0)
+        pred_binary = prediction.item() if prediction <= 1 else 1
         preds_binary.append(pred_binary)
         trues_binary.append(float(label_binary))
     model.train()
