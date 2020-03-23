@@ -251,7 +251,7 @@ def train_model(config):
                 losses = []
             if batch_num % 10000 == 0 and batch_num != 0:
                 print('Saving current model to disk...')
-                save_model(model, config, args.location, cur_epoch, cur_batch, finale_true=False)
+                save_model(model, config, args.location, cur_epoch, cur_batch, args.user, finale_true=False)
 
         avg_epoch_losses.append(np.mean(avg_batch_losses))
         avg_batch_losses = []
@@ -444,22 +444,22 @@ class CNNOnly(nn.Module):
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.conv1 = nn.Sequential(
             nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[0], embedding_dim), stride=stride, padding=padding),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[1], embedding_dim), stride=stride, padding=padding),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv3 = nn.Sequential(
             nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[2], embedding_dim), stride=stride, padding=padding),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv4 = nn.Sequential(
             nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[3], embedding_dim), stride=stride, padding=padding),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
 
@@ -480,7 +480,7 @@ class CNNOnly(nn.Module):
         self.classifier_layers = nn.Sequential(
             nn.Dropout(self.dropout_rt),
             # nn.Linear(self.conv_concat_size, inbetw_lin_size),
-            nn.Linear(4040, inbetw_lin_size),
+            nn.Linear(1204, inbetw_lin_size),
             nn.ReLU(inplace=True),
             nn.Dropout(self.dropout_rt),
             nn.Linear(inbetw_lin_size, num_classes),
@@ -636,8 +636,8 @@ class CNNHierarch(nn.Module):
         return self.final_layer(final_feat_vec)
 
 
-def save_model(trained_model, config, location, num_epochs, num_batches, all_dev_results=None,
-               finale_true=False, user=args.user):
+def save_model(trained_model, config, location, num_epochs, num_batches, user, all_dev_results=None,
+               finale_true=False):
     if location == 'local':
         path_out = 'models'
     elif location == 'midgard':
@@ -804,7 +804,7 @@ def main():
     print('Initiate training procedure...')
     trained_model, num_epochs, num_batches, all_dev_results = train_model(config)
     print('Saving trained model...')
-    save_model(trained_model, config, args.location, num_epochs, num_batches, all_dev_results,
+    save_model(trained_model, config, args.location, num_epochs, num_batches, args.user, all_dev_results,
                finale_true=True)
 
 
