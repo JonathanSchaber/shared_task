@@ -26,6 +26,7 @@ def parse_cmd_args():
                         help='Set the number of threads to use for training by torch.')
     parser.add_argument('-g', '--gpu_num', type=int, default=0, help='The number of the gpu to be used.')
     parser.add_argument('-d', '--device', type=str, help='"cpu" or "cuda". Device to be used.')
+    parser.add_argument('-u', '--user', type=str, help='"janis" or "joni". Device to be used.')
     parser.add_argument('-p', '--num_predictions', type=int, default=1000,
                         help='Number of predictions to make for eval on devset.')
     return parser.parse_args()
@@ -250,7 +251,7 @@ def train_model(config):
                 losses = []
             if batch_num % 10000 == 0 and batch_num != 0:
                 print('Saving current model to disk...')
-                save_model(model, config, args.location, cur_epoch, cur_batch, finale_true=False)
+                save_model(model, config, args.location, cur_epoch, cur_batch, args.user, finale_true=False)
 
         avg_epoch_losses.append(np.mean(avg_batch_losses))
         avg_batch_losses = []
@@ -452,22 +453,22 @@ class CNNOnly(nn.Module):
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.conv1 = nn.Sequential(
             nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[0], embedding_dim), stride=stride, padding=padding),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[1], embedding_dim), stride=stride, padding=padding),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv3 = nn.Sequential(
             nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[2], embedding_dim), stride=stride, padding=padding),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.conv4 = nn.Sequential(
             nn.Conv2d(1, num_out_channels, kernel_size=(filter_sizes[3], embedding_dim), stride=stride, padding=padding),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.logsoftmax = nn.LogSoftmax(dim=1)
@@ -489,7 +490,7 @@ class CNNOnly(nn.Module):
         self.classifier_layers = nn.Sequential(
             nn.Dropout(self.dropout_rt),
             # nn.Linear(self.conv_concat_size, inbetw_lin_size),
-            nn.Linear(4040, inbetw_lin_size),
+            nn.Linear(1204, inbetw_lin_size),
             nn.ReLU(inplace=True),
             nn.Dropout(self.dropout_rt),
             nn.Linear(inbetw_lin_size, num_classes),
@@ -649,14 +650,17 @@ class CNNHierarch(nn.Module):
         return out_proba
 
 
-def save_model(trained_model, config, location, num_epochs, num_batches, all_dev_results=None,
+def save_model(trained_model, config, location, num_epochs, num_batches, user, all_dev_results=None,
                finale_true=False):
     if location == 'local':
         path_out = 'models'
     elif location == 'midgard':
         path_out = '/home/user/jgoldz/storage/shared_task/models'
     elif location == 'rattle':
-        path_out = '/srv/scratch3/jgoldz_jschab/shared_task/models'
+        if user == "janis":
+            path_out = '/srv/scratch3/jgoldz_jschab/shared_task/models'
+        elif user == "joni":
+            path_out = '/srv/scratch3/jschab_jgoldz/shared_task/models'
     else:
         raise Exception('Error! Location "{}" not known.'.format(location))
     time_stamp = get_timestamp()
@@ -816,7 +820,7 @@ def main():
     print('Initiate training procedure...')
     trained_model, num_epochs, num_batches, all_dev_results = train_model(config)
     print('Saving trained model...')
-    save_model(trained_model, config, args.location, num_epochs, num_batches, all_dev_results,
+    save_model(trained_model, config, args.location, num_epochs, num_batches, args.user, all_dev_results,
                finale_true=True)
 
 
