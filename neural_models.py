@@ -55,7 +55,65 @@ def adjust_text_len(text, max_len):
     return text
 
 
-def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length):
+def get_random_char():
+    latin1_chars = ('!"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`'
+                    'abcdefghijklmnopqrstuvwxyz{|}~\x7f€\x81‚ƒ„…†‡ˆ‰Š‹Œ\x8dŽ\x8f\x90‘’“”•'
+                    '–—˜™š›œ\x9džŸ ¡¢£¤¥¦§¨©ª«¬\xad®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓ'
+                    'ÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ')
+    return random.choice(latin1_chars)
+
+
+def get_random_english_or_german_token():
+    raise NotImplementedError
+
+
+def noisify_text(text, noise_params):
+    """Introduce noise to text by adding english words and repeating/inserting/removing characters.
+
+    Args:
+        text: str
+        noise_params: dict, subdict of config
+    """
+    token_threshold = noise_params['token_threshold']
+    token_continue_threshold = noise_params['token_continue_threshold']
+    char_threshold = noise_params['char_threshold']
+    char_continue_threshold = noise_params['char_continue_threshold']
+    actions = [1, 2, 3]  # 1: repeat, insert, remove
+    # insert noise words
+    tokens = text.split(' ')
+    noisy_tokens = []
+    for i, token in enumerate(tokens):
+        num_noise_tokens = 0
+        if random.random() > token_threshold:
+            noise_token = get_random_english_or_german_token()
+            noisy_tokens.append(noise_token)
+            num_noise_tokens += 1
+            while random.random() > token_continue_threshold and not num_noise_tokens > int(len(tokens) / 2):
+                noise_token = get_random_english_or_german_token()
+                noisy_tokens.append(noise_token)
+                num_noise_tokens += 1
+        noisy_tokens.append(token)
+    # noise chars
+    noisy_token_text = ' '.join(noisy_tokens)
+    noisy_chars = ''
+    for char in noisy_token_text:
+        if random.random() > char_threshold:
+            action = random.choice(actions)
+            if action == 1:  # repeat
+                noise_char = char
+                noisy_chars += noise_char
+            elif action == 2:  # insert
+                noise_char = get_random_char()
+                noisy_chars += noise_char
+            else:
+                continue
+            while random.random() > char_continue_threshold:
+                noisy_chars += noise_char
+        noisy_chars += char
+    return noisy_chars
+
+
+def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length, config):
     """
     Lazy loading of batches. Returns
 
@@ -65,6 +123,7 @@ def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length)
         granularity: str
         char_to_idx: {str: int}
         max_length: int
+        config: dict
     """
     x_list = []
     y_list = []
@@ -80,7 +139,11 @@ def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length)
         try:
             row = next(csv_reader)
             adjust_text = adjust_text_len(row[1], max_length)
-            char_idxs = [char_to_idx.get(char, 'unk') for char in adjust_text]
+            if config.get('noisify', False):
+                noisy_text = noisify_text(adjust_text)
+            else:
+                noisy_text = adjust_text
+            char_idxs = [char_to_idx.get(char, 'unk') for char in noisy_text]
             label = row[index]
             x_item = np.zeros(max_length)
             for i, idx in enumerate(char_idxs):
@@ -220,8 +283,8 @@ def train_model(config):
         for batch_num in range(num_batches):
             cur_batch = batch_num
             # batch_size = 4 * batch_size if epoch > 2 else batch_size
-            x, y = get_next_batch(csv_reader=train_reader, batch_size=batch_size,
-                                  granularity=granularity, char_to_idx=char_to_idx, max_length=max_length)
+            x, y = get_next_batch(csv_reader=train_reader, batch_size=batch_size, granularity=granularity,
+                                  char_to_idx=char_to_idx, max_length=max_length, config=config)
             if len(x) == 0:
                 print('WARNING: Empty batch.')
                 continue
