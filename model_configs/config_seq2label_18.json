@@ -1,6 +1,6 @@
 {
   "model_name": "SeqToLabelModelOnlyHiddenBiDeep",
-  "config_id": "seq2label_finegrained_17",
+  "config_id": "seq2label_finegrained_18",
   "batch_size": 64,
   "granularity": "finegrained",
   "path_train": {

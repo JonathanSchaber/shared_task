@@ -1,6 +1,6 @@
 {
-  "model_name": "SeqToLabelModelOnlyHiddenBiDeepOriginal",
-  "config_id": "seq2label_finegrained_19",
+  "model_name": "SeqToLabelModelOutputAndHiddenBi",
+  "config_id": "seq2label_binary_23",
   "batch_size": 64,
   "granularity": "finegrained",
   "path_train": {
@@ -19,8 +19,20 @@
   "model_params": {
     "num_classes": 23,
     "dropout": 0.1,
+    "batch_size": 64,
     "embedding_dim": 300,
     "hidden_gru_size": 300,
-    "num_gru_layers": 1
+    "num_gru_layers": 1,
+    "in_lin_size_fw_h": 300,
+    "inbetw_lin_size_fw_h": 300,
+    "out_lin_size_fw_h": 100,
+    "in_lin_size_bw_h": 300,
+    "inbetw_lin_size_bw_h": 300,
+    "out_lin_size_bw_h": 100,
+    "inbetw_lin_size_final": 200,
+    "filter_sizes": [2, 3, 4, 5],
+    "strides": [2, 3, 4, 5],
+    "num_in_channels": 1,
+    "num_out_channels": 1
   }
 }
