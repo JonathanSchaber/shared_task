@@ -9,6 +9,9 @@ from neural_models import *
 
 # General Pipeline: specify model -> specify test set -> specify if with char-checker -> specify if written to file
 
+""" sample call on rattle: 
+    python test_model.py -m /srv/scratch3/jschab_jgoldz/shared_task/models/CNNHierarch_CNNHierarch_ternary_106_5_15107_Tue_Mar_24_18:27:36_2020_endTrue.model -c model_configs/config_cnnhierarch_106.json -t torch -i /srv/scratch3/jschab_jgoldz/shared_task/data/test_tweets.full.csv -o OUTFILE.cvs -w"""
+
 def parse_cmd_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
