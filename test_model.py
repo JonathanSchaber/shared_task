@@ -45,11 +45,12 @@ def predict_on_input(model, model_type, path_in, config, char_checker, device):
         next(reader)
         for row in reader:
             tweet_id, text = row[0], Cleaner.clean(Cleaner.mask(row[1])[0])
+            adjust_text = adjust_text_len(text, max_length)
             if char_checker == True:
                 if check_sentences(text) == False:
                     predictions.append((tweet_id, 1, 0.99))
                     continue
-            tweet_idxs = [char_to_idx.get(char, char_to_idx['unk']) for char in text][:max_length]
+            tweet_idxs = [char_to_idx.get(char, char_to_idx['unk']) for char in adjust_text][:max_length]
             x = np.zeros(max_length)
             for j, idx in enumerate(tweet_idxs):
                 x[j] = idx
