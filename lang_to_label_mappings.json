@@ -27,6 +27,10 @@
     "swedish": 12,
     "yiddish": 13,
     "other": 14,
-    "west_frisian": 15
+    "west_frisian": 15,
+    "portuguese": 16,
+    "romanian": 17,
+    "hindi": 18,
+    "tagalog": 19
   }
 }
