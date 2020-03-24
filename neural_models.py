@@ -382,7 +382,8 @@ def predict_on_devsubset(model, char_to_idx, max_length, path_devset, num_predic
         output_raw = model(torch.LongTensor([x]).to(device))
         output = torch.squeeze(output_raw)
         max_prob, prediction = torch.max(output, 0)
-        pred_binary = prediction.item() if prediction <= 1 else 1
+        prediction = prediction.item()
+        pred_binary = prediction if prediction <= 1 else 1
         preds_binary.append(pred_binary)
         trues_binary.append(float(label_binary))
     model.train()
@@ -410,7 +411,49 @@ class SeqToLabelModelConcatAll(nn.Module):
         # all_in_one = torch.reshape(seq_output, (1, -1)) for eval of old models
         all_in_one = torch.reshape(seq_output, (self.batch_size, -1))
         output = self.linear(torch.squeeze(all_in_one))
-        return output
+        return self.logsoftmax(output)
+
+
+class SeqToLabelModelOutputAndHiddenBi(nn.Module):
+
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout,
+                 batch_size, in_lin_size_fw_h, inbetw_lin_size_fw_h, out_lin_size_fw_h, in_lin_size_bw_h,
+                 inbetw_lin_size_bw_h, out_lin_size_bw_h, inbetw_lin_size_final, filter_sizes, strides,
+                 num_in_channels, num_out_channels):
+        super(SeqToLabelModelOutputAndHiddenBi, self).__init__()
+        self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
+        self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
+                                      num_layers=num_gru_layers, batch_first=True, bidirectional=True)
+        self.linblock_fw_h = LinBlock(in_lin_size=in_lin_size_fw_h, inbetw_lin_size=inbetw_lin_size_fw_h,
+                                      out_lin_size=out_lin_size_fw_h, dropout=dropout)
+        self.linblock_bw_h = LinBlock(in_lin_size=in_lin_size_bw_h, inbetw_lin_size=inbetw_lin_size_bw_h,
+                                      out_lin_size=out_lin_size_bw_h, dropout=dropout)
+        # self.linblock_fw_out = LinBlock(in_lin_size=in_lin_size_fw_out, inbetw_lin_size=inbetw_lin_size_fw_out,
+        #                                 out_lin_size=out_lin_size_fw_out, dropout=dropout)
+        # self.linblock_bw_out = LinBlock(in_lin_size=in_lin_size_bw_out, inbetw_lin_size=inbetw_lin_size_bw_out,
+        #                                 out_lin_size=out_lin_size_bw_out, dropout=dropout)
+        self.cnnblock = CNNBlock2(filter_sizes=filter_sizes, embedding_dim=embedding_dim, strides=strides,
+                                  num_in_channels=num_in_channels, num_out_channels=num_out_channels)
+        # self.linear = nn.Linear(max_len_text*hidden_gru_size, num_classes)
+        self.linblock_final = LinBlock(515, inbetw_lin_size=inbetw_lin_size_final,
+                                       out_lin_size=num_classes, dropout=0.05)
+        self.batch_size = batch_size if self.training else 1
+        self.logsoftmax = nn.LogSoftmax(dim=1)
+
+    def forward(self, x):
+        embeds = self.embedding(x)
+        seq_output, h_n = self.char_lang_model(embeds)
+        lin_out_fw_h = self.linblock_fw_h(h_n[0])
+        lin_out_bw_h = self.linblock_bw_h(h_n[1])
+        cnn_out1, cnn_out2, cnn_out3, cnn_out4 = self.cnnblock(seq_output[:, None, :, :])
+        cnn_out1_re = torch.reshape(cnn_out1, (self.batch_size, -1))
+        cnn_out2_re = torch.reshape(cnn_out2, (self.batch_size, -1))
+        cnn_out3_re = torch.reshape(cnn_out3, (self.batch_size, -1))
+        cnn_out4_re = torch.reshape(cnn_out4, (self.batch_size, -1))
+        feat_vec = torch.cat((lin_out_fw_h, lin_out_bw_h, cnn_out1_re, cnn_out2_re, cnn_out3_re, cnn_out4_re), dim=1)
+        output = self.linblock_final(feat_vec)
+        out_proba = self.logsoftmax(output)
+        return out_proba
 
 
 class SeqToLabelModelOnlyHiddenBiDeepOriginal(nn.Module):
@@ -799,6 +842,45 @@ class CNNBlock(nn.Module):
         return output_conv1, output_conv2, output_conv3, output_conv4
 
 
+class CNNBlock2(nn.Module):
+
+    def __init__(self, filter_sizes, embedding_dim, strides, num_in_channels, num_out_channels):
+        super(CNNBlock2, self).__init__()
+        self.filter_dim_2 = int(embedding_dim / 5)
+        self.stride_dim_2 = self.filter_dim_2
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[0], self.filter_dim_2),
+                      stride=(strides[0], self.stride_dim_2), padding=(0, 0)),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[1], self.filter_dim_2),
+                      stride=(strides[1], self.stride_dim_2), padding=(0, 0)),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[1], self.filter_dim_2),
+                      stride=(strides[2], self.stride_dim_2), padding=(0, 0)),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.conv4 = nn.Sequential(
+            nn.Conv2d(num_in_channels, num_out_channels, kernel_size=(filter_sizes[1], self.filter_dim_2),
+                      stride=(strides[3], self.stride_dim_2), padding=(0, 0)),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+
+    def forward(self, x):
+        output_conv1 = self.conv1(x)
+        output_conv2 = self.conv2(x)
+        output_conv3 = self.conv3(x)
+        output_conv4 = self.conv4(x)
+        return output_conv1, output_conv2, output_conv3, output_conv4
+
+
 class LinBlock(nn.Module):
 
     def __init__(self, in_lin_size, inbetw_lin_size, out_lin_size, dropout):
@@ -884,7 +966,8 @@ models = {
     'CNNHierarch': CNNHierarch,
     'GRUCNN': GRUCNN,
     'SeqToLabelModelOnlyHiddenUniDeep': SeqToLabelModelOnlyHiddenUniDeep,
-    'SeqToLabelModelOnlyHiddenBiDeepOriginal': SeqToLabelModelOnlyHiddenBiDeepOriginal
+    'SeqToLabelModelOnlyHiddenBiDeepOriginal': SeqToLabelModelOnlyHiddenBiDeepOriginal,
+    'SeqToLabelModelOutputAndHiddenBi': SeqToLabelModelOutputAndHiddenBi
 }
 
 
