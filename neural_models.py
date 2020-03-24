@@ -586,7 +586,9 @@ class CNNOnly(nn.Module):
         feat_vec = torch.cat((oconv1_re, oconv2_re, oconv3_re, oconv4_re), dim=1)[:, None, :]
 
         out_hier1 = self.hier(feat_vec) 
-        output = self.classifier_layers(out_hier1)
+        out_hier1_rs = torch.reshape(out_hier1, (batch_size, -1))
+
+        output = self.classifier_layers(out_hier1_rs)
         # import pdb; pdb.set_trace()
         out_proba = self.logsoftmax(output)
         return out_proba
