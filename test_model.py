@@ -1,7 +1,7 @@
 import os
 
-from predict import load_model, get_num_examples, predict_on_input
-from corpus_parser import Parser
+from predict import load_model, get_num_examples
+from corpus_parser import Parser, Cleaner
 from swiss_char_checker import check_sentences
 
 # General Pipeline: specify model -> specify test set -> specify if with char-checker -> specify if written to file
@@ -10,7 +10,8 @@ def parse_cmd_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--path_model", type=str, help="Path to model.")
-    parser.add_argument("-t", "--path_test", type=str, help="Path to test data.")
+    parser.add_argument('-i', '--path_in', type=str, help='Path to input file.')
+    parser.add_argument('-t', '--type', type=str, help='Either "torch" or "sklearn".')
     parser.add_argument("-c", "--path_config", type=str, help="Path to hyperparamter/config file (json).")
     parser.add_argument("-cc", "--charchecker", action="store_true", default=True, help="Do pre-elimination with char-checker.")
     parser.add_argument("-w", "--write", action="store_true", default=False, help="Write to file (name automatically generated.")
@@ -74,14 +75,47 @@ def process_predictions_file(pred_file):
 
 
 
-def predict_on_test_set(model, config, test_set):
+def predict_on_input(model, model_type, path_in, config, char_checker, device):
+    """Make prediction on the input data with the given model.
+
+    Args:
+        model: either torch.nn.Model or sklearn-model
+        model_type: str
+        path_in: str
+        config: dict
+        max_examples: int
+        device: str
+    """
+    char_to_idx = load_char_to_idx()
+    max_length = load_max_len() if 'max_length_text' not in config else config['max_length_text']
+    if not max_examples:
+        max_examples = get_num_examples(path_in)
+    predictions = []
+    if model_type == 'torch':
+        reader = csv.reader(open(path_in, 'r', encoding='utf8'))
+        for row in reader:
+            tweet_id, text = row[0], cleaner.clean(Cleaner.mask(row[1])[0])
+            if char_checker == True:
+                if check_sentences(text) == False:
+                    predictions.append(tweet_id, 1, 0.99)
+                    continue
+            tweet_idxs = [char_to_idx.get(char, char_to_idx['unk']) for char in text][:max_length]
+            x = np.zeros(max_length)
+            for j, idx in enumerate(tweet_idxs):
+                x[j] = idx
+            output_raw = model(torch.LongTensor([x]).to(device))
+            output = torch.squeeze(output_raw)
+            max_prob, prediction = torch.max(output, 0)
+            pred_binary = prediction if prediction <= 1 else 1
+            predictions.append((tweet_id, pred_binary, max_prob))
+    return predictions
 
 
 def main():
     print("Reading in command-line args...")
     args = parse_cmd_args()
     print("Evaluate on test set...")
-    results = predict_on_test_set(args.model, args.config, test_set)
+    results = predict_on_input(args.model, args.type, args.path_in, args.config, test_set)
     if args.write == True:
         print("Writing to file {}.".format(XYZ))
     print("Done.")
