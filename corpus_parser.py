@@ -174,6 +174,22 @@ class GSWIDCleaner(Cleaner):
     pass
 
 
+class LeipzigCleanerPOR(Cleaner):
+    pass
+
+
+class LeipzigCleanerRON(Cleaner):
+    pass
+
+
+class LeipzigCleanerTGL(Cleaner):
+    pass
+
+
+class Cleanerhrwa(Cleaner):
+    pass
+
+
 # *****************************
 # ********** Parsers **********
 # *****************************
@@ -498,6 +514,28 @@ class LeipzigParserNOR(LeipzigParser):
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
+
+
+class LeipzigParserPOR(LeipzigParser):
+    """For portuguese."""
+
+    path_in = 'data/leipzig_por/por-pt_newscrawl_2011_100K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
+    path_out = 'data/main/leipzig_por_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
+    language = 'portuguese'
+    corpus_name = 'leipzig_por'
+    label_binary = lang_to_label['binary']['other']
+    label_ternary = lang_to_label['ternary']['other']
+    label_finegrained = lang_to_label['finegrained'][language]
+    cleaner = LeipzigCleanerPOR()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all tsv-files to the main file (csv) one sentence per row."""
         if self.use_server_paths:
             self.path_in = self.path_in_server
             self.path_out = self.path_out_server
