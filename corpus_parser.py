@@ -542,6 +542,28 @@ class LeipzigParserPOR(LeipzigParser):
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
+class LeipzigParserRON(LeipzigParser):
+    """For romanian."""
+
+    path_in = 'data/leipzig_ron/ron-ro_web_2015_100K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
+    path_out = 'data/main/leipzig_ron_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
+    language = 'romanian'
+    corpus_name = 'leipzig_ron'
+    label_binary = lang_to_label['binary']['other']
+    label_ternary = lang_to_label['ternary']['other']
+    label_finegrained = lang_to_label['finegrained'][language]
+    cleaner = LeipzigCleanerRON()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all tsv-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
+
+
 class LeipzigParserSWE(LeipzigParser):
     """For Swedish.."""
 
@@ -555,6 +577,28 @@ class LeipzigParserSWE(LeipzigParser):
     label_ternary = lang_to_label['ternary']['other']
     label_finegrained = lang_to_label['finegrained'][language]
     cleaner = LeipzigCleanerSWE()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
+
+
+class LeipzigParserTGL(LeipzigParser):
+    """For tagalog."""
+
+    path_in = 'data/leipzig_tgl/tgl_newscrwal_2011_100K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
+    path_out = 'data/main/leipzig_tgl_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
+    language = 'tagalog'
+    corpus_name = 'leipzig_tgl'
+    label_binary = lang_to_label['binary']['other']
+    label_ternary = lang_to_label['ternary']['other']
+    label_finegrained = lang_to_label['finegrained'][language]
+    cleaner = LeipzigCleanerTGL()
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
