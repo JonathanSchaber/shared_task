@@ -981,7 +981,7 @@ def main():
                LeipzigParserFR, LeipzigParserFRR, LeipzigParserFRY, LeipzigParserGSW,
                LeipzigParserITA, LeipzigParserLMO, LeipzigParserLTZ, LeipzigParserNDS,
                LeipzigParserNLD, LeipzigParserNOR, LeipzigParserSWE, LeipzigParserYID,
-               GSWIDParser]
+               GSWIDParser, LeipzigParserPOR, LeipzigParserRON, LeipzigParserTGL, HRWAParser]
 
     for parser_type in parsers:
         parser = parser_type(args.server)
