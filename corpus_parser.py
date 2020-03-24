@@ -866,6 +866,8 @@ class HRWAParser(Parser):
         writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
         tree = ET.parse(self.path_in)
         root = tree.getroot()
+        max_rows = 10000
+        rows_added = 0
         for p in root:
             for s in p:
                 annotated_sent = s.text.strip()
@@ -878,6 +880,9 @@ class HRWAParser(Parser):
                     continue
                 self.writerow(writer, cleaned_text, masked_strings, self.label_binary,
                               self.label_ternary, self.label_finegrained, self.corpus_name)
+                rows_added += 1
+                if rows_added > max_rows:
+                    return
 
 
 class NoahParser(Parser):
