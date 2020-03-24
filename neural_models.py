@@ -542,20 +542,6 @@ class CNNOnly(nn.Module):
         )
         self.logsoftmax = nn.LogSoftmax(dim=1)
 
-        # self.linear = nn.Linear(1520, num_classes)
-        # self.conv1_out_size = (embedding_dim * max_len_text - filter_sizes[0] + 2 * padding) / (stride) + 1
-        # self.conv2_out_size = (embedding_dim * max_len_text - filter_sizes[1] + 2 * padding) / (stride) + 1
-        # self.conv3_out_size = (embedding_dim * max_len_text - filter_sizes[2] + 2 * padding) / (stride) + 1
-        # self.conv4_out_size = (embedding_dim * max_len_text - filter_sizes[3] + 2 * padding) / (stride) + 1
-        #
-        # self.conv1_out_flat_size = num_out_channels * self.conv1_out_size
-        # self.conv2_out_flat_size = num_out_channels * self.conv2_out_size
-        # self.conv3_out_flat_size = num_out_channels * self.conv3_out_size
-        # self.conv4_out_flat_size = num_out_channels * self.conv4_out_size
-        #
-        # self.conv_concat_size = int(self.conv1_out_flat_size + self.conv2_out_flat_size + \
-        #                         self.conv3_out_flat_size + self.conv4_out_flat_size)
-
         self.classifier_layers = nn.Sequential(
             nn.Dropout(self.dropout_rt),
             # nn.Linear(self.conv_concat_size, inbetw_lin_size),
@@ -607,42 +593,42 @@ class CNNHierarch(nn.Module):
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.conv_l1_1 = nn.Sequential(
             nn.Conv1d(1, num_out_channels, kernel_size=filter_sizes[0] * embedding_dim, stride=stride*embedding_dim, padding=(filter_sizes[0]-1)*embedding_dim),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool1d(kernel_size=2, stride=2)
         )
         self.conv_l1_2 = nn.Sequential(
             nn.Conv1d(1, num_out_channels, kernel_size=filter_sizes[1] * embedding_dim, stride=stride*embedding_dim, padding=(filter_sizes[1]-1)*embedding_dim),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool1d(kernel_size=2, stride=2)
         )
         self.conv_l1_3 = nn.Sequential(
             nn.Conv1d(1, num_out_channels, kernel_size=filter_sizes[2] * embedding_dim, stride=stride*embedding_dim, padding=(filter_sizes[2]-1)*embedding_dim),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool1d(kernel_size=2, stride=2)
         )
         self.conv_l1_4 = nn.Sequential(
             nn.Conv1d(1, num_out_channels, kernel_size=filter_sizes[3] * embedding_dim, stride=stride*embedding_dim, padding=(filter_sizes[3]-1)*embedding_dim),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool1d(kernel_size=2, stride=2)
         )
         self.conv_l2_1 = nn.Sequential(
             nn.Conv1d(num_out_channels, num_out_channels, kernel_size=filter_sizes[0], stride=stride, padding=filter_sizes[0]-1),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool1d(kernel_size=2, stride=2)
         )
         self.conv_l2_2 = nn.Sequential(
             nn.Conv1d(num_out_channels, num_out_channels, kernel_size=filter_sizes[1], stride=stride, padding=filter_sizes[1]-1),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool1d(kernel_size=2, stride=2)
         )
         self.conv_l2_3 = nn.Sequential(
             nn.Conv1d(num_out_channels, num_out_channels, kernel_size=filter_sizes[2], stride=stride, padding=filter_sizes[2]-1),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool1d(kernel_size=2, stride=2)
         )
         self.conv_l2_4 = nn.Sequential(
             nn.Conv1d(num_out_channels, num_out_channels, kernel_size=filter_sizes[3], stride=stride, padding=filter_sizes[3]-1),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.MaxPool1d(kernel_size=2, stride=2)
         )
 
@@ -666,31 +652,31 @@ class CNNHierarch(nn.Module):
 
         self.lin_layers_per_filter_1 = nn.Sequential(
             nn.Dropout(self.dropout_rt),
-            nn.Linear(300, 100),
+            nn.Linear(50, 32),
             nn.ReLU(inplace=True),
         )
 
         self.lin_layers_per_filter_2 = nn.Sequential(
             nn.Dropout(self.dropout_rt),
-            nn.Linear(304, 100),
+            nn.Linear(51, 32),
             nn.ReLU(inplace=True),
         )
 
         self.lin_layers_per_filter_3 = nn.Sequential(
             nn.Dropout(self.dropout_rt),
-            nn.Linear(308, 100),
+            nn.Linear(52, 32),
             nn.ReLU(inplace=True),
         )
 
         self.lin_layers_per_filter_4 = nn.Sequential(
             nn.Dropout(self.dropout_rt),
-            nn.Linear(312, 100),
+            nn.Linear(53, 32),
             nn.ReLU(inplace=True),
         )
 
         self.final_layer = nn.Sequential(
             nn.Dropout(self.dropout_rt),
-            nn.Linear(400, num_classes),
+            nn.Linear(128, num_classes),
         )
         self.logsoftmax = nn.LogSoftmax(dim=1)
 
