@@ -1,4 +1,5 @@
 {
-	"german":["bist", "Leute", "Schweiz", "plötzlich", "freundlich", "guten", "gute", "Mein", "ist"],
-	"english":["amazing", "darling", "day", "love", "nice", "awkward"]
+	"german":["bist", "Leute", "Schweiz", "plötzlich", "freundlich", "guten", "gute", "Mein", "ist", "klein", "kleinlich", "kleinste", "ihr", "seid", "seit", "immer", "Kloß", "gleich", "Butter", "bei", "Klepmner", "einkaufen", "Gemüt", "ruhig", "Straßenbahn", "Gehweg", "Arbeit", "auf", "Wolke", "drei", "fünf", "zehn"],
+	"english":["amazing", "darling", "day", "love", "nice", "awkward", "world", "music", "artist", "like", "heart", "mind", "pure", "well", "shit", "the", "fuck", "most", "lol", "hate", "best", "ever", "huge", "little"],
+	"places":["Zürich", "Matterhorn", "Eiger", "Jungrfraujoch", "Vierwaldstettersee", "Luzern", "Gotthard", "Locarno", "Rütli", "Streetparade", "Bern", "St. Gallen", "Davos", "St. Moritz", "Wengen", "Genf", "Lausanne"]
 }
