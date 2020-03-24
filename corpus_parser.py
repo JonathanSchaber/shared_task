@@ -186,7 +186,11 @@ class LeipzigCleanerTGL(Cleaner):
     pass
 
 
-class Cleanerhrwa(Cleaner):
+class CleanerHRWA(Cleaner):
+    pass
+
+
+class CleanerHIN(Cleaner):
     pass
 
 
@@ -766,6 +770,40 @@ class HamburgDTBParser(Parser):
                         word = line.split('\t')[1]
                         words.append(word)
                 self.clean_and_write(csv_writer, words)
+
+
+class HRWAParser(Parser):
+    path_in = 'data/hrWa/hrWaC2.1.01.xml'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
+    path_out = 'data/main/hrwa_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
+    language = 'croatian'
+    corpus_name = 'hrwa'
+    label_binary = lang_to_label['binary']['other']
+    label_ternary = lang_to_label['ternary']['other']
+    label_finegrained = lang_to_label['finegrained'][language]
+    cleaner = CleanerHRWA()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
+        writer = csv.writer(open(self.path_out, 'w', encoding='utf8', newline='\n'))
+        tree = ET.parse(self.path_in)
+        root = tree.getroot()
+        for p in root:
+            for s in p:
+                annotated_sent = s.text.strip()
+                annotated_words = annotated_sent.split('\n')
+                tokens = [word.split('\t')[0] for word in annotated_words]
+                sent_str = ' '.join(tokens)
+                masked_text, masked_strings = self.cleaner.mask(sent_str)
+                cleaned_text = self.cleaner.clean(masked_text)
+                if cleaned_text == '':
+                    continue
+                self.writerow(writer, cleaned_text, masked_strings, self.label_binary,
+                              self.label_ternary, self.label_finegrained, self.corpus_name)
 
 
 class NoahParser(Parser):
