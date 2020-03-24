@@ -190,7 +190,15 @@ class CleanerHRWA(Cleaner):
     pass
 
 
-class CleanerHIN(Cleaner):
+class LeipzigCleanerSRP(Cleaner):
+    pass
+
+
+class LeipzigCleanerSPA(Cleaner):
+    pass
+
+
+class LeipzigCleanerHBS(Cleaner):
     pass
 
 
@@ -392,6 +400,28 @@ class LeipzigParserFRY(LeipzigParser):
         self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
 
 
+class LeipzigParserHBS(LeipzigParser):
+    """For west frisian."""
+
+    path_in = 'data/leipzig_hbs/hbs_mixed_2014_100K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
+    path_out = 'data/main/leipzig_hbs_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
+    language = 'serbocroatian'
+    corpus_name = 'leipzig_hbs'
+    label_binary = lang_to_label['binary']['other']
+    label_ternary = lang_to_label['ternary']['other']
+    label_finegrained = lang_to_label['finegrained'][language]
+    cleaner = LeipzigCleanerHBS()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
+
+
 class LeipzigParserITA(LeipzigParser):
     """For Italian."""
 
@@ -581,6 +611,50 @@ class LeipzigParserSWE(LeipzigParser):
     label_ternary = lang_to_label['ternary']['other']
     label_finegrained = lang_to_label['finegrained'][language]
     cleaner = LeipzigCleanerSWE()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
+
+
+class LeipzigParserSPA(LeipzigParser):
+    """For Swedish.."""
+
+    path_in = 'data/leipzig_spa/spa_news_2011_100K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
+    path_out = 'data/main/leipzig_spa_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
+    language = 'spanish'
+    corpus_name = 'leipzig_spa'
+    label_binary = lang_to_label['binary']['other']
+    label_ternary = lang_to_label['ternary']['other']
+    label_finegrained = lang_to_label['finegrained'][language]
+    cleaner = LeipzigCleanerSPA()
+
+    def copy_to_main_file(self):
+        """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
+        if self.use_server_paths:
+            self.path_in = self.path_in_server
+            self.path_out = self.path_out_server
+        self._copy_to_main_file(self.path_in, self.path_out, self.cleaner, self.corpus_name)
+
+
+class LeipzigParserSRP(LeipzigParser):
+    """For Swedish.."""
+
+    path_in = 'data/leipzig_srp/srp-rs_web_2016_100K-sentences.txt'
+    path_in_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_in)
+    path_out = 'data/main/leipzig_srp_parsed.csv'
+    path_out_server = os.path.join('/home/user/jgoldz/storage/shared_task/', path_out)
+    language = 'serbian'
+    corpus_name = 'leipzig_srp'
+    label_binary = lang_to_label['binary']['other']
+    label_ternary = lang_to_label['ternary']['other']
+    label_finegrained = lang_to_label['finegrained'][language]
+    cleaner = LeipzigCleanerSRP()
 
     def copy_to_main_file(self):
         """Copy parsed contents of all xml-files to the main file (csv) one sentence per row."""
