@@ -472,6 +472,11 @@ class CNNOnly(nn.Module):
             nn.Tanh(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
+        self.hier = nn.Sequential(
+            nn.Conv1d(1, num_out_channels, kernel_size=20, stride=stride, padding=padding),
+            nn.Tanh(),
+            nn.MaxPool1d(kernel_size=3, stride=3)
+        )
         self.logsoftmax = nn.LogSoftmax(dim=1)
 
         # self.linear = nn.Linear(1520, num_classes)
@@ -491,7 +496,10 @@ class CNNOnly(nn.Module):
         self.classifier_layers = nn.Sequential(
             nn.Dropout(self.dropout_rt),
             # nn.Linear(self.conv_concat_size, inbetw_lin_size),
-            nn.Linear(1204, inbetw_lin_size),
+            nn.Linear(1204, 800),
+            nn.ReLU(inplace=True),
+            nn.Dropout(self.dropout_rt),
+            nn.Linear(800, inbetw_lin_size),
             nn.ReLU(inplace=True),
             nn.Dropout(self.dropout_rt),
             nn.Linear(inbetw_lin_size, num_classes),
@@ -513,7 +521,10 @@ class CNNOnly(nn.Module):
         oconv4_re = torch.reshape(output_conv4, (batch_size, -1))
 
         feat_vec = torch.cat((oconv1_re, oconv2_re, oconv3_re, oconv4_re), dim=1)
-        output = self.classifier_layers(feat_vec)
+
+        out_hier1 = self.hier(feat_vec) 
+        output = self.classifier_layers(out_hier1)
+        # import pdb; pdb.set_trace()
         out_proba = self.logsoftmax(output)
         return out_proba
 
