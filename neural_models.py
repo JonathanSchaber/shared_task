@@ -559,10 +559,10 @@ class CNNOnly(nn.Module):
         self.classifier_layers = nn.Sequential(
             nn.Dropout(self.dropout_rt),
             # nn.Linear(self.conv_concat_size, inbetw_lin_size),
-            nn.Linear(1204, 800),
+            nn.Linear(396, 256),
             nn.ReLU(inplace=True),
             nn.Dropout(self.dropout_rt),
-            nn.Linear(800, inbetw_lin_size),
+            nn.Linear(256, inbetw_lin_size),
             nn.ReLU(inplace=True),
             nn.Dropout(self.dropout_rt),
             nn.Linear(inbetw_lin_size, num_classes),
@@ -583,7 +583,7 @@ class CNNOnly(nn.Module):
         oconv3_re = torch.reshape(output_conv3, (batch_size, -1))
         oconv4_re = torch.reshape(output_conv4, (batch_size, -1))
 
-        feat_vec = torch.cat((oconv1_re, oconv2_re, oconv3_re, oconv4_re), dim=1)
+        feat_vec = torch.cat((oconv1_re, oconv2_re, oconv3_re, oconv4_re), dim=1)[:, None, :]
 
         out_hier1 = self.hier(feat_vec) 
         output = self.classifier_layers(out_hier1)
