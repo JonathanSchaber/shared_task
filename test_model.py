@@ -18,6 +18,7 @@ def parse_cmd_args():
     parser.add_argument("-c", "--config", type=str, help="Path to hyperparamter/config file (json).")
     parser.add_argument("-cc", "--charchecker", action="store_true", default=True, help="Do pre-elimination with char-checker.")
     parser.add_argument("-w", "--write", action="store_true", default=False, help="Write to file (name automatically generated.")
+    parser.add_argument("-o", "--outfile", type=str, help="Path to outfile to write to.")
     return parser.parse_args()
 
 
@@ -30,6 +31,8 @@ def predict_on_input(model, model_type, path_in, config, char_checker, device):
         path_in: str
         config: dict
         device: str
+    Return:
+        list
     """
     char_to_idx = load_char_to_idx()
     max_length = load_max_len() if 'max_length_text' not in config else config['max_length_text']
@@ -47,23 +50,38 @@ def predict_on_input(model, model_type, path_in, config, char_checker, device):
             x = np.zeros(max_length)
             for j, idx in enumerate(tweet_idxs):
                 x[j] = idx
-            import pdb; pdb.set_trace()
             output_raw = model(torch.LongTensor([x]).to(device))
             output = torch.squeeze(output_raw)
             max_prob, prediction = torch.max(output, 0)
-            pred_binary = prediction if prediction <= 1 else 1
-            predictions.append((tweet_id, pred_binary, max_prob))
+            pred_binary = prediction.item() if prediction.item() <= 1 else 1
+            predictions.append((tweet_id, pred_binary, np.exp(max_prob.tolist())))
     return predictions
+
+def write_to_file(preds, outfile):
+    """Write to outfile
+
+    Args:
+        preds: list
+        outfile: str
+    Return:
+        None
+    """
+    with open(outfile, "w", encoding="utf8") as f:
+        csv_writer = csv.writer(f)
+        for item in preds:
+            csv_writer.writerow(item)
 
 
 def main():
     print("Reading in command-line args...")
     args = parse_cmd_args()
     config = load_config(args.config)
+    model = load_model(args.model, args.type, device="cpu")
     print("Evaluate on test set...")
-    results = predict_on_input(args.model, args.type, args.path_in, config, args.charchecker, "cpu")
+    results = predict_on_input(model, args.type, args.path_in, config, args.charchecker, "cpu")
     if args.write == True:
-        print("Writing to file {}.".format(XYZ))
+        print("Writing to file {}.".format(args.outfile))
+        write_to_file(results, args.outfile)
     print("Done.")
 
 if __name__ == "__main__":
