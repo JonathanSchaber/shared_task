@@ -30,8 +30,10 @@
     "west_frisian": 15,
     "portuguese": 16,
     "romanian": 17,
-    "hindi": 18,
     "tagalog": 19,
-    "croatian": 20
+    "croatian": 20,
+    "serbian": 21,
+    "spanish": 22,
+    "serbocroatian": 23
   }
 }
