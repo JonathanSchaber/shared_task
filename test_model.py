@@ -58,8 +58,14 @@ def predict_on_input(model, model_type, path_in, config, char_checker, device):
             output_raw = model(torch.LongTensor([x]).to(device))
             output = torch.squeeze(output_raw)
             max_prob, prediction = torch.max(output, 0)
-            pred_binary = prediction.item() if prediction.item() <= 1 else 1
-            predictions.append((tweet_id, pred_binary, np.exp(max_prob.tolist())))
+            prediction = prediction.item()
+            if prediction == 0:
+                prob_binary = np.exp(max_prob.tolist())
+                pred_binary = 0
+            else:
+                prob_binary = 1 - output[0].item()
+                pred_binary = 1
+            predictions.append((tweet_id, pred_binary, prob_binary))
     return predictions
 
 def write_to_file(preds, outfile):
