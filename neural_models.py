@@ -92,11 +92,13 @@ def noisify_text(text, noise_params):
     noisy_tokens = []
     for i, token in enumerate(tokens):
         num_noise_tokens = 0
-        if random.random() > token_threshold:
+        r = random.random()
+        if r > token_threshold:
             noise_token = get_random_english_or_german_token()
             noisy_tokens.append(noise_token)
             num_noise_tokens += 1
-            while random.random() > token_continue_threshold and not num_noise_tokens > int(len(tokens) / 2):
+            r2 = random.random()
+            while r2 > token_continue_threshold and not num_noise_tokens > int(len(tokens) / 2):
                 noise_token = get_random_english_or_german_token()
                 noisy_tokens.append(noise_token)
                 num_noise_tokens += 1
@@ -105,7 +107,8 @@ def noisify_text(text, noise_params):
     noisy_token_text = ' '.join(noisy_tokens)
     noisy_chars = ''
     for char in noisy_token_text:
-        if random.random() > char_threshold:
+        r = random.random()
+        if r > char_threshold:
             action = random.choice(actions)
             if action == 1:  # repeat
                 noise_char = char
@@ -115,7 +118,8 @@ def noisify_text(text, noise_params):
                 noisy_chars += noise_char
             else:
                 continue
-            while random.random() > char_continue_threshold:
+            r2 = random.random()
+            while r2 > char_continue_threshold:
                 noisy_chars += noise_char
         noisy_chars += char
     return noisy_chars
@@ -146,12 +150,12 @@ def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length,
     for _ in range(batch_size):
         try:
             row = next(csv_reader)
-            adjust_text = adjust_text_len(row[1], max_length)
             if config.get('noisify', False):
-                noisy_text = noisify_text(adjust_text, noise_params=config['noise_params'])
+                noisy_text = noisify_text(row[1], noise_params=config['noise_params'])
             else:
-                noisy_text = adjust_text
-            char_idxs = [char_to_idx.get(char, 'unk') for char in noisy_text]
+                noisy_text = row[1]
+            adjust_text = adjust_text_len(noisy_text, max_length)
+            char_idxs = [char_to_idx.get(char, char_to_idx['unk']) for char in adjust_text]
             label = row[index]
             x_item = np.zeros(max_length)
             for i, idx in enumerate(char_idxs):
