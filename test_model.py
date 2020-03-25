@@ -63,7 +63,7 @@ def predict_on_input(model, model_type, path_in, config, char_checker, device):
                 prob_binary = np.exp(max_prob.tolist())
                 pred_binary = 0
             else:
-                prob_binary = 1 - output[0].item()
+                prob_binary = 1 - np.exp(output[0].item())
                 pred_binary = 1
             predictions.append((tweet_id, pred_binary, prob_binary))
     return predictions
