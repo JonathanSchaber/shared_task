@@ -63,8 +63,16 @@ def get_random_char():
     return random.choice(latin1_chars)
 
 
+with open('german_english.json', 'r', encoding='utf8') as f:
+    german_english_tokens = json.load(f)
+    get_list = []
+    for key, token_list in german_english_tokens.items():
+        for token in token_list:
+            get_list.append(token)
+
+
 def get_random_english_or_german_token():
-    raise NotImplementedError
+    return random.choice(get_list)
 
 
 def noisify_text(text, noise_params):
@@ -140,7 +148,7 @@ def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length,
             row = next(csv_reader)
             adjust_text = adjust_text_len(row[1], max_length)
             if config.get('noisify', False):
-                noisy_text = noisify_text(adjust_text)
+                noisy_text = noisify_text(adjust_text, noise_params=config['noise_params'])
             else:
                 noisy_text = adjust_text
             char_idxs = [char_to_idx.get(char, 'unk') for char in noisy_text]
@@ -441,15 +449,19 @@ class SeqToLabelModelOutputAndHiddenBi(nn.Module):
         self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
+        batch_size = x.shape[0]
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
         lin_out_fw_h = self.linblock_fw_h(h_n[0])
         lin_out_bw_h = self.linblock_bw_h(h_n[1])
         cnn_out1, cnn_out2, cnn_out3, cnn_out4 = self.cnnblock(seq_output[:, None, :, :])
-        cnn_out1_re = torch.reshape(cnn_out1, (self.batch_size, -1))
-        cnn_out2_re = torch.reshape(cnn_out2, (self.batch_size, -1))
-        cnn_out3_re = torch.reshape(cnn_out3, (self.batch_size, -1))
-        cnn_out4_re = torch.reshape(cnn_out4, (self.batch_size, -1))
+        try:
+            cnn_out1_re = torch.reshape(cnn_out1, (batch_size, -1))
+            cnn_out2_re = torch.reshape(cnn_out2, (batch_size, -1))
+            cnn_out3_re = torch.reshape(cnn_out3, (batch_size, -1))
+            cnn_out4_re = torch.reshape(cnn_out4, (batch_size, -1))
+        except RuntimeError:
+            import pdb; pdb.set_trace()
         feat_vec = torch.cat((lin_out_fw_h, lin_out_bw_h, cnn_out1_re, cnn_out2_re, cnn_out3_re, cnn_out4_re), dim=1)
         output = self.linblock_final(feat_vec)
         out_proba = self.logsoftmax(output)
@@ -470,6 +482,32 @@ class SeqToLabelModelOnlyHiddenBiDeepOriginal(nn.Module):
         self.linblock2 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
                                   out_lin_size=50, dropout=dropout)
         self.linear = nn.Linear(100, num_classes)
+        self.logsoftmax = nn.LogSoftmax(dim=1)
+
+    def forward(self, x):
+        embeds = self.embedding(x)
+        seq_output, h_n = self.char_lang_model(embeds)
+        out1 = self.linblock1(h_n[0])
+        out2 = self.linblock2(h_n[0])
+        out = self.linear(torch.cat((out1, out2), dim=1))
+        out_proba = self.logsoftmax(out)
+        return out_proba
+
+
+class SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin(nn.Module):
+
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
+        super(SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin, self).__init__()
+        self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
+        self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
+                                      num_layers=num_gru_layers, batch_first=True, bidirectional=True)
+        self.in_lin_size = hidden_gru_size * num_gru_layers
+        self.in_betw_size = self.in_lin_size
+        self.linblock1 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                  out_lin_size=self.in_betw_size, dropout=dropout)
+        self.linblock2 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                  out_lin_size=self.in_betw_size, dropout=dropout)
+        self.linear = nn.Linear(self.in_betw_size * 2, num_classes)
         self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
@@ -953,7 +991,8 @@ models = {
     'GRUCNN': GRUCNN,
     'SeqToLabelModelOnlyHiddenUniDeep': SeqToLabelModelOnlyHiddenUniDeep,
     'SeqToLabelModelOnlyHiddenBiDeepOriginal': SeqToLabelModelOnlyHiddenBiDeepOriginal,
-    'SeqToLabelModelOutputAndHiddenBi': SeqToLabelModelOutputAndHiddenBi
+    'SeqToLabelModelOutputAndHiddenBi': SeqToLabelModelOutputAndHiddenBi,
+    'SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin': SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin
 }
 
 
