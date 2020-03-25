@@ -22,7 +22,7 @@ def parse_cmd_args():
     parser.add_argument("-cc", "--charchecker", action="store_true", default=True, help="Do pre-elimination with char-checker.")
     parser.add_argument("-w", "--write", action="store_true", default=False, help="Write to file (name automatically generated.")
     parser.add_argument("-o", "--outfile", type=str, help="Path to outfile to write to.")
-    parser.add_argument('-g', 'gpu', default=0, help='The number of the gpu to be used.')
+    parser.add_argument('-g', '--gpu', default=0, help='The number of the gpu to be used.')
     return parser.parse_args()
 
 
