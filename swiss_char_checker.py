@@ -28,7 +28,7 @@ def parse_cmd_args():
     return parser.parse_args()
 
 
-def check_sentences(text, threshold, print_only=False):
+def check_sentences(text, threshold=80, print_only=False):
     """check if a given text consists of more non-swiss chars than allowed by the threshold
 
     Args:
