@@ -511,15 +511,21 @@ class SeqToLabelModelOnlyHiddenBiDeepLSTM(nn.Module):
                                   out_lin_size=50, dropout=dropout)
         self.linblock2 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
                                   out_lin_size=50, dropout=dropout)
-        self.linear = nn.Linear(100, num_classes)
+        self.linblock3 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                  out_lin_size=50, dropout=dropout)
+        self.linblock4 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                  out_lin_size=50, dropout=dropout)
+        self.linear = nn.Linear(200, num_classes)
         self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         embeds = self.embedding(x)
-        seq_output, h_n = self.char_lang_model(embeds)
+        seq_output, (h_n, c_n) = self.char_lang_model(embeds)
         out1 = self.linblock1(h_n[0])
-        out2 = self.linblock2(h_n[0])
-        out = self.linear(torch.cat((out1, out2), dim=1))
+        out2 = self.linblock2(h_n[1])
+        out3 = self.linblock3(c_n[0])
+        out4 = self.linblock4(c_n[1])
+        out = self.linear(torch.cat((out1, out2, out3, out4), dim=1))
         out_proba = self.logsoftmax(out)
         return out_proba
 
