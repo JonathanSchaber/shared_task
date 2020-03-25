@@ -23,9 +23,10 @@
     "hidden_gru_size": 300,
     "num_gru_layers": 1
   },
+  "noisify": true,
   "noise_params":
   {
-    "token_threshold": 0.98,
+    "token_threshold": 0.97,
     "token_continue_threshold": 0.5,
     "char_threshold": 0.95,
     "char_continue_threshold": 0.3
