@@ -497,6 +497,38 @@ class SeqToLabelModelOnlyHiddenBiDeepOriginal(nn.Module):
         return out_proba
 
 
+class SeqToLabelModelOnlyHiddenBiDeepLSTM(nn.Module):
+
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
+        super(SeqToLabelModelOnlyHiddenBiDeepLSTM, self).__init__()
+        self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
+        self.char_lang_model = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
+                                      num_layers=num_gru_layers, batch_first=True, bidirectional=True)
+        self.in_lin_size = hidden_gru_size * num_gru_layers
+        self.in_betw_size = int(self.in_lin_size / 2)
+        self.linblock1 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                  out_lin_size=50, dropout=dropout)
+        self.linblock2 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                  out_lin_size=50, dropout=dropout)
+        self.linblock3 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                  out_lin_size=50, dropout=dropout)
+        self.linblock4 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
+                                  out_lin_size=50, dropout=dropout)
+        self.linear = nn.Linear(200, num_classes)
+        self.logsoftmax = nn.LogSoftmax(dim=1)
+
+    def forward(self, x):
+        embeds = self.embedding(x)
+        seq_output, (h_n, c_n) = self.char_lang_model(embeds)
+        out1 = self.linblock1(h_n[0])
+        out2 = self.linblock2(h_n[1])
+        out3 = self.linblock3(c_n[0])
+        out4 = self.linblock4(c_n[1])
+        out = self.linear(torch.cat((out1, out2, out3, out4), dim=1))
+        out_proba = self.logsoftmax(out)
+        return out_proba
+
+
 class SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin(nn.Module):
 
     def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
@@ -995,7 +1027,8 @@ models = {
     'SeqToLabelModelOnlyHiddenUniDeep': SeqToLabelModelOnlyHiddenUniDeep,
     'SeqToLabelModelOnlyHiddenBiDeepOriginal': SeqToLabelModelOnlyHiddenBiDeepOriginal,
     'SeqToLabelModelOutputAndHiddenBi': SeqToLabelModelOutputAndHiddenBi,
-    'SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin': SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin
+    'SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin': SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin,
+    'SeqToLabelModelOnlyHiddenBiDeepLSTM': SeqToLabelModelOnlyHiddenBiDeepLSTM
 }
 
 
