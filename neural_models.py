@@ -97,8 +97,7 @@ def noisify_text(text, noise_params):
             noise_token = get_random_english_or_german_token()
             noisy_tokens.append(noise_token)
             num_noise_tokens += 1
-            r2 = random.random()
-            while r2 > token_continue_threshold and not num_noise_tokens > int(len(tokens) / 2):
+            while random.random() > token_continue_threshold and not num_noise_tokens > int(len(tokens) / 2):
                 noise_token = get_random_english_or_german_token()
                 noisy_tokens.append(noise_token)
                 num_noise_tokens += 1
@@ -118,8 +117,7 @@ def noisify_text(text, noise_params):
                 noisy_chars += noise_char
             else:
                 continue
-            r2 = random.random()
-            while r2 > char_continue_threshold:
+            while random.random() > char_continue_threshold:
                 noisy_chars += noise_char
         noisy_chars += char
     return noisy_chars
