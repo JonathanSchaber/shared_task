@@ -489,7 +489,6 @@ class SeqToLabelModelOnlyHiddenBiDeepOriginal(nn.Module):
     def forward(self, x):
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
-        import pdb; pdb.set_trace()
         out1 = self.linblock1(h_n[0])
         out2 = self.linblock2(h_n[0])
         out = self.linear(torch.cat((out1, out2), dim=1))
