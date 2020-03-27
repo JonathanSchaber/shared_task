@@ -1,7 +1,7 @@
 import argparse
 import csv
 import numpy as np
-
+from scipy.special import softmax
 from collections import defaultdict
 from statistics import mode
 
@@ -15,10 +15,12 @@ def parse_cmd_args():
     return parser.parse_args()
 
 
-def softmax(x):
-    """Compute softmax values for each sets of scores in x."""
-    e_x = np.exp(x - np.max(x))
-    return e_x / e_x.sum(axis=0)
+# def softmax(x):
+#     """Compute softmax values for each sets of scores in x."""
+#     # e_x = np.exp(x - np.max(x))
+#     # e_x = np.exp(x[])
+#     # return e_x / e_x.sum(axis=0)
+#     return softmax(x)
 
 
 def majority_decision_dev(list_files):
@@ -70,13 +72,18 @@ def majority_decision_test(list_files):
             csv_reader = csv.reader(f)
             for row in csv_reader:
                 tweet_id, label_pred, confidence = row
-                id_preds[tweet_id].append((label_pred, confidence))
+                id_preds[tweet_id].append((int(label_pred), float(confidence)))
 
     assert all(len(labels_pred) == num_files for labels_pred in id_preds.values()), "ATTENTION: Something wrong with prediction files!"
                 
     for tweet_id in id_preds:
         maj_pred = mode([pred[0] for pred in id_preds[tweet_id]])
-        maj_conf = softmax([sum([pred[1] for pred in id_preds.values() if pred[0] == maj_pred]), sum([pred[1] for pred in id_preds.values() if pred[1] != maj_pred])])[0]
+        sum_conf_swiss = sum([pred[1] for pred in id_preds[tweet_id] if pred[0] == 0])
+        sum_conf_other = sum([pred[1] for pred in id_preds[tweet_id] if pred[0] == 1])
+        sum_conf = sum_conf_swiss + sum_conf_other
+        if sum_conf == 0:
+            import pdb; pdb.set_trace()
+        maj_conf = sum_conf_swiss / sum_conf if maj_pred == 0 else sum_conf_other / sum_conf
         definite_preds.append([tweet_id, maj_pred, maj_conf])
 
     return definite_preds
