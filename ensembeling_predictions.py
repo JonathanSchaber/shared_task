@@ -22,7 +22,6 @@ def majority_decision(list_files):
         definite_preds: list
     """
     num_files = len(list_files)
-    id_text = {}
     id_preds = defaultdict(lambda: [])
     definite_preds = []
 
@@ -30,14 +29,13 @@ def majority_decision(list_files):
         with open(file, "r", encoding="utf8") as f:
             csv_reader = csv.reader(f)
             for row in csv_reader:
-                tweet_id, text, label_pred = row
-                id_text[tweet_id] = text
+                tweet_id, label_pred, confidence = row
                 id_preds[tweet_id].append(label_pred)
 
     assert all(len(labels_pred) == num_files for labels_pred in id_preds.values()), "ATTENTION: Something wrong with prediction files!"
                 
     for tweet_id in id_preds:
-        definite_preds.append([tweet_id, mode(id_preds[tweet_id]), id_text[tweet_id]])
+        definite_preds.append([tweet_id, mode(id_preds[tweet_id])])
 
     return definite_preds
     
