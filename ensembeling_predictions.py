@@ -5,6 +5,7 @@ import numpy as np
 from collections import defaultdict
 from statistics import mode
 
+
 def parse_cmd_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
@@ -37,13 +38,16 @@ def majority_decision_dev(list_files):
         with open(file, "r", encoding="utf8") as f:
             csv_reader = csv.reader(f)
             for row in csv_reader:
-            text_id, label_binary, label_ternary, label_finegrained, pred_binary, pred_ternary, pred_finegrained, text, masked, source = row
+                text_id, label_binary, label_ternary, label_finegrained, pred_binary, pred_ternary, pred_finegrained, text, masked, source = row
                 id_preds[text_id].append(pred_binary)
 
     assert all(len(labels_pred) == num_files for labels_pred in id_preds.values()), "ATTENTION: Something wrong with prediction files!"
-                
-    for tweet_id in id_preds:
-        definite_preds.append([text_id, label_binary, label_ternary, label_finegrained, mode(id_preds[text_id]), pred_ternary, pred_finegrained, text, masked, source])
+
+    with open(list_files[0], "r", encoding="utf8") as f:
+        csv_reader = csv.reader(f)
+        for row in csv_reader:
+            text_id, label_binary, label_ternary, label_finegrained, pred_binary, pred_ternary, pred_finegrained, text, masked, source = row
+            definite_preds.append([text_id, label_binary, label_ternary, label_finegrained, mode(id_preds[text_id]), pred_ternary, pred_finegrained, text, masked, source])
 
     return definite_preds
     
@@ -77,6 +81,7 @@ def majority_decision_test(list_files):
 
     return definite_preds
 
+
 def write_to_file(preds, outfile):
     """Write definite predictions to file.
     
@@ -98,14 +103,14 @@ def main():
     list_files = args.input_files[0]
     output_file = args.output_file
     modus = args.modus
-    if len(list_files) % 2 != 0:
+    if len(list_files) % 2 == 0:
         print("Warning: Even number of files provided!")
     if modus == "dev":
         print("Calculating majority decisions...")
-        maj_preds = majority_decision(list_files)
+        maj_preds = majority_decision_dev(list_files)
     elif modus == "test":
         print("Calculating majority decisions...")
-        maj_preds = majority_decision(list_files)
+        maj_preds = majority_decision_test(list_files)
     else:
         print("Warning: Unknown Modus! Aborting!")
         return False
