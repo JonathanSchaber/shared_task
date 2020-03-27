@@ -34,7 +34,7 @@ def majority_decision(list_files):
                 id_text[tweet_id] = text
                 id_preds[tweet_id].append(label_pred)
 
-    assert all(len(labels_pred) == num_files for labels_pred in id_preds.values())
+    assert all(len(labels_pred) == num_files for labels_pred in id_preds.values()), "ATTENTION: Something wrong with prediction files!"
                 
     for tweet_id in id_preds:
         definite_preds.append([tweet_id, mode(id_preds[tweet_id]), id_text[tweet_id]])
