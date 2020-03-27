@@ -74,10 +74,10 @@ def predict_on_input(model, model_type, path_in, config, char_checker, device):
             prob_other = 1 - prob_swiss_finegrained
             if prediction.item() == 0:
                 prob_binary = prob_swiss
-                pred_binary = 0
+                pred_binary = 'gsw'
             else:
                 prob_binary = prob_other
-                pred_binary = 1
+                pred_binary = 'not_gsw'
             predictions.append((tweet_id, pred_binary, prob_binary))
     return predictions
 
@@ -93,6 +93,7 @@ def write_to_file(preds, outfile):
     """
     with open(outfile, "w", encoding="utf8") as f:
         csv_writer = csv.writer(f)
+        csv_writer.writerow(['tweet_id', 'label', 'score'])
         for item in preds:
             csv_writer.writerow(item)
 
