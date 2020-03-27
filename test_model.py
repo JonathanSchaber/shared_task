@@ -10,7 +10,7 @@ from scipy.special import softmax
 
 # General Pipeline: specify model -> specify test set -> specify if with char-checker -> specify if written to file
 
-""" sample call on rattle: 
+""" sample call on rattle: aaa
     python3 test_model.py -m /srv/scratch3/jgoldz_jschab/shared_task/models/SeqToLabelModelOnlyHiddenBiDeepOriginal_seq2label_finegrained_19_15_60429_Wed_Mar_25_11:57:02_2020_endTrue.model -c model_configs/config_seq2label_19.json -t torch -i /srv/scratch3/jgoldz_jschab/shared_task/data/main/test_tweets.full.csv -o OUTFILE.csv """
 
 def parse_cmd_args():
