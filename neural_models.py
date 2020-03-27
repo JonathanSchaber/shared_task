@@ -479,9 +479,9 @@ class SeqToLabelModelOnlyHiddenBiDeepOriginal(nn.Module):
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=True)
         self.in_lin_size = hidden_gru_size * num_gru_layers
         self.in_betw_size = int(self.in_lin_size / 2)
-        self.linblock1 = LinBlock(in_lin_size=int(self.in_lin_size/2), inbetw_lin_size=self.in_betw_size,
+        self.linblock1 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
                                   out_lin_size=50, dropout=dropout)
-        self.linblock2 = LinBlock(in_lin_size=int(self.in_lin_size/2), inbetw_lin_size=self.in_betw_size,
+        self.linblock2 = LinBlock(in_lin_size=self.in_lin_size, inbetw_lin_size=self.in_betw_size,
                                   out_lin_size=50, dropout=dropout)
         self.linear = nn.Linear(100, num_classes)
         self.logsoftmax = nn.LogSoftmax(dim=1)
