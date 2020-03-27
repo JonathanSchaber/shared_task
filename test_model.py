@@ -10,7 +10,7 @@ from neural_models import *
 # General Pipeline: specify model -> specify test set -> specify if with char-checker -> specify if written to file
 
 """ sample call on rattle: 
-    python3 test_model.py -m /srv/scratch3/jgoldz_jschab/shared_task/models/SeqToLabelModelOnlyHiddenBiDeepOriginal_seq2label_finegrained_19_15_60429_Wed_Mar_25_11:57:02_2020_endTrue.model -c model_configs/config_seq2label_19.json -t torch -i /srv/scratch3/jgoldz_jschab/shared_task/data/main/test_tweets.full.csv -o OUTFILE.csv -w"""
+    python3 test_model.py -m /srv/scratch3/jgoldz_jschab/shared_task/models/SeqToLabelModelOnlyHiddenBiDeepOriginal_seq2label_finegrained_19_15_60429_Wed_Mar_25_11:57:02_2020_endTrue.model -c model_configs/config_seq2label_19.json -t torch -i /srv/scratch3/jgoldz_jschab/shared_task/data/main/test_tweets.full.csv -o OUTFILE.csv """
 
 def parse_cmd_args():
     """Parse command line arguments."""
@@ -20,7 +20,6 @@ def parse_cmd_args():
     parser.add_argument('-t', '--type', type=str, help='Either "torch" or "sklearn".')
     parser.add_argument("-c", "--config", type=str, help="Path to hyperparamter/config file (json).")
     parser.add_argument("-cc", "--charchecker", action="store_true", default=True, help="Do pre-elimination with char-checker.")
-    parser.add_argument("-w", "--write", action="store_true", default=False, help="Write to file (name automatically generated.")
     parser.add_argument("-o", "--outfile", type=str, help="Path to outfile to write to.")
     parser.add_argument('-g', '--gpu', default=0, help='The number of the gpu to be used.')
     return parser.parse_args()
@@ -90,9 +89,8 @@ def main():
     model = load_model(args.model, args.type, device="cuda:{}".format(args.gpu))
     print("Evaluate on test set...")
     results = predict_on_input(model, args.type, args.path_in, config, args.charchecker, "cuda:{}".format(args.gpu))
-    if args.write == True:
-        print("Writing to file {}.".format(args.outfile))
-        write_to_file(results, args.outfile)
+    print("Writing to file {}.".format(args.outfile))
+    write_to_file(results, args.outfile)
     print("Done.")
 
 if __name__ == "__main__":
