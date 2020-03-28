@@ -49,7 +49,7 @@ def predict_on_input(model, model_type, path_in, config, char_checker, device):
             adjust_text = adjust_text_len(text, max_length)
             if char_checker == True:
                 if check_sentences(text) == False:
-                    predictions.append((tweet_id, 1, 0.99))
+                    predictions.append((tweet_id, 'not_gsw', 0.99))
                     continue
             tweet_idxs = [char_to_idx.get(char, char_to_idx['unk']) for char in adjust_text][:max_length]
             x = np.zeros(max_length)
