@@ -3,6 +3,7 @@ import argparse
 import json
 import csv
 import random
+import time
 import numpy as np
 import torch
 from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score
@@ -846,7 +847,7 @@ class CNNHierarch(nn.Module):
         return out_proba
 
 
-def save_model(trained_model, config, location, num_epochs, num_batches, user, all_dev_results=None,
+def save_model(trained_model, config, location, num_epochs, num_batches, user, train_time, all_dev_results=None,
                finale_true=False):
     if location == 'local':
         path_out = 'models'
@@ -876,6 +877,7 @@ def save_model(trained_model, config, location, num_epochs, num_batches, user, a
         with open(fpath_dev_results, 'w', encoding='utf8') as f:
             for epoch_result in all_dev_results:
                 f.write(str(epoch_result) + '\n')
+            f.write('train time: {}\n'.format(train_time))
         print('Dev-results saved to {}'.format(fpath_dev_results))
 
 
@@ -1055,9 +1057,12 @@ def main():
     print('Loading config from {}...'.format(args.path_config))
     config = load_config(args.path_config)
     print('Initiate training procedure...')
+    time_before = time.time()
     trained_model, num_epochs, num_batches, all_dev_results = train_model(config)
+    time_after = time.time()
+    time_taken = time_after - time_before
     print('Saving trained model...')
-    save_model(trained_model, config, args.location, num_epochs, num_batches, args.user, all_dev_results,
+    save_model(trained_model, config, args.location, num_epochs, num_batches, args.user, time_taken, all_dev_results,
                finale_true=True)
 
 
