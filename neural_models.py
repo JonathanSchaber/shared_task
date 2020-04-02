@@ -847,7 +847,7 @@ class CNNHierarch(nn.Module):
         return out_proba
 
 
-def save_model(trained_model, config, location, num_epochs, num_batches, user, train_time, all_dev_results=None,
+def save_model(trained_model, config, location, num_epochs, num_batches, user, train_time=None, all_dev_results=None,
                finale_true=False):
     if location == 'local':
         path_out = 'models'
