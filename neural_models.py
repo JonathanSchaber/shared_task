@@ -1046,7 +1046,8 @@ models = {
     'SeqToLabelModelOnlyHiddenUniDeep': SeqToLabelModelOnlyHiddenUniDeep,
     'SeqToLabelModelOnlyHiddenBiDeepOriginal': SeqToLabelModelOnlyHiddenBiDeepOriginal,
     'SeqToLabelModelOutputAndHiddenBi': SeqToLabelModelOutputAndHiddenBi,
-    'SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin': SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin
+    'SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin': SeqToLabelModelOnlyHiddenBiDeepOriginalLargeLin,
+    'SeqToLabelModelOnlyHiddenBiDeepLinBlock': SeqToLabelModelOnlyHiddenBiDeepLinBlock
 }
 
 
