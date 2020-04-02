@@ -583,19 +583,19 @@ class SeqToLabelModelOnlyHiddenBiDeepLinBlock(nn.Module):
         self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
         self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
                                       num_layers=num_gru_layers, batch_first=True, bidirectional=True)
-        self.linblock_in_size = hidden_gru_size
+        self.linblock_in_size = hidden_gru_size * 2
         self.linblock_in_betw_size = hidden_gru_size
         self.linblock_out_size = int(self.linblock_in_betw_size / 2) if self.linblock_in_betw_size > 100 else 50
         self.linblock = LinBlock(in_lin_size=self.linblock_in_size, inbetw_lin_size=self.linblock_in_betw_size,
-                                   out_lin_size=self.linblock_out_size, dropout=dropout)
+                                   out_lin_size=num_classes, dropout=dropout)
         # self.linear = nn.Linear(self.linblock_out_size*num_gru_layers*2, num_classes)
         self.logsoftmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         embeds = self.embedding(x)
         seq_output, h_n = self.char_lang_model(embeds)
-        concat_h_n = torch.cat(h_n, dim=1)
-        out = self.linblock(concat_h_n, dim=1)
+        concat_h_n = torch.cat((h_n[0], h_n[1]), dim=1)
+        out = self.linblock(concat_h_n)
         out_proba = self.logsoftmax(out)
         return out_proba
 
