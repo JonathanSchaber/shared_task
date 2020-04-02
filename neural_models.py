@@ -42,15 +42,17 @@ def load_config(path):
         return json.load(f)
 
 
-def adjust_text_len(text, max_len):
+def adjust_text_len(text, max_len, config):
     """Multiply char_idxs until max-len.
 
     Args:
         text: str
         max_len: int
+        config: dict
     """
-    while len(text) < max_len:
-        text += (" " + text)
+    if config['repeat']:
+        while len(text) < max_len:
+            text += (" " + text)
     text = text[:max_len]
     return text
 
@@ -152,7 +154,7 @@ def get_next_batch(csv_reader, batch_size, granularity, char_to_idx, max_length,
                 noisy_text = noisify_text(row[1], noise_params=config['noise_params'])
             else:
                 noisy_text = row[1]
-            adjust_text = adjust_text_len(noisy_text, max_length)
+            adjust_text = adjust_text_len(noisy_text, max_length, config)
             char_idxs = [char_to_idx.get(char, char_to_idx['unk']) for char in adjust_text]
             label = row[index]
             x_item = np.zeros(max_length)
@@ -569,6 +571,30 @@ class SeqToLabelModelOnlyHiddenBiDeep(nn.Module):
         for i, h_n_i in enumerate(h_n):
             lin_outputs.append(self.linblocks[i](h_n_i))
         out = self.linear(torch.cat(lin_outputs, dim=1))
+        out_proba = self.logsoftmax(out)
+        return out_proba
+
+
+class SeqToLabelModelOnlyHiddenBiDeepLinBlock(nn.Module):
+
+    def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout):
+        super(SeqToLabelModelOnlyHiddenBiDeepLinBlock, self).__init__()
+        self.embedding = nn.Embedding(len(char_to_idx), embedding_dim=embedding_dim)
+        self.char_lang_model = nn.GRU(input_size=embedding_dim, hidden_size=hidden_gru_size, dropout=dropout,
+                                      num_layers=num_gru_layers, batch_first=True, bidirectional=True)
+        self.linblock_in_size = hidden_gru_size
+        self.linblock_in_betw_size = hidden_gru_size
+        self.linblock_out_size = int(self.linblock_in_betw_size / 2) if self.linblock_in_betw_size > 100 else 50
+        self.linblock = LinBlock(in_lin_size=self.linblock_in_size, inbetw_lin_size=self.linblock_in_betw_size,
+                                   out_lin_size=self.linblock_out_size, dropout=dropout)
+        # self.linear = nn.Linear(self.linblock_out_size*num_gru_layers*2, num_classes)
+        self.logsoftmax = nn.LogSoftmax(dim=1)
+
+    def forward(self, x):
+        embeds = self.embedding(x)
+        seq_output, h_n = self.char_lang_model(embeds)
+        concat_h_n = torch.cat(h_n, dim=1)
+        out = self.linblock(concat_h_n, dim=1)
         out_proba = self.logsoftmax(out)
         return out_proba
 
