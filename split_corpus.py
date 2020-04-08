@@ -8,6 +8,7 @@ from random import shuffle
 To execute the script use: 
 python3 split_corpus.py -r 0.8
 to get a train test split of 0.8 using the default paths.
+test
 """
 
 
