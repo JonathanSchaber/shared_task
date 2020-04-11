@@ -16,6 +16,7 @@
   "num_epochs": 15,
   "max_length_text": 100,
   "learning_rate": 0.001,
+  "repeat": true,
   "model_params": {
     "num_classes": 23,
     "dropout": 0.1,
