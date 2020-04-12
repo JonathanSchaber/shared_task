@@ -1,0 +1,35 @@
+{
+  "model_name": "SeqToLabelModelOnlyHiddenBiDeepOriginal",
+  "config_id": "seq2label_ternary_45",
+  "batch_size": 64,
+  "granularity": "ternary",
+  "path_train": {
+    "local": "data/main/train_main.csv",
+    "midgard": "/home/user/jgoldz/storage/shared_task/data/main/train_main.csv",
+    "rattle": "/srv/scratch3/jgoldz_jschab/shared_task/data/main/train_main.csv"
+  },
+  "path_dev": {
+    "local": "data/main/dev_main.csv",
+    "midgard": "/home/user/jgoldz/storage/shared_task/data/main/dev_main.csv",
+    "rattle": "/srv/scratch3/jgoldz_jschab/shared_task/data/main/dev_main.csv"
+  },
+  "num_epochs": 15,
+  "max_length_text": 100,
+  "learning_rate": 0.001,
+  "repeat": true,
+  "model_params": {
+    "num_classes": 3,
+    "dropout": 0.1,
+    "embedding_dim": 300,
+    "hidden_gru_size": 300,
+    "num_gru_layers": 1
+  },
+  "noisify": true,
+  "noise_params":
+  {
+    "token_threshold": 0.99,
+    "token_continue_threshold": 0.6,
+    "char_threshold": 0.97,
+    "char_continue_threshold": 0.5
+  }
+}
