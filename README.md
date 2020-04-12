@@ -4,42 +4,6 @@ Swiss German Language Detection
 
 Collaborators: Janis Goldzycher, Jonathan Schaber
 
-## Timeline:
-
-- 22.03.2020: Bigram Model trained/finished
-- 29.03.2020: Embedding Based Model trained/finished
-- 20.03.2020: Test Set Release
-- 27.03.2020: Experimental Results Due
-- 03.04.2020: Publication of Evaluation Results
-- 14.04.2020: System Description Submission
-- 21.04.2020: Acceptance Notification
-- 05.05.2020: Camera Ready
-- 23-24.06.2020: Swiss Text Conference
-
-TODOs for week 17.-22. Feb:
-- [x] write script to split training/validation data
-- [x] write script for evaluation
-- [x] write bigram based model
-- [x] train and test bigram based model
-- [x] get balanced training data -> Janis
-- [ ] train svm over subset of balanced training data to get baseline -> Janis
-- [ ] implement filter mechanism; all on swiss keyboard; test on swiss data, if stuff is filtered out -> Jonathan
-- [ ] test if filter mechanism produces errors -> Jonathan
-- [ ] train character embeddings
-- [ ] train CNN
-
-TODOs for week 23.-29. Feb:
-- [ ] train and test embedding based model
-
-Format of system output:
-- csv file
-- columns: id, text, masked-items, label-binary, label-ternary label-finegrained, corpus-name
-- swiss german always has the label 0
-- optional: confidence as additional column
-
-Format of bigram repr files:
-text_id KOMMA label_binary KOMMA label_ternary KOMMA label_finegrained KOMMA Representations
-
 ## Corpus Statistics
 
 ### Overall
@@ -119,30 +83,6 @@ rule based way (without classification)
   1. filter out text that is mostly not lGood video from oral presentation: https://vimeo.com/384767351atin1 (ignore emojis) -> negative for sure
   2. clean/mask text remaining text examples
   3. pass remaining text examples to trained model (and only train model on such languages)
-
-#### Ideas for models
-
-  - bigram based
-    - "multi"-hot-encoding for bigrams
-    - problems: sparsity, high dimensionality
-    - for classification on top: svm, mlp, CNNs (hierarchical)
-  - character embedding based
-    - compute character embeddings using char-lang-model or cbow/skip-gram for on char-level?
-    - for classification on top: CNN (hierarchical, multiple channels, dilation etc)  
-    
-    
-## Questions
-
-### Organizational
-- Can the submitted paper count as the report for the pp? yes
-
-### Technical
-- what are the SOTA performances in language detection? -> over 99%
-- What ratio of swiss german vs not-swiss german should we target? (depends on distribution of test data?)
-- Invest more time in collecting data or tweaking models (do we need more swiss german data)?
-- Encode with padding or rnn-hidden representations?
-- other model ideas?
-- other representation ideas?
 
 ## Additional Corpora
 - Hamburg Tree Bank: already downloaded
