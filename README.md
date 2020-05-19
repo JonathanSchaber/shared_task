@@ -7,7 +7,7 @@ Collaborators: Janis Goldzycher, Jonathan Schaber
 ## Project
 
 This Repo contains the code for our system subsmission for the Swiss German language detection shared task, part of the GermEval 2020 Campaign, held at the SwissText & KONVENS 2020 conference.
-In the file 'neural_models.py' you find an overview over different architectures we experimented with.
+In the file `neural_models.py` you find an overview over different architectures we experimented with.
 The submitted model is the XXXX.
 
 Note that to reproduce our results you need to download the corpora and reproduce the corresponding directory structure as well.
