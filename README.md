@@ -4,6 +4,14 @@ Swiss German Language Detection
 
 Collaborators: Janis Goldzycher, Jonathan Schaber
 
+## Project
+
+This Repo contains the code for our system subsmission for the Swiss German language detection shared task, part of the GermEval 2020 Campaign, held at the SwissText & KONVENS 2020 conference.
+In the file 'neural_models.py' you find an overview over different architectures we experimented with.
+The submitted model is the XXXX.
+
+Note that to reproduce our results you need to download the corpora and reproduce the corresponding directory structure as well.
+
 ## Corpus Statistics
 
 ### Overall
@@ -50,8 +58,9 @@ Number of examples:
 7. `python create_train_subcorpus.py -i data/main/dev_main_bigr_repr.csv -g <granularity> -n num_ex_per_clas`
     - outputfile: `data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv`
 8. `python bigram_based_models.py -t data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -d data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -o results/`
-9. `python neural_models.py -c <path_to_config>`
-10. `python evaluation.py -p <predicted-file>`
+9. `python neural_models.py -c <path_to_config> -d <device> -g <gpu-core> -l <location>`
+10. `python predict.py -m <model> -t <type> -i <input file> -o <output file> -c <config file> -g <gpu-core>`
+11. `python evaluation.py -p <predicted-file>`
 
 ### Server
 1. activate the conda environment
@@ -65,7 +74,7 @@ Number of examples:
     - outputfile: `/home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv`
 8. `python bigram_based_models.py -t /home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -d /home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -o results/`
 9. `python neural_models.py -c <path_to_config> -d <device> -g <gpu-core> -l <location>`
-10. `python predict.py -m <model> -t -i <input file> -o <output file> -c <config file> -g <gpu-core>`
+10. `python predict.py -m <model> -t <type> -i <input file> -o <output file> -c <config file> -g <gpu-core>`
 11. `python evaluation.py -p <predicted-file>`
 
 ## Linguistic Considerations
