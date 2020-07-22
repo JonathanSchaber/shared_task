@@ -8,9 +8,10 @@ Collaborators: Janis Goldzycher, Jonathan Schaber
 
 This Repo contains the code for our system subsmission for the Swiss German language detection shared task, part of the GermEval 2020 Campaign, held at the SwissText & KONVENS 2020 conference.
 In the file `neural_models.py` you find an overview over different architectures we experimented with.
-The submitted model is the XXXX.
+The submitted model is the one defined in the `SeqToLabelModelOnlyHiddenBiDeepOriginal` class.
 
 Note that to reproduce our results you need to download the corpora and reproduce the corresponding directory structure as well.
+For detailed information, please see the [Execution Instructions](#execution-instructions)
 
 ## Corpus Statistics
 
@@ -51,31 +52,41 @@ Number of examples:
 1. activate the conda environment
 2. `python corpus_parser.py`
 3. `python split_corpus.py`
-4. `python generate_bigram_repr.py -g -m train_bigram_to_dim_mapping.json -i data/main/train_main.csv -o data/main/train_main_bigr_repr.csv`
-5. `python generate_bigram_repr.py -m train_bigram_to_dim_mapping.json -i data/main/dev_main.csv -o data/main/dev_main_bigr_repr.csv`
-6. `python create_train_subcorpus.py -i data/main/train_main_bigr_repr.csv -g <granularity> -n num_ex_per_clas`
+
+#### For training a neural model
+4. `python neural_models.py -c <path_to_config> -d <device> -g <gpu-core> -l <location>`
+5. `python predict.py -m <model> -t <type> -i <input file> -o <output file> -c <config file> -g <gpu-core>`
+6. `python evaluation.py -p <predicted-file>`
+
+#### For training a character bigram-based SVM
+7. `python generate_bigram_repr.py -g -m train_bigram_to_dim_mapping.json -i data/main/train_main.csv -o data/main/train_main_bigr_repr.csv`
+8. `python generate_bigram_repr.py -m train_bigram_to_dim_mapping.json -i data/main/dev_main.csv -o data/main/dev_main_bigr_repr.csv`
+9. `python create_train_subcorpus.py -i data/main/train_main_bigr_repr.csv -g <granularity> -n num_ex_per_clas`
     - outputfile: `data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv`
-7. `python create_train_subcorpus.py -i data/main/dev_main_bigr_repr.csv -g <granularity> -n num_ex_per_clas`
+10. `python create_train_subcorpus.py -i data/main/dev_main_bigr_repr.csv -g <granularity> -n num_ex_per_clas`
     - outputfile: `data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv`
-8. `python bigram_based_models.py -t data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -d data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -o results/`
-9. `python neural_models.py -c <path_to_config> -d <device> -g <gpu-core> -l <location>`
-10. `python predict.py -m <model> -t <type> -i <input file> -o <output file> -c <config file> -g <gpu-core>`
-11. `python evaluation.py -p <predicted-file>`
+11. `python bigram_based_models.py -t data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -d data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -o results/`
 
 ### Server
 1. activate the conda environment
 2. `python corpus_parser.py -s`
 3. `python split_corpus.py -s -i /home/user/jgoldz/storage/shared_task/data/main/main.csv -o /home/user/jgoldz/storage/shared_task/data/main/`
-4. `python generate_bigram_repr.py -g -m train_bigram_to_dim_mapping.json -i /home/user/jgoldz/storage/shared_task/data/main/train_main.csv -o /home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr.csv`
-5. `python generate_bigram_repr.py -m train_bigram_to_dim_mapping.json -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o /home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr.csv`
-6. `python create_train_subcorpus.py -i /home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr.csv -g <granularity> -n <num_ex_per_clas>`
+
+
+#### For training a neural model
+4. `python neural_models.py -c <path_to_config> -d <device> -g <gpu-core> -l <location>`
+5. `python predict.py -m <model> -t <type> -i <input file> -o <output file> -c <config file> -g <gpu-core>`
+6. `python evaluation.py -p <predicted-file>`
+
+
+#### For training a character bigram-based SVM
+7. `python generate_bigram_repr.py -g -m train_bigram_to_dim_mapping.json -i /home/user/jgoldz/storage/shared_task/data/main/train_main.csv -o /home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr.csv`
+8. `python generate_bigram_repr.py -m train_bigram_to_dim_mapping.json -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o /home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr.csv`
+9. `python create_train_subcorpus.py -i /home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr.csv -g <granularity> -n <num_ex_per_clas>`
     - outputfile: `/home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv`
-7. `python create_train_subcorpus.py -i /home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr.csv -g <granularity> -n <num_ex_per_clas>`
+10. `python create_train_subcorpus.py -i /home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr.csv -g <granularity> -n <num_ex_per_clas>`
     - outputfile: `/home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv`
-8. `python bigram_based_models.py -t /home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -d /home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -o results/`
-9. `python neural_models.py -c <path_to_config> -d <device> -g <gpu-core> -l <location>`
-10. `python predict.py -m <model> -t <type> -i <input file> -o <output file> -c <config file> -g <gpu-core>`
-11. `python evaluation.py -p <predicted-file>`
+11. `python bigram_based_models.py -t /home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -d /home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -o results/`
 
 ## Linguistic Considerations
 
