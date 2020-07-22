@@ -18,9 +18,9 @@ For detailed information, please see the [Execution Instructions](#execution-ins
 ## Corpus Statistics
 
 ### Overall
-- Number of examples (line of main.csv): 3'798'459
-- Number positive examples (ch): 760'729 (`grep -Pc '\d+,.*,.*,0,.*$' main.csv`)
-- Number of negative examples (other): 2'937'735 (`grep -Pc '\d+,.*,.*,0,.*$' main.csv`) <- needs update
+- Number of examples (line of main.csv): 4'071'017
+- Number positive examples (ch): 780'507 (`grep -Pc '\d+,.*,.*,0,.*$' main.csv`)
+- Number of negative examples (other): 3'290'515 (`grep -Pc '\d+,.*,.*,1,.*$' main.csv`)
 - Number of standard german examples (part of other): hamburgtb + sbde + leipzig_de + leipzig_bar + a little ex3 = ca. 600'000
 
 ### Subcorpora
@@ -28,6 +28,7 @@ For detailed information, please see the [Execution Instructions](#execution-ins
 Number of examples:
 - ex3-corpus: 66'921
 - hamburgtb: 261'821
+- hrWa: 10'000
 - sbde: 9'982
 - noah: 7'303
 - sbch: 90'897
@@ -38,13 +39,21 @@ Number of examples:
 - leipzig_fr: 299'017
 - leipzig_frr: 10'000
 - leipzig_fry: 100'000
+- leipzig_gsw: 100'000
+- leipzig_hbs: 100'000
+- leipzig_ita: 300'000
 - leipzig_ita: 300'000
 - leipzig_lmo: 30'000
 - leipzig_itz: 300'000
 - leipzig_nds: 100'000
 - leipzig_nld: 300'000
 - leipzig_nor: 300'000
+- lepizig_por: 100'000
+- leipzig_ron: 100'000
 - leipzig_swe: 300'000
+- leipzig_spa: 100'000
+- leipzig_srp: 100'000
+- leipzig_tgl: 100'000
 - leipzig_yid: 30'000
 
 
