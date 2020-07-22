@@ -4,6 +4,8 @@ Swiss German Language Detection
 
 Collaborators: Janis Goldzycher, Jonathan Schaber
 
+Paper Link: http://ceur-ws.org/Vol-2624/germeval-task2-paper3.pdf
+
 ## Project
 
 This Repo contains the code for our system subsmission for the Swiss German language detection shared task, part of the GermEval 2020 Campaign, held at the SwissText & KONVENS 2020 conference.
