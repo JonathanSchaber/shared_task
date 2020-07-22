@@ -36,7 +36,6 @@ def load_corpus(path_in):
 
 def get_split_index(ratio, num_examples):
     """Compute index at which corpus is split.
-
     Args:
         ratio: float, for example 0.7 -> 70% training ste, 30% dev set
         num_examples: int
@@ -46,7 +45,6 @@ def get_split_index(ratio, num_examples):
 
 def write_csv_to_file(rows, path):
     """Write rows to csv-file at <path>
-
     Args:
         rows: list of list of any
         path: str
@@ -59,7 +57,6 @@ def write_csv_to_file(rows, path):
 
 def create_train_dev_files(corpus, split_index, path_out):
     """Write examples to train and dev files.
-
     Args:
         corpus: list of rows
         split_index: int
