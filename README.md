@@ -60,9 +60,10 @@ Number of examples:
 ## Execution Instructions
 
 ### Local 
-1. activate the conda environment
-2. `python corpus_parser.py`
-3. `python split_corpus.py`
+1. create conda environment `conda create --name <env_name> --file requirements.txt`
+2. activate the conda environment `conda activate <env_name>`
+3. `python corpus_parser.py`
+4. `python split_corpus.py -i <path_to_main.csv> -o <path_to_train_dev_files_dir>`
 
 #### For training a neural model
 4. `python neural_models.py -c <path_to_config> -d <device> -g <gpu-core> -l <location>`
@@ -79,9 +80,10 @@ Number of examples:
 11. `python bigram_based_models.py -t data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -d data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -o results/`
 
 ### Server
-1. activate the conda environment
-2. `python corpus_parser.py -s`
-3. `python split_corpus.py -s -i /home/user/jgoldz/storage/shared_task/data/main/main.csv -o /home/user/jgoldz/storage/shared_task/data/main/`
+1. create conda environment `conda create --name <env_name> --file requirements.txt`
+2. activate the conda environment `conda activate <env_name>`
+3. `python corpus_parser.py -s`
+4. `python split_corpus.py -s -i <path_to_main.csv> -o <path_to_train_dev_files_dir>`
 
 
 #### For training a neural model
