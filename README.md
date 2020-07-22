@@ -69,7 +69,7 @@ Number of examples:
 5. `python predict.py -m <model> -t <type> -i <input file> -o <output file> -c <config file> -g <gpu-core>`
 6. `python evaluation.py -p <predicted-file>`
 
-#### For training a character bigram-based SVM
+#### For training a character bigram-based SVM (DEPRECATED)
 7. `python generate_bigram_repr.py -g -m train_bigram_to_dim_mapping.json -i data/main/train_main.csv -o data/main/train_main_bigr_repr.csv`
 8. `python generate_bigram_repr.py -m train_bigram_to_dim_mapping.json -i data/main/dev_main.csv -o data/main/dev_main_bigr_repr.csv`
 9. `python create_train_subcorpus.py -i data/main/train_main_bigr_repr.csv -g <granularity> -n num_ex_per_clas`
@@ -90,7 +90,7 @@ Number of examples:
 6. `python evaluation.py -p <predicted-file>`
 
 
-#### For training a character bigram-based SVM
+#### For training a character bigram-based SVM (DEPRECATED)
 7. `python generate_bigram_repr.py -g -m train_bigram_to_dim_mapping.json -i /home/user/jgoldz/storage/shared_task/data/main/train_main.csv -o /home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr.csv`
 8. `python generate_bigram_repr.py -m train_bigram_to_dim_mapping.json -i /home/user/jgoldz/storage/shared_task/data/main/dev_main.csv -o /home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr.csv`
 9. `python create_train_subcorpus.py -i /home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr.csv -g <granularity> -n <num_ex_per_clas>`
