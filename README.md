@@ -8,7 +8,7 @@ Paper Link: http://ceur-ws.org/Vol-2624/germeval-task2-paper3.pdf
 
 ## Project
 
-This Repo contains the code for our system subsmission for the Swiss German language detection shared task, part of the GermEval 2020 Campaign, held at the SwissText & KONVENS 2020 conference.
+This repo contains the code for our system submission for the Swiss German language detection shared task, part of the GermEval 2020 Campaign, held at the SwissText & KONVENS 2020 conference.
 In the file `neural_models.py` you find an overview over different architectures we experimented with.
 The submitted model is the one defined in the `SeqToLabelModelOnlyHiddenBiDeepOriginal` class.
 
