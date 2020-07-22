@@ -99,51 +99,6 @@ Number of examples:
     - outputfile: `/home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv`
 11. `python bigram_based_models.py -t /home/user/jgoldz/storage/shared_task/data/main/train_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -d /home/user/jgoldz/storage/shared_task/data/main/dev_main_bigr_repr_<granularity>_<num_ex_per_clas>.csv -o results/`
 
-## Linguistic Considerations
-
-- linguistic intuition: most difficult languages to distinguish from swiss german are:
-  - Standard German
-  - Luxemburgish
-  - Dutch
-  - French
-  - English
-  - -> these languages should have strong representation in the training data
-- assumption: swiss german text will mostly use latin1 characters
-- -> text that mostly consists of other characters (after cleaning of urls etc.) can be ruled out in a 
-rule based way (without classification)
-- Thus, the structure:
-  1. filter out text that is mostly not lGood video from oral presentation: https://vimeo.com/384767351atin1 (ignore emojis) -> negative for sure
-  2. clean/mask text remaining text examples
-  3. pass remaining text examples to trained model (and only train model on such languages)
-
-## Additional Corpora
-- Hamburg Tree Bank: already downloaded
-- Leipzig corpora (many languages to choose from): https://wortschatz.uni-leipzig.de/en/download
-- schwäbisch: https://www.schwaebisch-schwaetza.de/datenschutzerklaerung.htm
-
-
-## Relevant Literature and Resources
-
-### Language Detection
-- kocmi: https://arxiv.org/pdf/1701.03338.pdf
-- survey: https://arxiv.org/pdf/1804.08186.pdf
-- http://ceur-ws.org/Vol-1228/
-- http://ceur-ws.org/Vol-1228/tweetlid-1-gamallo.pdf -> winner of above, best model: naive bayes with bigrams and trigrams for prefix and suffix
-- https://dbs.cs.uni-duesseldorf.de/lehre/bmarbeit/barbeiten/ba_panich.pdf
-- https://www.slideshare.net/shuyo/language-detection-library-for-java
-
-### Character Embeddings
-- https://www.aclweb.org/anthology/S19-1008/
-- https://www.depends-on-the-definition.com/lstm-with-char-embeddings-for-ner/
-- https://hackernoon.com/chars2vec-character-based-language-model-for-handling-real-world-texts-with-spelling-errors-and-a3e4053a147d
-- https://github.com/euler16/CharRNN
-- https://www.kaggle.com/francescapaulin/character-level-lstm-in-pytorch
-
-### Swiss Dialect Identification
-- https://github.com/bricksdont/swiss-dialect-identification
-
-### Libraries
-- for sequence classification: https://github.com/pytorch/fairseq
 
 ## Instructions for Adding a Corpus
 
