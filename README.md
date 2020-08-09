@@ -4,7 +4,7 @@ Swiss German Language Detection
 
 Collaborators: Janis Goldzycher, Jonathan Schaber
 
-Paper Link: http://ceur-ws.org/Vol-2624/germeval-task2-paper3.pdf
+Paper Link: [http://ceur-ws.org/Vol-2624/germeval-task2-paper3.pdf](http://ceur-ws.org/Vol-2624/germeval-task2-paper3.pdf)
 
 ## Project
 
