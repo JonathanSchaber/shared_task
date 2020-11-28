@@ -1015,6 +1015,27 @@ class GRUCNN(nn.Module):
         return out_proba
 
 
+class SlimSwissCrawlModel(nn.Model):
+
+    input_features = 1000
+    hidden_size = 200
+    num_classes = 3  # [gsw, non-gsw, code-switching]
+    dropout = 0.05
+
+    def __init__(self):
+        super(SlimSwissCrawlModel, self).__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(self.input_features, self.hidden_size),
+            nn.ReLU(inplace=True),
+            nn.Dropout(self.dropout),
+            nn.Linear(self.hidden_size, self.num_classes),
+            nn.LogSoftmax(dim=1)
+        )
+
+    def forward(self, in_features):
+        return self.layers(in_features)
+
+
 class TransformerLin(nn.Module):
 
     def __init__(self, char_to_idx, embedding_dim, hidden_gru_size, num_gru_layers, num_classes, dropout, max_len_text,
